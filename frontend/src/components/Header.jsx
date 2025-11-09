@@ -93,7 +93,7 @@ export default function Header() {
 
             <a href="/" className="flex items-center space-x-2">
               <img
-                src="public/images/Logo.PNG"
+                src="../public/images/Logo.PNG"
                 alt="Klinik Patnal"
                 className="h-10 md:h-12 w-auto drop-shadow-sm"
               />
@@ -346,11 +346,11 @@ export default function Header() {
       {/* === LOGIN / REGISTER MODAL === */}
       {showLoginModal && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/40 animate-fadeIn">
-          <div className="relative bg-white rounded-3xl shadow-2xl w-[90%] max-w-sm p-8 transform transition-all duration-300 scale-95 animate-slideUp">
+          <div className="relative bg-white rounded-lg shadow-2xl w-[90%] max-w-sm p-8 transform transition-all duration-300 scale-95 animate-slideUp">
             {/* Tombol close */}
             <button
               onClick={closeLoginModal}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
             >
               <X size={25} strokeWidth={2.5} />
             </button>
@@ -367,20 +367,6 @@ export default function Header() {
 
             {/* Form */}
             <form className="space-y-4">
-              {isRegister && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nama Lengkap
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Nama lengkap anda"
-                    required
-                  />
-                </div>
-              )}
-
               {/* NIP */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -399,7 +385,49 @@ export default function Header() {
                 />
               </div>
 
-              {/* Kata sandi */}
+              {isRegister && (
+                <>
+                  {/* Nama Lengkap */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nama Lengkap
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                      placeholder="Nama lengkap anda"
+                      required
+                    />
+                  </div>
+
+                  {/* Tipe Pengguna */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Tipe Pengguna
+                    </label>
+                    <select
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 bg-white text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all duration-200 appearance-none"
+                      required
+                      defaultValue=""
+                      style={{
+                        backgroundImage:
+                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='gray' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "right 1rem center",
+                        backgroundSize: "1.2em",
+                      }}
+                    >
+                      <option value="" disabled>
+                        Pilih tipe pengguna...
+                      </option>
+                      <option value="psikolog">Psikolog</option>
+                      <option value="pegawai">Pegawai</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
+              {/* Kata Sandi */}
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Kata Sandi

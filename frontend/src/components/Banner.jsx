@@ -7,7 +7,6 @@ export default function Banner() {
   const [loaded, setLoaded] = useState(false);
   const autoSlideRef = useRef(null);
 
-  // === Gambar banner (dari public/images/banner) ===
   const images = useMemo(
     () => [
       "/images/banner/1.png",
@@ -17,12 +16,13 @@ export default function Banner() {
     []
   );
 
+  // Tambahkan buffer di depan dan belakang
   const slides = useMemo(
-    () => [images[images.length - 1], ...images, images[0]],
+    () => [images[images.length - 1], ...images, images[0], images[1]],
     [images]
   );
 
-  // === Preload semua gambar ===
+  // Preload 3 gambar ke depan dan belakang
   useEffect(() => {
     let loadedCount = 0;
     slides.forEach((src) => {
@@ -35,7 +35,6 @@ export default function Banner() {
     });
   }, [slides]);
 
-  // === Hitung lebar tiap slide ===
   const getSlideWidth = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return 0;
@@ -82,23 +81,19 @@ export default function Banner() {
     [startAutoSlide]
   );
 
-  // === Auto slide ===
   useEffect(() => {
     if (!loaded) return;
     startAutoSlide();
     return () => clearInterval(autoSlideRef.current);
   }, [loaded, startAutoSlide]);
 
-  // === Transisi selesai ===
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
 
     const handleTransitionEnd = () => {
       setTransitioning(false);
-
-      // Loop ke awal
-      if (index >= slides.length - 1) {
+      if (index >= slides.length - 2) {
         slider.style.transition = "none";
         setIndex(1);
         slider.style.transform = `translateX(-${getSlideWidth()}px)`;
@@ -108,13 +103,11 @@ export default function Banner() {
           })
         );
       }
-
-      // Loop ke akhir
       if (index <= 0) {
         slider.style.transition = "none";
-        setIndex(slides.length - 2);
+        setIndex(slides.length - 3);
         slider.style.transform = `translateX(-${
-          getSlideWidth() * (slides.length - 2)
+          getSlideWidth() * (slides.length - 3)
         }px)`;
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
@@ -129,16 +122,14 @@ export default function Banner() {
       slider.removeEventListener("transitionend", handleTransitionEnd);
   }, [index, slides.length, getSlideWidth]);
 
-  // === Geser saat index berubah ===
   useEffect(() => {
     moveToSlide(index, true);
   }, [index, moveToSlide]);
 
-  // === Swipe mobile ===
+  // Swipe
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
-
     let startX = 0;
     let moveX = 0;
     let isSwiping = false;
@@ -173,7 +164,7 @@ export default function Banner() {
     };
   }, [nextSlide, prevSlide, startAutoSlide]);
 
-  // === Update posisi saat resize ===
+  // Resize
   useEffect(() => {
     const handleResize = () => moveToSlide(index, false);
     window.addEventListener("resize", handleResize);
@@ -191,19 +182,20 @@ export default function Banner() {
           <div
             ref={sliderRef}
             id="banner-slider"
-            className="flex transition-transform ease-in-out duration-[1000ms] md:gap-8 md:px-8 md:pt-8"
+            className="flex transition-transform ease-in-out duration-[1000ms] md:gap-6 md:px-6 md:pt-6"
           >
             {slides.map((src, i) => (
               <img
                 key={i}
                 src={src}
                 alt={`Banner ${i}`}
-                className="banner-slide flex-shrink-0 w-full md:w-1/3 object-contain md:rounded-xl max-h-[260px] md:max-h-[340px]"
+                loading="eager"
+                decoding="async"
+                className="banner-slide flex-shrink-0 w-full md:w-[37%] object-cover md:rounded-xl max-h-[260px] md:max-h-[340px]"
               />
             ))}
           </div>
 
-          {/* Dots navigasi */}
           <div className="relative mt-4 flex justify-center space-x-2 z-10">
             {images.map((_, i) => (
               <button
