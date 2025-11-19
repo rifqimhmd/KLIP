@@ -66,28 +66,28 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
-      <div className="w-full p-6 md:p-10 bg-white space-y-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-4">
+      <div className="w-full p-6 md:p-10 bg-gray-50 space-y-6">
+        <h1 className="text-3xl font-bold mb-4 text-gray-800">
           Dashboard Pengguna
         </h1>
 
-        <div className="flex flex-col md:flex-row gap-6 w-full">
+        <div className="flex flex-col md:flex-row gap-8 w-full">
           {/* PROFIL PENGGUNA */}
-          <div className="md:w-1/3 w-full p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h3 className="text-xl font-semibold mb-4 text-center">
+          <div className="md:w-1/3 w-full p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-xl font-semibold mb-4 text-center text-gray-700">
               Data Profil
             </h3>
 
             <div className="flex flex-col items-center gap-4">
-              <div className="relative w-32 h-32 md:w-40 md:h-40 flex-shrink-0">
+              <div className="relative w-36 h-36 md:w-44 md:h-44">
                 <img
                   src={user.foto}
-                  className="w-full h-full object-cover border border-gray-300 rounded-full"
+                  className="w-full h-full object-cover rounded-full ring-4 ring-blue-100 shadow"
                 />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black/20 cursor-pointer rounded-full transition-opacity">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black/30 rounded-full transition-opacity cursor-pointer">
                   <label
                     htmlFor="fotoUpload"
-                    className="text-white text-xl bg-blue-600 px-2 py-1 rounded cursor-pointer"
+                    className="text-white text-lg bg-blue-600 px-2 py-1 rounded shadow"
                   >
                     🖊
                   </label>
@@ -101,10 +101,12 @@ export default function Dashboard() {
                 />
               </div>
 
-              <h4 className="text-lg font-semibold">{user.nama}</h4>
+              <h4 className="text-lg font-semibold text-gray-800">
+                {user.nama}
+              </h4>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 space-y-4">
               {[
                 { label: "NIP", field: "nip" },
                 { label: "Nama", field: "nama" },
@@ -118,20 +120,21 @@ export default function Dashboard() {
               ].map((item) => (
                 <div
                   key={item.field}
-                  className="flex items-center justify-between py-2 border-b border-gray-200"
+                  className="flex items-center justify-between pb-2 border-b border-gray-200"
                 >
-                  <div className="flex flex-col">
-                    <span className="text-gray-500 text-sm">{item.label}</span>
+                  <div>
+                    <span className="text-gray-500 text-xs">{item.label}</span>
+
                     {item.field === "status" ? (
-                      <span
-                        className={`${
+                      <p
+                        className={`font-medium mt-0.5 ${
                           user.status === "Aktif"
                             ? "text-green-600"
                             : "text-red-600"
-                        } font-medium`}
+                        }`}
                       >
                         {user.status}
-                      </span>
+                      </p>
                     ) : editField[item.field] ? (
                       <input
                         type="text"
@@ -139,17 +142,17 @@ export default function Dashboard() {
                         onChange={(e) =>
                           handleChange(item.field, e.target.value)
                         }
-                        className="border px-2 py-1 w-full rounded"
+                        className="border px-2 py-1 w-full rounded mt-1 text-sm shadow-sm"
                       />
                     ) : (
-                      <span>{user[item.field]}</span>
+                      <p className="text-gray-800 mt-0.5">{user[item.field]}</p>
                     )}
                   </div>
 
                   {item.field !== "status" && (
                     <button
                       onClick={() => toggleEdit(item.field)}
-                      className="text-gray-400 hover:text-gray-700"
+                      className="text-gray-400 hover:text-blue-600 transition"
                     >
                       🖉
                     </button>
@@ -161,7 +164,7 @@ export default function Dashboard() {
             <div className="mt-6 text-center">
               <button
                 onClick={handleSave}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-semibold transition"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-semibold shadow transition"
               >
                 Simpan Perubahan
               </button>
@@ -171,29 +174,27 @@ export default function Dashboard() {
           {/* KONSULTASI & WBS */}
           <div className="md:w-2/3 w-full flex flex-col gap-6">
             {/* Histori & Jadwal Konsultasi */}
-            <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">
+            <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
                 Histori & Jadwal Konsultasi
               </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left">Tanggal</th>
-                      <th className="px-3 py-2 text-left">Topik</th>
-                      <th className="px-3 py-2 text-left">Status</th>
+
+              <div className="overflow-x-auto rounded-xl border">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-100">
+                    <tr className="text-gray-600">
+                      <th className="px-4 py-2 text-left">Tanggal</th>
+                      <th className="px-4 py-2 text-left">Topik</th>
+                      <th className="px-4 py-2 text-left">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {konsultasi.map((k, i) => (
-                      <tr
-                        key={i}
-                        className="odd:bg-white even:bg-gray-50 border-b border-gray-200"
-                      >
-                        <td className="px-3 py-2">{k.tanggal}</td>
-                        <td className="px-3 py-2">{k.topik}</td>
+                      <tr key={i} className="odd:bg-white even:bg-gray-50">
+                        <td className="px-4 py-2">{k.tanggal}</td>
+                        <td className="px-4 py-2">{k.topik}</td>
                         <td
-                          className={`px-3 py-2 font-medium ${
+                          className={`px-4 py-2 font-medium ${
                             k.status === "Selesai"
                               ? "text-green-600"
                               : k.status === "Dijadwalkan"
@@ -211,17 +212,20 @@ export default function Dashboard() {
             </div>
 
             {/* Progress WBS */}
-            <div className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">Progress WBS</h3>
-              <ul>
+            <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Progress WBS
+              </h3>
+
+              <ul className="space-y-3">
                 {wbsProgress.map((w, i) => (
                   <li
                     key={i}
                     className="flex justify-between py-2 border-b border-gray-200"
                   >
-                    <span>{w.nomor}</span>
+                    <span className="font-medium text-gray-700">{w.nomor}</span>
                     <span
-                      className={`font-medium ${
+                      className={`font-semibold ${
                         w.status === "Ditinjau"
                           ? "text-blue-600"
                           : "text-green-600"

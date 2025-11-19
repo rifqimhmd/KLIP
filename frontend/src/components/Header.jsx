@@ -275,12 +275,12 @@ export default function Header() {
           </div>
         )}
 
-        <a
+        {/* <a
           href="/psikolog"
           className="block px-6 py-3 text-gray-700 hover:bg-blue-50"
         >
           List Psikolog
-        </a>
+        </a> */}
 
         {/* === KONTEN MOBILE === */}
         <button
