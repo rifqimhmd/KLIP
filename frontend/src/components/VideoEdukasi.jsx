@@ -3,7 +3,7 @@ import React from "react";
 export default function VideoEdukasi() {
   return (
     <section
-      id="video-edukasi"
+      id="videoedukasi"
       className="relative w-full bg-gradient-to-r from-blue-50 to-white py-10 md:py-20"
     >
       <div className="container mx-auto px-6 md:px-12 text-center">

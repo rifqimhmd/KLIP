@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 
 export default function Header() {
+  const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [scrollHidden, setScrollHidden] = useState(false);
@@ -93,7 +95,7 @@ export default function Header() {
 
             <a href="/" className="flex items-center space-x-2">
               <img
-                src="../public/images/Logo.PNG"
+                src="public/images/Logo.PNG"
                 alt="Klinik Patnal"
                 className="h-10 md:h-12 w-auto drop-shadow-sm"
               />
@@ -140,21 +142,21 @@ export default function Header() {
                     Konsultasi
                   </a>
                   <a
-                    href="/pelaporan"
+                    href="/wbs"
                     className="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-b-lg"
                   >
-                    Pelaporan
+                    WBS
                   </a>
                 </div>
               )}
             </div>
 
-            <a
+            {/* <a
               href="/psikolog"
               className="text-gray-700 hover:text-blue-600 transition py-2"
             >
               List Psikolog
-            </a>
+            </a> */}
 
             {/* === DROPDOWN KONTEN === */}
             <div className="relative">
@@ -181,13 +183,13 @@ export default function Header() {
               {openDropdown === "konten" && (
                 <div className="absolute left-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg">
                   <a
-                    href="#artikel"
+                    href={location.pathname === "/" ? "#pustakadokumen" : "/"}
                     className="block px-4 py-2 text-gray-700 hover:bg-blue-50"
                   >
-                    Artikel
+                    Pustaka Dokumen
                   </a>
                   <a
-                    href="#video-edukasi"
+                    href={location.pathname === "/" ? "#videoedukasi" : "/"}
                     className="block px-4 py-2 text-gray-700 hover:bg-blue-50"
                   >
                     Video Edukasi
@@ -265,10 +267,10 @@ export default function Header() {
               Konsultasi
             </a>
             <a
-              href="/pelaporan"
+              href="/wbs"
               className="block px-10 py-2 text-gray-700 hover:bg-blue-100"
             >
-              Pelaporan
+              WBS
             </a>
           </div>
         )}
@@ -305,10 +307,10 @@ export default function Header() {
         {mobileDropdown.konten && (
           <div className="flex flex-col bg-gray-50">
             <a
-              href="#artikel"
+              href="#pustakadokumen"
               className="block px-10 py-2 text-gray-700 hover:bg-blue-100"
             >
-              Artikel
+              Pustaka Dokumen
             </a>
             <a
               href="#video-edukasi"

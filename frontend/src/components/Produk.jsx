@@ -7,8 +7,7 @@ export default function Produk() {
         {/* === Kiri: Teks & Tombol Produk === */}
         <div className="flex-1 text-center md:text-left md:pt-0 pt-8">
           <p className="text-blue-600 font-semibold text-sm md:text-base">
-            Temukan Layanan Konseling dan Pelaporan yang Profesional &
-            Terpercaya
+            Temukan Layanan Konseling dan WBS yang Profesional & Terpercaya
           </p>
           <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
             Bersama Kami, <br />
@@ -58,14 +57,16 @@ export default function Produk() {
 
             {/* === Kartu Pelaporan === */}
             <a
-              href="/pelaporan"
+              href="/wbs"
               className="group bg-white shadow-md rounded-xl p-5 flex items-center justify-between w-full sm:w-72 
                 hover:bg-blue-50 hover:shadow-lg transition-all duration-300"
             >
               <div className="text-left">
-                <p className="text-gray-500 text-sm">Pelaporan untuk saya</p>
+                <p className="text-gray-500 text-sm">
+                  Whistleblowing System Saya
+                </p>
                 <h3 className="text-blue-600 font-semibold text-lg group-hover:text-blue-700">
-                  Pelaporan
+                  WBS
                 </h3>
                 <div className="text-blue-600 text-sm font-medium flex items-center gap-1 mt-2">
                   Pilih
