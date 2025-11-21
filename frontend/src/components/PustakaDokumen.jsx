@@ -46,15 +46,26 @@ export default function PustakaDokumen({ itemsProp }) {
   };
 
   // === fungsi buka PDF lewat Google Docs (anti IDM)
-  const openPdf = (fileUrl) => {
-    const absoluteUrl = window.location.origin + fileUrl;
-    const encoded = encodeURIComponent(absoluteUrl);
+  const openPdf = async (fileUrl) => {
+    try {
+      // pastikan URL absolut
+      const finalUrl = fileUrl.startsWith("http")
+        ? fileUrl
+        : window.location.origin + fileUrl;
 
-    window.open(
-      `https://docs.google.com/gview?embedded=1&url=${encoded}`,
-      "_blank",
-      "noopener"
-    );
+      // ambil pdf sebagai blob
+      const response = await fetch(finalUrl, {
+        headers: { "Cache-Control": "no-cache" },
+      });
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // buka pdf manual (tanpa download)
+      window.open(blobUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      console.error("PDF gagal dibuka:", err);
+    }
   };
 
   return (
@@ -94,22 +105,22 @@ export default function PustakaDokumen({ itemsProp }) {
                   key={item.id}
                   onClick={() => openPdf(item.file)}
                   className="
-          w-[140px] h-[200px]
-          sm:w-[180px] sm:h-[240px]
-          md:w-[220px] md:h-[300px]
-          lg:w-[240px] lg:h-[320px]
-          
-          flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl
-          
-          bg-white/90 backdrop-blur-sm
-          border-2 border-blue-600/20 shadow-sm
+  w-[140px] h-[200px]
+  sm:w-[180px] sm:h-[240px]
+  md:w-[220px] md:h-[300px]
+  lg:w-[240px] lg:h-[320px]
 
-          hover:border-blue-600
-          hover:shadow-blue-600/30 hover:shadow-xl
-          hover:scale-[1.04] hover:-translate-y-[4px]
+  flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl
 
-          transition-all duration-300 ease-out
-        "
+  bg-white/80 backdrop-blur-sm
+  shadow-md border border-gray-200
+
+  hover:bg-white/60
+  hover:shadow-lg
+  hover:-translate-y-[2px]
+
+  transition-all duration-300 ease-out
+"
                 >
                   <div className="relative w-full h-full">
                     <img
