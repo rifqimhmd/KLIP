@@ -65,7 +65,7 @@ export default function Header() {
           scrollHidden ? "-translate-y-full" : ""
         }`}
       >
-        <div className="container mx-auto flex justify-between items-center px-4 py-2.5 md:px-6 md:py-4">
+        <div className="container mx-auto flex justify-between items-center px-4 py-2.5 md:px-6 md:py-3">
           {/* === KIRI: LOGO & HAMBURGER === */}
           <div className="flex items-center space-x-3">
             <button
@@ -95,9 +95,9 @@ export default function Header() {
 
             <a href="/" className="flex items-center space-x-2">
               <img
-                src="public/images/Logo.PNG"
+                src="/Logo.png"
                 alt="Klinik Patnal"
-                className="h-10 md:h-12 w-auto drop-shadow-sm"
+                className="h-10 md:h-[52px] w-auto drop-shadow-sm"
               />
             </a>
           </div>
