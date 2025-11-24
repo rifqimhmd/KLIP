@@ -66,7 +66,7 @@ export default function Produk() {
                   Whistleblowing System Saya
                 </p>
                 <h3 className="text-blue-600 font-semibold text-lg group-hover:text-blue-700">
-                  WBS
+                  Layanan WBS
                 </h3>
                 <div className="text-blue-600 text-sm font-medium flex items-center gap-1 mt-2">
                   Pilih

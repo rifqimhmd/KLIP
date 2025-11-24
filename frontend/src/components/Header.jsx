@@ -145,7 +145,7 @@ export default function Header() {
                     href="/wbs"
                     className="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-b-lg"
                   >
-                    WBS
+                    Layanan WBS
                   </a>
                 </div>
               )}
@@ -270,7 +270,7 @@ export default function Header() {
               href="/wbs"
               className="block px-10 py-2 text-gray-700 hover:bg-blue-100"
             >
-              WBS
+              Layanan WBS
             </a>
           </div>
         )}

@@ -9,9 +9,9 @@ export default function Banner() {
 
   const images = useMemo(
     () => [
-      "/images/banner/1.png",
-      "/images/banner/2.png",
-      "/images/banner/3.png",
+      "https://drive.google.com/thumbnail?id=1XV-ajH1XykcyARMGaAlb1l94WkGlGn5d&sz=w2000",
+      "https://drive.google.com/thumbnail?id=1O179luKSMO5w2KxfDJjsBLU_iEt08EdE&sz=w2000",
+      "https://drive.google.com/thumbnail?id=1CxFj7_0K4jDFG5bGAPUBaFPwJcM2U4OB&sz=w2000",
     ],
     []
   );
