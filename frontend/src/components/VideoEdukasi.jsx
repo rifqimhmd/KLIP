@@ -36,15 +36,15 @@ export default function VideoEdukasi() {
         </div>
 
         {/* === CAROUSEL === */}
-        <div className="relative max-w-3xl mx-auto mt-10 select-none">
+        <div className="relative w-full max-w-5xl mx-auto mt-10 select-none">
           {/* tombol kiri */}
           <button
             onClick={prevThumb}
             disabled={carouselIndex <= 0}
             className={`absolute -left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg 
-  border border-blue-200 text-blue-600 rounded-full w-10 h-10 
-  items-center justify-center hover:bg-blue-50 z-10 hidden md:flex
-  ${carouselIndex <= 0 ? "opacity-30 cursor-not-allowed" : ""}`}
+    border border-blue-200 text-blue-600 rounded-full w-10 h-10 
+    items-center justify-center hover:bg-blue-50 z-10 flex
+    ${carouselIndex <= 0 ? "opacity-30 cursor-not-allowed" : ""}`}
           >
             ❮
           </button>
@@ -84,13 +84,16 @@ export default function VideoEdukasi() {
             </div>
           </div>
 
+          {/* tombol kanan */}
           <button
             onClick={nextThumb}
             disabled={carouselIndex >= videos.length - 1}
             className={`absolute -right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg 
-  border border-blue-200 text-blue-600 rounded-full w-10 h-10 
-  items-center justify-center hover:bg-blue-50 z-10 hidden md:flex
-  ${carouselIndex >= videos.length - 1 ? "opacity-30 cursor-not-allowed" : ""}`}
+    border border-blue-200 text-blue-600 rounded-full w-10 h-10 
+    items-center justify-center hover:bg-blue-50 z-10 flex
+    ${
+      carouselIndex >= videos.length - 1 ? "opacity-30 cursor-not-allowed" : ""
+    }`}
           >
             ❯
           </button>
