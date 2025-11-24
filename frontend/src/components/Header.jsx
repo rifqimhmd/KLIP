@@ -1,6 +1,6 @@
+// Updated Header component with login/register removed
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { X } from "lucide-react";
 
 export default function Header() {
   const location = useLocation();
@@ -11,9 +11,6 @@ export default function Header() {
     produk: false,
     konten: false,
   });
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [isRegister, setIsRegister] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   // === HIDE HEADER ON SCROLL ===
   useEffect(() => {
@@ -44,17 +41,6 @@ export default function Header() {
       return newState;
     });
   };
-
-  const openLoginModal = () => {
-    setShowLoginModal(true);
-    setShowMobileMenu(false);
-  };
-
-  const closeLoginModal = () => setShowLoginModal(false);
-
-  const toggleFormMode = () => setIsRegister(!isRegister);
-
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   return (
     <>
@@ -151,13 +137,6 @@ export default function Header() {
               )}
             </div>
 
-            {/* <a
-              href="/psikolog"
-              className="text-gray-700 hover:text-blue-600 transition py-2"
-            >
-              List Psikolog
-            </a> */}
-
             {/* === DROPDOWN KONTEN === */}
             <div className="relative">
               <button
@@ -205,16 +184,6 @@ export default function Header() {
               Tentang Kami
             </a>
           </nav>
-
-          {/* === TOMBOL LOGIN DESKTOP === */}
-          <div className="hidden md:flex">
-            <button
-              onClick={openLoginModal}
-              className="px-5 py-2 border border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 shadow-sm text-base"
-            >
-              Masuk
-            </button>
-          </div>
         </div>
       </header>
 
@@ -275,13 +244,6 @@ export default function Header() {
           </div>
         )}
 
-        {/* <a
-          href="/psikolog"
-          className="block px-6 py-3 text-gray-700 hover:bg-blue-50"
-        >
-          List Psikolog
-        </a> */}
-
         {/* === KONTEN MOBILE === */}
         <button
           onClick={() => toggleMobileDropdown("konten")}
@@ -327,15 +289,6 @@ export default function Header() {
         >
           Tentang Kami
         </a>
-
-        <div className="px-6 py-4">
-          <button
-            onClick={openLoginModal}
-            className="block w-full text-center bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md"
-          >
-            Masuk
-          </button>
-        </div>
       </div>
 
       {showMobileMenu && (
@@ -343,147 +296,6 @@ export default function Header() {
           className="fixed inset-0 bg-black bg-opacity-40 z-30"
           onClick={closeMobileMenu}
         ></div>
-      )}
-
-      {/* === LOGIN / REGISTER MODAL === */}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[999] flex items-center justify-center backdrop-blur-sm bg-black/40 animate-fadeIn">
-          <div className="relative bg-white rounded-lg shadow-2xl w-[90%] max-w-sm p-8 transform transition-all duration-300 scale-95 animate-slideUp">
-            {/* Tombol close */}
-            <button
-              onClick={closeLoginModal}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
-            >
-              <X size={25} strokeWidth={2.5} />
-            </button>
-
-            {/* Judul */}
-            <h2 className="text-2xl font-semibold text-gray-800 mb-2 text-center">
-              {isRegister ? "Buat Akun Baru" : "Selamat Datang Kembali"}
-            </h2>
-            <p className="text-sm text-gray-500 text-center mb-6">
-              {isRegister
-                ? "Daftar untuk mengakses layanan kami"
-                : "Masuk untuk mengakses layanan Anda"}
-            </p>
-
-            {/* Form */}
-            <form className="space-y-4">
-              {/* NIP */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  NIP
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  onInput={(e) => {
-                    e.target.value = e.target.value.replace(/\D/g, "");
-                  }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Masukkan NIP"
-                  required
-                />
-              </div>
-
-              {isRegister && (
-                <>
-                  {/* Nama Lengkap */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nama Lengkap
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="Nama lengkap anda"
-                      required
-                    />
-                  </div>
-
-                  {/* Tipe Pengguna */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Tipe Pengguna
-                    </label>
-                    <select
-                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 bg-white text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all duration-200 appearance-none"
-                      required
-                      defaultValue=""
-                      style={{
-                        backgroundImage:
-                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='gray' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E\")",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 1rem center",
-                        backgroundSize: "1.2em",
-                      }}
-                    >
-                      <option value="" disabled>
-                        Pilih tipe pengguna...
-                      </option>
-                      <option value="psikolog">Psikolog</option>
-                      <option value="pegawai">Pegawai</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {/* Kata Sandi */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Kata Sandi
-                </label>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-[34px] text-gray-500 hover:text-gray-700 text-lg"
-                >
-                  {showPassword ? "🙈" : "👁️"}
-                </button>
-              </div>
-
-              {/* Tombol submit */}
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md"
-              >
-                {isRegister ? "Daftar" : "Masuk"}
-              </button>
-            </form>
-
-            {/* Switch form */}
-            <p className="text-center text-sm text-gray-600 mt-5">
-              {isRegister ? (
-                <>
-                  Sudah punya akun?{" "}
-                  <button
-                    onClick={toggleFormMode}
-                    className="text-blue-600 font-semibold hover:underline"
-                  >
-                    Masuk di sini
-                  </button>
-                </>
-              ) : (
-                <>
-                  Belum punya akun?{" "}
-                  <button
-                    onClick={toggleFormMode}
-                    className="text-blue-600 font-semibold hover:underline"
-                  >
-                    Daftar di sini
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
-        </div>
       )}
     </>
   );
