@@ -7,7 +7,8 @@ export default function Produk() {
         {/* === Kiri: Teks & Tombol Produk === */}
         <div className="flex-1 text-center md:text-left md:pt-0 pt-8">
           <p className="text-blue-600 font-semibold text-sm md:text-base">
-            Temukan Layanan Konseling dan WBS yang Profesional & Terpercaya
+            Dapatkan Layanan Konseling dan WBS yang Profesional, Aman, dan
+            Tepercaya
           </p>
           <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
             Bersama Kami, <br />
@@ -15,7 +16,7 @@ export default function Produk() {
           </h2>
 
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
-            Pilih layanan yang sesuai dengan kebutuhanmu.
+            Pilih layanan yang paling sesuai dengan kebutuhan Anda.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center md:justify-start">

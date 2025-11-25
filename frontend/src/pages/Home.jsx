@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 export default function Home() {
   useEffect(() => {
-    document.title = "Klinik Patnal - Konsultasi Mudah, Laporan Cepat";
+    document.title = "Klinik Patnal - Konsultasi Aman, Respons Tepat";
   }, []);
   return (
     <MainLayout>
