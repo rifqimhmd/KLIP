@@ -5,13 +5,18 @@ export default function VideoEdukasi() {
     { id: 1, url: "https://www.youtube.com/embed/aVgihMIhi6c" },
     { id: 2, url: "https://www.youtube.com/embed/bFmGdzeEV0s" },
     { id: 3, url: "https://www.youtube.com/embed/6YOkAL8BoUU" },
+    { id: 4, url: "https://www.youtube.com/embed/6YOkAL8BoUU" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
+  // === aturan carousel ===
+  const visibleCount = 3; // selalu tampil 3 thumbnail
+  const maxIndex = Math.max(0, videos.length - visibleCount); // batas next
+
   const nextThumb = () => {
-    setCarouselIndex((prev) => (prev < videos.length - 1 ? prev + 1 : prev));
+    setCarouselIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
   };
 
   const prevThumb = () => {
@@ -24,7 +29,7 @@ export default function VideoEdukasi() {
       className="relative w-full bg-gradient-to-r from-blue-50 to-white py-10 md:py-20"
     >
       <div className="container mx-auto px-6 md:px-12 text-center">
-        {/* === VIDEO UTAMA === */}
+        {/* VIDEO UTAMA */}
         <div className="relative w-full max-w-5xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-2xl">
           <iframe
             key={videos[currentIndex].id}
@@ -35,35 +40,26 @@ export default function VideoEdukasi() {
           ></iframe>
         </div>
 
-        {/* === CAROUSEL === */}
+        {/* CAROUSEL */}
         <div className="relative w-full max-w-5xl mx-auto mt-10 select-none">
           {/* tombol kiri */}
           <button
             onClick={prevThumb}
             disabled={carouselIndex <= 0}
             className={`absolute -left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg 
-    border border-blue-200 text-blue-600 rounded-full w-10 h-10 
-    items-center justify-center hover:bg-blue-50 z-10 flex
-    ${carouselIndex <= 0 ? "opacity-30 cursor-not-allowed" : ""}`}
+            border border-blue-200 text-blue-600 rounded-full w-10 h-10 
+            items-center justify-center hover:bg-blue-50 z-10 flex
+            ${carouselIndex <= 0 ? "opacity-30 cursor-not-allowed" : ""}`}
           >
             ❮
           </button>
 
-          {/* thumbnail wrapper */}
-          <div
-            className="overflow-hidden px-6 md:px-12"
-            onTouchStart={(e) => (window.touchStartX = e.touches[0].clientX)}
-            onTouchEnd={(e) => {
-              const diff = e.changedTouches[0].clientX - window.touchStartX;
-              if (diff > 50) prevThumb();
-              if (diff < -50) nextThumb();
-            }}
-          >
+          <div className="overflow-hidden w-full max-w-5xl mx-auto md:px-10 px-9">
             <div
-              className="flex gap-4 md:gap-5 transition-transform duration-500"
+              className="flex gap-4 md:gap-11 transition-transform duration-500"
               style={{
                 transform: `translateX(-${
-                  carouselIndex * (100 / videos.length)
+                  carouselIndex * (100 / visibleCount)
                 }%)`,
               }}
             >
@@ -71,11 +67,9 @@ export default function VideoEdukasi() {
                 <div
                   key={v.id}
                   onClick={() => setCurrentIndex(i)}
-                  className={`basis-[calc(100%/${
-                    videos.length
-                  })] aspect-video rounded-xl overflow-hidden 
-        cursor-pointer shadow-lg transition ring-4 
-        ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}`}
+                  className={`min-w-[30%] max-w-[30%]  aspect-video rounded-xl overflow-hidden 
+          cursor-pointer shadow-lg transition ring-4 
+          ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}`}
                 >
                   <iframe
                     className="w-full h-full pointer-events-none"
@@ -90,13 +84,13 @@ export default function VideoEdukasi() {
           {/* tombol kanan */}
           <button
             onClick={nextThumb}
-            disabled={carouselIndex >= videos.length - 1}
+            disabled={carouselIndex >= maxIndex}
             className={`absolute -right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg 
-    border border-blue-200 text-blue-600 rounded-full w-10 h-10 
-    items-center justify-center hover:bg-blue-50 z-10 flex
-    ${
-      carouselIndex >= videos.length - 1 ? "opacity-30 cursor-not-allowed" : ""
-    }`}
+            border border-blue-200 text-blue-600 rounded-full w-10 h-10 
+            items-center justify-center hover:bg-blue-50 z-10 flex
+            ${
+              carouselIndex >= maxIndex ? "opacity-30 cursor-not-allowed" : ""
+            }`}
           >
             ❯
           </button>
