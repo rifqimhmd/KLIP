@@ -3,34 +3,45 @@ import React, { useRef } from "react";
 export default function PustakaDokumen({ itemsProp }) {
   const defaultItems = [
     {
-      id: "tester-1",
-      title: "Dokumen 1",
-      cover: "/images/pelaporan.png",
-      file: "/pdf/tester.pdf",
+      id: "1",
+      title: "Kode Etik Pegawai Pemasyarakatan",
+      cover:
+        "https://i.ibb.co.com/BH4xyT8j/Cover-Kode-Etik-Pegawai-Pemasyarakatan.jpg",
+      file: "/pdf/Kode Etik Pegawai Pemasyarakatan.pdf",
     },
     {
-      id: "tester-2",
-      title: "Dokumen 2",
-      cover: "/images/pelaporan.png",
-      file: "/pdf/tester.pdf",
+      id: "2",
+      title: "Netralitas ASN dalam Pilkada",
+      cover:
+        "https://i.ibb.co.com/xSfwxmzG/Cover-Pelanggaran-Netralitas-dan-Wewenang-ASN-dalam-Pilkada.jpg",
+      file: "/pdf/Netralitas ASN dalam Pilkada.pdf",
     },
     {
-      id: "tester-2",
-      title: "Dokumen 3",
-      cover: "/images/pelaporan.png",
-      file: "/pdf/tester.pdf",
+      id: "3",
+      title: "Permen Iminpas No. 1 Tahun 2024",
+      cover:
+        "https://i.ibb.co.com/XZmH47nT/Cover-Permen-Iminpas-No-1-Tahun-2024.jpg",
+      file: "/pdf/Permen Iminpas No. 1 Tahun 2024.pdf",
     },
     {
-      id: "tester-2",
-      title: "Dokumen 4",
-      cover: "/images/pelaporan.png",
-      file: "/pdf/tester.pdf",
+      id: "4",
+      title: "PP No. 94 Tahun 2021 tentang Disiplin PNS",
+      cover:
+        "https://i.ibb.co.com/zTM85KyH/Cover-PP-No-94-Tahun-2021-tentang-Disiplin-PNS.jpg",
+      file: "/pdf/PP No. 94 Tahun 2021 tentang Disiplin PNS.pdf",
     },
     {
-      id: "tester-2",
-      title: "Dokumen 5",
-      cover: "/images/pelaporan.png",
-      file: "/pdf/tester.pdf",
+      id: "5",
+      title: "Disiplin Berat ASN: Perspektif Hukum",
+      cover: "https://i.ibb.co.com/tTZ0fRjh/Cover-Sanski.jpg",
+      file: "/pdf/Disiplin Berat ASN: Perspektif Hukum.pdf",
+    },
+    {
+      id: "6",
+      title: "UU ASN No.20 Tahun 2023 Tentang ASN",
+      cover:
+        "https://i.ibb.co.com/1Gk7b2nc/Cover-UU-ASN-No-20-Tahun-2023-Tentang-ASN.jpg",
+      file: "/pdf/UU ASN No.20 Tahun 2023 Tentang ASN.pdf",
     },
   ];
 
@@ -95,8 +106,7 @@ export default function PustakaDokumen({ itemsProp }) {
           >
             <div
               className={`
-      flex gap-6
-      w-full
+      flex gap-6 w-full
       ${items.length < 5 ? "md:justify-center" : "md:justify-start"}
     `}
             >
@@ -105,22 +115,22 @@ export default function PustakaDokumen({ itemsProp }) {
                   key={item.id}
                   onClick={() => openPdf(item.file)}
                   className="
-  w-[140px] h-[200px]
-  sm:w-[180px] sm:h-[240px]
-  md:w-[220px] md:h-[300px]
-  lg:w-[240px] lg:h-[320px]
+          w-[150px] h-[220px]
+          sm:w-[190px] sm:h-[260px]
+          md:w-[230px] md:h-[320px]
+          lg:w-[250px] lg:h-[340px]
 
-  flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl
+          flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl
 
-  bg-white/80 backdrop-blur-sm
-  shadow-md border border-gray-200
+          bg-white/70 backdrop-blur-sm
+          shadow-xl border border-gray-300
 
-  hover:bg-white/60
-  hover:shadow-lg
-  hover:-translate-y-[2px]
+          hover:bg-white/80
+          hover:shadow-2xl
+          hover:-translate-y-1
 
-  transition-all duration-300 ease-out
-"
+          transition-all duration-300 ease-out
+        "
                 >
                   <div className="relative w-full h-full">
                     <img
@@ -129,15 +139,22 @@ export default function PustakaDokumen({ itemsProp }) {
                       className="w-full h-full object-cover"
                     />
 
-                    {/* Title bar modern */}
+                    {/* Title bar sangat kontras */}
                     <div
                       className="
               absolute bottom-0 left-0 right-0
-              bg-gradient-to-t from-black/70 via-black/40 to-transparent
-              px-3 py-2
+              bg-gradient-to-t 
+              from-black/90 via-black/70 to-transparent
+              px-3 py-3
             "
                     >
-                      <h3 className="text-white text-sm md:text-base font-semibold line-clamp-2">
+                      <h3
+                        className="
+                text-white text-sm md:text-base font-semibold 
+                line-clamp-2 leading-tight
+                drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]
+              "
+                      >
                         {item.title}
                       </h3>
                     </div>
@@ -145,7 +162,6 @@ export default function PustakaDokumen({ itemsProp }) {
                 </div>
               ))}
 
-              {/* Spacer kanan — pendek sesuai permintaan */}
               <div className="w-4 sm:w-6 md:w-10 flex-shrink-0"></div>
             </div>
           </div>
