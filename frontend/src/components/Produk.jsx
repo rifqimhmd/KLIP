@@ -62,9 +62,7 @@ export default function Produk() {
                 hover:bg-blue-50 hover:shadow-lg transition-all duration-300"
             >
               <div className="text-left">
-                <p className="text-gray-500 text-sm">
-                  Whistleblowing System Saya
-                </p>
+                <p className="text-gray-500 text-sm">WBS untuk saya</p>
                 <h3 className="text-blue-600 font-semibold text-lg group-hover:text-blue-700">
                   Layanan WBS
                 </h3>

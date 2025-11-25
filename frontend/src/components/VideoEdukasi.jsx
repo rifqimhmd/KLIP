@@ -62,17 +62,20 @@ export default function VideoEdukasi() {
             <div
               className="flex gap-4 md:gap-5 transition-transform duration-500"
               style={{
-                transform: `translateX(calc(-${carouselIndex} * (250px + 1rem)))`,
+                transform: `translateX(-${
+                  carouselIndex * (100 / videos.length)
+                }%)`,
               }}
             >
               {videos.map((v, i) => (
                 <div
                   key={v.id}
                   onClick={() => setCurrentIndex(i)}
-                  className={`min-w-[250px] md:min-w-[300px] aspect-video rounded-xl overflow-hidden 
-            cursor-pointer shadow-lg transition ring-4 ${
-              currentIndex === i ? "ring-blue-400" : "ring-transparent"
-            }`}
+                  className={`basis-[calc(100%/${
+                    videos.length
+                  })] aspect-video rounded-xl overflow-hidden 
+        cursor-pointer shadow-lg transition ring-4 
+        ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}`}
                 >
                   <iframe
                     className="w-full h-full pointer-events-none"
