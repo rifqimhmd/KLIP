@@ -5,7 +5,6 @@ export default function VideoEdukasi() {
     { id: 1, url: "https://www.youtube.com/embed/aVgihMIhi6c" },
     { id: 2, url: "https://www.youtube.com/embed/bFmGdzeEV0s" },
     { id: 3, url: "https://www.youtube.com/embed/6YOkAL8BoUU" },
-    { id: 4, url: "https://www.youtube.com/embed/6YOkAL8BoUU" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,9 +53,9 @@ export default function VideoEdukasi() {
             ❮
           </button>
 
-          <div className="overflow-hidden w-full max-w-5xl mx-auto md:px-10 px-9">
+          <div className="overflow-hidden w-full max-w-5xl mx-auto px-6 md:px-12">
             <div
-              className="flex gap-4 md:gap-11 transition-transform duration-500"
+              className="flex gap-5 md:gap-10 transition-transform duration-500"
               style={{
                 transform: `translateX(-${
                   carouselIndex * (100 / visibleCount)
@@ -67,7 +66,7 @@ export default function VideoEdukasi() {
                 <div
                   key={v.id}
                   onClick={() => setCurrentIndex(i)}
-                  className={`min-w-[30%] max-w-[30%]  aspect-video rounded-xl overflow-hidden 
+                  className={`min-w-[30%] max-w-[30%] aspect-video rounded-xl overflow-hidden 
           cursor-pointer shadow-lg transition ring-4 
           ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}`}
                 >
