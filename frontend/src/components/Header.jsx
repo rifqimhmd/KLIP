@@ -281,13 +281,13 @@ export default function Header() {
         {mobileDropdown.konten && (
           <div className="flex flex-col bg-gray-50">
             <a
-              href="#pustakadokumen"
+              href={location.pathname === "/" ? "#pustakadokumen" : "/"}
               className="block px-10 py-2 text-gray-700 hover:bg-blue-100"
             >
               Pustaka Dokumen
             </a>
             <a
-              href="#video-edukasi"
+              href={location.pathname === "/" ? "#videoedukasi" : "/"}
               className="block px-10 py-2 text-gray-700 hover:bg-blue-100"
             >
               Video Edukasi
