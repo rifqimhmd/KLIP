@@ -9,9 +9,9 @@ export default function Banner() {
 
   const images = useMemo(
     () => [
-      "https://i.ibb.co.com/rKks25JQ/1.png",
-      "https://i.ibb.co.com/8ncj01gF/2.png",
-      "https://i.ibb.co.com/BKnvVPft/3.png",
+      "/images/banner/1.png",
+      "/images/banner/2.png",
+      "/images/banner/3.png",
     ],
     []
   );

@@ -7,7 +7,7 @@ export default function PustakaDokumen({ itemsProp }) {
       title: "Kode Etik Pegawai Pemasyarakatan",
       cover:
         "https://i.ibb.co.com/BH4xyT8j/Cover-Kode-Etik-Pegawai-Pemasyarakatan.jpg",
-      file: "https://drive.google.com/uc?export=download&id=1I2UufZv42jNvvF63X-Iezq0SxVB95oLj",
+      file: "/pdf/Kode Etik Pegawai Pemasyarakatan.pdf",
     },
     {
       id: "2",
