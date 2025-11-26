@@ -11,7 +11,7 @@ export default function Tentang() {
     <MainLayout>
       <div className="min-h-screen w-full bg-gray-50 text-gray-800">
         {/* HERO */}
-        <section className="relative w-full bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-600 text-white">
+        <section className="relative w-full bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 text-white">
           <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-20 mix-blend-overlay"></div>
 
           <div className="max-w-4xl mx-auto px-6 py-20 md:py-24 text-center relative z-10">
@@ -107,7 +107,7 @@ export default function Tentang() {
                   text-center
                 "
               >
-                <div className="text-indigo-600 mx-auto mb-4">{item.icon}</div>
+                <div className="text-blue-600 mx-auto mb-4">{item.icon}</div>
                 <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
                 <p className="text-gray-600">{item.desc}</p>
               </div>
