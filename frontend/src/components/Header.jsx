@@ -97,7 +97,7 @@ export default function Header() {
               Beranda
             </a>
 
-            {/* === DROPDOWN PRODUK === */}
+            {/* 
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("produk")}
@@ -135,15 +135,21 @@ export default function Header() {
                   </a>
                 </div>
               )}
-            </div>
+            </div> */}
 
-            {/* === DROPDOWN KONTEN === */}
+            <a
+              href="https://konsultasi.klinikpatnal.com/"
+              className="text-gray-700 hover:text-blue-600 transition py-2"
+            >
+              Konsultasi
+            </a>
+
             <div className="relative">
               <button
                 onClick={() => toggleDropdown("konten")}
                 className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition py-2 focus:outline-none"
               >
-                <span>Konten</span>
+                <span>Media Informasi</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4 mt-0.5"
@@ -204,9 +210,15 @@ export default function Header() {
         >
           Beranda
         </a>
-
+        <a
+          href="https://konsultasi.klinikpatnal.com/"
+          className="block px-6 py-3 text-gray-700 hover:bg-blue-50"
+          onClick={closeMobileMenu}
+        >
+          Konsultasi
+        </a>
         {/* === PRODUK MOBILE === */}
-        <button
+        {/* <button
           onClick={() => toggleMobileDropdown("produk")}
           className="w-full text-left px-6 py-3 text-gray-700 hover:bg-blue-50 flex justify-between items-center"
         >
@@ -226,7 +238,7 @@ export default function Header() {
               d="M19 9l-7 7-7-7"
             />
           </svg>
-        </button>
+        </button> */}
         {mobileDropdown.produk && (
           <div className="flex flex-col bg-gray-50">
             <a
@@ -249,7 +261,7 @@ export default function Header() {
           onClick={() => toggleMobileDropdown("konten")}
           className="w-full text-left px-6 py-3 text-gray-700 hover:bg-blue-50 flex justify-between items-center"
         >
-          <span>Konten</span>
+          <span>Media Informasi</span>
           <svg
             className={`w-4 h-4 transform transition-transform duration-300 ${
               mobileDropdown.konten ? "rotate-180" : ""

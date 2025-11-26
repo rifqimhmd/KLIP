@@ -10,32 +10,52 @@ export default function Produk() {
             Dapatkan Layanan Konseling dan WBS yang Profesional, Aman, dan
             Tepercaya
           </p>
+
           <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
-            Bersama Kami, <br />
-            Kamu Tidak Sendiri Lagi
+            Bersama Kami, <br /> Kamu Tidak Sendiri Lagi
           </h2>
 
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
             Pilih layanan yang paling sesuai dengan kebutuhan Anda.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-6 justify-center md:justify-start">
-            {/* === Kartu Konsultasi === */}
+          <div className="flex md:justify-start justify-center mt-6">
             <a
-              href="/konsultasi"
-              className="group bg-white shadow-md rounded-xl p-5 flex items-center justify-between w-full sm:w-72 
-                hover:bg-blue-50 hover:shadow-lg transition-all duration-300"
+              href="https://konsultasi.klinikpatnal.com/"
+              className="
+        group relative rounded-2xl px-7 py-5
+        flex items-center justify-between 
+        w-full md:w-[540px] lg:w-[580px]
+        bg-white 
+        border border-gray-200/70 shadow-sm
+        hover:shadow-lg hover:border-blue-100
+        transition-all duration-300
+      "
             >
-              <div className="text-left">
+              {/* Subtle gradient glow */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-50/30 to-white opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none"></div>
+
+              {/* Text */}
+              <div className="text-left relative z-10 space-y-1.5">
                 <p className="text-gray-500 text-sm">Konsultasi untuk saya</p>
-                <h3 className="text-blue-600 font-semibold text-lg group-hover:text-blue-700">
+
+                <h3 className="text-blue-600 font-bold text-2xl tracking-tight group-hover:text-blue-700 transition-colors">
                   Konsultasi
                 </h3>
-                <div className="text-blue-600 text-sm font-medium flex items-center gap-1 mt-2">
-                  Pilih
+
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Layanan konsultasi profesional.
+                </p>
+
+                {/* Pilih Text + Animated Arrow */}
+                <div className="flex items-center gap-1 text-blue-600 text-sm font-medium pt-1">
+                  <span className="transition-all duration-300 group-hover:translate-x-1">
+                    Pilih
+                  </span>
+
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="size-4"
+                    className="size-4 transition-all duration-300 opacity-80 group-hover:opacity-100 group-hover:translate-x-1"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -49,46 +69,16 @@ export default function Produk() {
                   </svg>
                 </div>
               </div>
+
+              {/* Image */}
               <img
                 src="/images/konsultasi.png"
                 alt="Konsultasi"
-                className="w-16 h-16 object-contain"
-              />
-            </a>
-
-            {/* === Kartu Pelaporan === */}
-            <a
-              href="/wbs"
-              className="group bg-white shadow-md rounded-xl p-5 flex items-center justify-between w-full sm:w-72 
-                hover:bg-blue-50 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="text-left">
-                <p className="text-gray-500 text-sm">WBS untuk saya</p>
-                <h3 className="text-blue-600 font-semibold text-lg group-hover:text-blue-700">
-                  Layanan WBS
-                </h3>
-                <div className="text-blue-600 text-sm font-medium flex items-center gap-1 mt-2">
-                  Pilih
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="size-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <img
-                src="/images/pelaporan.png"
-                alt="Pelaporan"
-                className="w-16 h-16 object-contain"
+                className="
+          w-20 h-20 object-contain relative z-10
+          transition-all duration-300
+          group-hover:scale-105 group-hover:-translate-y-0.5
+        "
               />
             </a>
           </div>
@@ -96,11 +86,33 @@ export default function Produk() {
 
         {/* === Kanan: Gambar Ilustrasi === */}
         <div className="flex-1 flex justify-center md:justify-end md:pt-24">
-          <img
-            src="/images/produk.png"
-            alt="Produk Klinik Patnal"
-            className="w-80 md:w-[420px] max-w-full object-contain drop-shadow-md"
-          />
+          <div className="relative">
+            {/* Glow belakang (soft & modern) */}
+            <div
+              className="
+      absolute inset-0 
+      bg-gradient-to-br from-blue-100/40 to-blue-50/0 
+      rounded-3xl blur-2xl 
+      opacity-60 pointer-events-none
+    "
+            ></div>
+
+            {/* Gambar */}
+            <img
+              src="/images/produk.png"
+              alt="Produk Klinik Patnal"
+              className="
+        relative z-10
+        w-80 md:w-[420px] max-w-full object-contain
+
+        transition-all duration-500 
+        drop-shadow-xl
+
+        group-hover:scale-[1.03]
+        group-hover:-translate-y-1
+      "
+            />
+          </div>
         </div>
       </div>
     </section>
