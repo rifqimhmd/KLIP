@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function VideoEdukasi() {
   const videos = [
@@ -9,10 +9,24 @@ export default function VideoEdukasi() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3); // default desktop
+
+  // === RESPONSIVE BREAKPOINT ===
+  useEffect(() => {
+    const update = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(2); // MOBILE → 2 video
+      } else {
+        setVisibleCount(3); // DESKTOP → 3 video
+      }
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   // === aturan carousel ===
-  const visibleCount = 3; // selalu tampil 3 thumbnail
-  const maxIndex = Math.max(0, videos.length - visibleCount); // batas next
+  const maxIndex = Math.max(0, videos.length - visibleCount);
 
   const nextThumb = () => {
     setCarouselIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
@@ -66,9 +80,17 @@ export default function VideoEdukasi() {
                 <div
                   key={v.id}
                   onClick={() => setCurrentIndex(i)}
-                  className={`min-w-[30%] max-w-[30%] aspect-video rounded-xl overflow-hidden 
-          cursor-pointer shadow-lg transition ring-4 
-          ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}`}
+                  className={`
+  /* MOBILE — 2 thumbnail */
+  min-w-[calc(50%-10px)] max-w-[calc(50%-10px)]
+
+  /* DESKTOP — 3 thumbnail sejajar */
+  md:min-w-[calc((100%-80px)/3)] md:max-w-[calc((100%-80px)/3)]
+
+  aspect-video rounded-xl overflow-hidden 
+  cursor-pointer shadow-lg transition ring-4
+  ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}
+`}
                 >
                   <iframe
                     className="w-full h-full pointer-events-none"
