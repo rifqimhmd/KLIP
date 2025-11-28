@@ -9,15 +9,15 @@ export default function VideoEdukasi() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3); // default desktop
+  const [visibleCount, setVisibleCount] = useState(3);
 
   // === RESPONSIVE BREAKPOINT ===
   useEffect(() => {
     const update = () => {
       if (window.innerWidth < 640) {
-        setVisibleCount(2); // MOBILE → 2 video
+        setVisibleCount(2);
       } else {
-        setVisibleCount(3); // DESKTOP → 3 video
+        setVisibleCount(3);
       }
     };
     update();
@@ -25,7 +25,7 @@ export default function VideoEdukasi() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // === aturan carousel ===
+  // === MAX INDEX (agar tidak keluar batas) ===
   const maxIndex = Math.max(0, videos.length - visibleCount);
 
   const nextThumb = () => {
@@ -34,6 +34,26 @@ export default function VideoEdukasi() {
 
   const prevThumb = () => {
     setCarouselIndex((prev) => (prev > 0 ? prev - 1 : 0));
+  };
+
+  // === SWIPE HANDLERS ===
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEndX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    const swipeDistance = touchStartX - touchEndX;
+
+    // threshold minimal biar ga sensitif
+    if (swipeDistance > 50) nextThumb(); // swipe kiri → next
+    if (swipeDistance < -50) prevThumb(); // swipe kanan → prev
   };
 
   return (
@@ -67,7 +87,12 @@ export default function VideoEdukasi() {
             ❮
           </button>
 
-          <div className="overflow-hidden w-full max-w-5xl mx-auto px-6 md:px-12">
+          <div
+            className="overflow-hidden w-full max-w-5xl mx-auto px-6 md:px-12"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <div
               className="flex gap-5 md:gap-10 transition-transform duration-500"
               style={{
@@ -81,16 +106,12 @@ export default function VideoEdukasi() {
                   key={v.id}
                   onClick={() => setCurrentIndex(i)}
                   className={`
-  /* MOBILE — 2 thumbnail */
-  min-w-[calc(50%-10px)] max-w-[calc(50%-10px)]
-
-  /* DESKTOP — 3 thumbnail sejajar */
-  md:min-w-[calc((100%-80px)/3)] md:max-w-[calc((100%-80px)/3)]
-
-  aspect-video rounded-xl overflow-hidden 
-  cursor-pointer shadow-lg transition ring-4
-  ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}
-`}
+          min-w-[calc(50%-10px)] max-w-[calc(50%-10px)]
+          md:min-w-[calc((100%-80px)/3)] md:max-w-[calc((100%-80px)/3)]
+          aspect-video rounded-xl overflow-hidden 
+          cursor-pointer shadow-lg transition ring-4
+          ${currentIndex === i ? "ring-blue-400" : "ring-transparent"}
+        `}
                 >
                   <iframe
                     className="w-full h-full pointer-events-none"
