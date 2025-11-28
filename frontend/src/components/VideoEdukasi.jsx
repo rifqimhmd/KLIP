@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 
 export default function VideoEdukasi() {
   const videos = [
-    { id: 1, url: "https://www.youtube.com/embed/aVgihMIhi6c" },
+    { id: 1, url: "https://www.youtube.com/embed/nP94bjzVUVY" },
     { id: 2, url: "https://www.youtube.com/embed/bFmGdzeEV0s" },
     { id: 3, url: "https://www.youtube.com/embed/6YOkAL8BoUU" },
+    { id: 4, url: "https://www.youtube.com/embed/aVgihMIhi6c" },
+    { id: 5, url: "https://www.youtube.com/embed/OkgbKHkErjs" },
+    { id: 6, url: "https://www.youtube.com/embed/wygiJONYlQA" },
+    { id: 7, url: "https://www.youtube.com/embed/XyBxnqWxWns" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
