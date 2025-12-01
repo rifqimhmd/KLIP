@@ -2,10 +2,23 @@ import React from "react";
 
 export default function Produk() {
   return (
-    <section className="relative w-full overflow-hidden bg-gradient-to-r from-white to-blue-50 mt-4">
+    <section
+      className="
+    relative w-full overflow-hidden 
+    bg-gradient-to-r from-white to-blue-50 
+    mt-4
+  "
+    >
       <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center gap-10">
         {/* === Kiri: Teks & Tombol Produk === */}
-        <div className="flex-1 text-center md:text-left md:pt-0 pt-8">
+        <div
+          className="
+      flex-1 
+      text-center md:text-left 
+      pt-10 md:pt-20 
+      pb-10 md:pb-20
+    "
+        >
           <p className="text-blue-600 font-semibold text-sm md:text-base">
             Dapatkan Layanan Konsultasi yang Profesional, Aman, dan Tepercaya
           </p>
@@ -23,19 +36,17 @@ export default function Produk() {
             <a
               href="https://konsultasi.klinikpatnal.com/"
               className="
-        group relative rounded-2xl px-7 py-5
-        flex items-center justify-between 
-        w-full md:w-[540px] lg:w-[580px]
-        bg-white 
-        border border-gray-200/70 shadow-sm
-        hover:shadow-lg hover:border-blue-100
-        transition-all duration-300
-      "
+            group relative rounded-2xl px-7 py-5
+            flex items-center justify-between 
+            w-full md:w-[540px] lg:w-[580px]
+            bg-white 
+            border border-gray-200/70 shadow-sm
+            hover:shadow-lg hover:border-blue-100
+            transition-all duration-300
+          "
             >
-              {/* Subtle gradient glow */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-50/30 to-white opacity-0 group-hover:opacity-100 transition duration-300 pointer-events-none"></div>
 
-              {/* Text */}
               <div className="text-left relative z-10 space-y-1.5">
                 <p className="text-gray-500 text-sm">Konsultasi untuk saya</p>
 
@@ -47,7 +58,6 @@ export default function Produk() {
                   Layanan konsultasi profesional.
                 </p>
 
-                {/* Pilih Text + Animated Arrow */}
                 <div className="flex items-center gap-1 text-blue-600 text-sm font-medium pt-1">
                   <span className="transition-all duration-300 group-hover:translate-x-1">
                     Pilih
@@ -70,44 +80,57 @@ export default function Produk() {
                 </div>
               </div>
 
-              {/* Image */}
               <img
                 src="/images/konsultasi.png"
                 alt="Konsultasi"
                 className="
-          w-20 h-20 object-contain relative z-10
-          transition-all duration-300
-          group-hover:scale-105 group-hover:-translate-y-0.5
-        "
+              w-20 h-20 object-contain relative z-10
+              transition-all duration-300
+              group-hover:scale-105 group-hover:-translate-y-0.5
+            "
               />
             </a>
           </div>
         </div>
 
         {/* === Kanan: Gambar Ilustrasi === */}
-        <div className="flex-1 flex justify-center md:justify-end md:pt-24">
-          <div className="relative">
-            {/* Glow belakang (soft & modern) */}
+        <div
+          className="
+    flex-1 flex justify-center md:justify-end
+    md:pt-24
+  "
+        >
+          <div
+            className="
+      relative 
+      w-full
+      md:translate-y-[10px] lg:translate-y-[18px]
+      max-w-[520px] 
+      md:max-w-[760px]     /* lebih besar di desktop */
+      lg:max-w-[960px]     /* sangat besar di layar besar */
+    "
+          >
+            {/* Glow */}
             <div
               className="
-      absolute inset-0 
-      bg-gradient-to-br from-blue-100/40 to-blue-50/0 
-      rounded-3xl blur-2xl 
-      opacity-60 pointer-events-none
-    "
+        absolute inset-0 
+        bg-gradient-to-br from-blue-100/40 to-blue-50/0 
+        rounded-3xl blur-2xl 
+        opacity-60 pointer-events-none
+      "
             ></div>
 
-            {/* Gambar */}
+            {/* Image */}
             <img
               src="/images/produk.png"
               alt="Produk Klinik Patnal"
               className="
         relative z-10
-        w-80 md:w-[420px] max-w-full object-contain
-
+        w-full
+        h-auto
+        object-contain
         transition-all duration-500 
         drop-shadow-xl
-
         group-hover:scale-[1.03]
         group-hover:-translate-y-1
       "
