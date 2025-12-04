@@ -97,18 +97,26 @@ export default function Produk() {
         <div
           className="
     flex-1 flex justify-center md:justify-end
-    md:pt-24
+    pt-10 md:pt-20 lg:pt-24
   "
         >
           <div
             className="
-      relative 
-      w-full
-      md:translate-y-[10px] lg:translate-y-[18px]
-      max-w-[520px] 
-      md:max-w-[760px]     /* lebih besar di desktop */
-      lg:max-w-[960px]     /* sangat besar di layar besar */
-    "
+    relative 
+    w-full
+
+    translate-y-[8px]        /* HP */
+    sm:translate-y-[12px]    /* HP besar */
+    md:translate-y-[16px]    /* Tablet */
+    lg:translate-y-[20px]    /* Desktop besar */
+    xl:translate-y-[18px]    /* Layar sangat besar (turun sedikit) */
+
+    max-w-[380px]
+    sm:max-w-[480px]
+    md:max-w-[720px]
+    lg:max-w-[920px]
+    xl:max-w-[1100px]
+  "
           >
             {/* Glow */}
             <div
