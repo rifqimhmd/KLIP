@@ -105,17 +105,19 @@ export default function Produk() {
     relative 
     w-full
 
-    translate-y-[8px]        /* HP */
-    sm:translate-y-[12px]    /* HP besar */
-    md:translate-y-[16px]    /* Tablet */
-    lg:translate-y-[20px]    /* Desktop besar */
-    xl:translate-y-[18px]    /* Layar sangat besar (turun sedikit) */
+    translate-y-[8px]          /* HP kecil */
+    sm:translate-y-[12px]      /* HP besar */
+    md:translate-y-[16px]      /* Tablet */
+    lg:translate-y-[20px]      /* Desktop 1024–1279 */
+    xl:translate-y-[18px]      /* Desktop 1280–1440 (1366 masuk sini) */
+    2xl:translate-y-[16px]     /* Layar sangat besar (≥1536) */
 
     max-w-[380px]
     sm:max-w-[480px]
     md:max-w-[720px]
     lg:max-w-[920px]
     xl:max-w-[1100px]
+    2xl:max-w-[1280px]
   "
           >
             {/* Glow */}
