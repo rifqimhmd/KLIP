@@ -22,7 +22,7 @@ export default function Tentang() {
             />
 
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-sm mb-2 animate-fadeInUp">
-              Klinik Kepatuhan Internal
+              Patnal Integrity Hub
             </h1>
 
             <p className="text-lg md:text-xl font-medium opacity-90 animate-fadeInUp">
@@ -78,7 +78,7 @@ export default function Tentang() {
         {/* FEATURES */}
         <section className="max-w-5xl mx-auto px-6 py-16 md:py-20">
           <h3 className="text-2xl md:text-3xl font-semibold mb-12 text-gray-800 text-center">
-            Fokus Layanan Klinik
+            Fokus Layanan
           </h3>
 
           <div className="grid md:grid-cols-3 gap-8">
