@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-sm">
           {/* Brand + Copyright */}
           <div className="text-center md:text-left text-gray-800">
-            © {new Date().getFullYear()} Klinik Patnal • Direktorat Jenderal
+            © {new Date().getFullYear()} Patnal Integrity Hub • Direktorat Jenderal
             Pemasyarakatan
           </div>
 
