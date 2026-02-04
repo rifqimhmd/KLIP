@@ -30,7 +30,11 @@ export default function Produk() {
           <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
             Di sini kamu bisa ngomong bebas, tanpa takut di-judge!
           </p>
-            
+          
+          <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
+            tanpa takut di-judge!
+          </p>
+          
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
             Patnal di sini buat bantu kamu cari solusi.
           </p>
