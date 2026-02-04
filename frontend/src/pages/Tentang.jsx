@@ -46,7 +46,7 @@ export default function Tentang() {
 
             <div className="space-y-4 text-gray-700 leading-relaxed text-justify">
               <p>
-                Klinik Kepatuhan Internal merupakan unit layanan yang berada di
+                Patnal Integrity Hub merupakan unit layanan yang berada di
                 bawah Direktorat Kepatuhan Internal, berkomitmen untuk mendukung
                 pelaksanaan kepatuhan yang efektif dan berkelanjutan di dalam
                 organisasi. Klinik ini hadir sebagai pusat konsultasi, edukasi,
