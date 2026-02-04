@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 
 export default function PustakaDokumen({ itemsProp }) {
   const defaultItems = [
@@ -46,25 +46,14 @@ export default function PustakaDokumen({ itemsProp }) {
   ];
 
   const items = itemsProp?.length ? itemsProp : defaultItems;
-  const scrollRef = useRef(null);
 
-  const scrollLeft = () => {
-    scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
-  };
-
-  // === fungsi buka PDF lewat Google Docs (anti IDM)
+  // === fungsi buka PDF
   const openPdf = async (fileUrl) => {
     try {
-      // pastikan URL absolut
       const finalUrl = fileUrl.startsWith("http")
         ? fileUrl
         : window.location.origin + fileUrl;
 
-      // ambil pdf sebagai blob
       const response = await fetch(finalUrl, {
         headers: { "Cache-Control": "no-cache" },
       });
@@ -72,7 +61,6 @@ export default function PustakaDokumen({ itemsProp }) {
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
 
-      // buka pdf manual (tanpa download)
       window.open(blobUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error("PDF gagal dibuka:", err);
@@ -91,88 +79,59 @@ export default function PustakaDokumen({ itemsProp }) {
           terdokumentasi dengan baik.
         </p>
 
-        <div className="relative">
-          <button
-            onClick={scrollLeft}
-            className="absolute -left-4 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-blue-200 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-50 z-10"
-          >
-            ❮
-          </button>
-          <div
-            className="overflow-x-auto scrollbar-hide scroll-smooth py-4 
-  px-8 md:px-14"
-            ref={scrollRef}
-            style={{ scrollbarWidth: "none" }}
-          >
-            <div
-              className={`
-      flex gap-6 w-full
-      ${items.length < 5 ? "md:justify-center" : "md:justify-start"}
-    `}
-            >
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => openPdf(item.file)}
-                  className="
-          w-[150px] h-[220px]
-          sm:w-[190px] sm:h-[260px]
-          md:w-[230px] md:h-[320px]
-          lg:w-[250px] lg:h-[340px]
-
-          flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl
-
-          bg-white/70 backdrop-blur-sm
-          shadow-xl border border-gray-300
-
-          hover:bg-white/80
-          hover:shadow-2xl
-          hover:-translate-y-1
-
-          transition-all duration-300 ease-out
-        "
-                >
-                  <div className="relative w-full h-full">
-                    <img
-                      src={item.cover}
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-
-                    {/* Title bar sangat kontras */}
-                    <div
-                      className="
-              absolute bottom-0 left-0 right-0
-              bg-gradient-to-t 
-              from-black/90 via-black/70 to-transparent
-              px-3 py-3
-            "
-                    >
-                      <h3
-                        className="
-                text-white text-sm md:text-base font-semibold 
-                line-clamp-2 leading-tight
-                drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]
-              "
-                      >
-                        {item.title}
-                      </h3>
-                    </div>
-                  </div>
+        {/* List Dokumen */}
+        <ul className="max-w-3xl mx-auto space-y-2">
+          {items.map((item, index) => (
+            <li key={item.id}>
+              <button
+                onClick={() => openPdf(item.file)}
+                className="
+                  w-full flex items-center gap-4 
+                  px-5 py-4 
+                  bg-white hover:bg-blue-50 
+                  border border-gray-200 rounded-xl
+                  shadow-sm hover:shadow-md
+                  transition-all duration-200
+                  group
+                "
+              >
+                {/* Nomor */}
+                <span className="text-blue-600 font-bold text-lg w-8 text-center">
+                  {index + 1}.
+                </span>
+                
+                {/* Thumbnail kecil */}
+                <div className="w-10 h-14 rounded-lg overflow-hidden shadow-sm flex-shrink-0">
+                  <img
+                    src={item.cover}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              ))}
 
-              <div className="w-4 sm:w-6 md:w-10 flex-shrink-0"></div>
-            </div>
-          </div>
+                {/* Judul */}
+                <span className="flex-1 text-left text-gray-800 font-medium group-hover:text-blue-600 transition-colors">
+                  {item.title}
+                </span>
 
-          <button
-            onClick={scrollRight}
-            className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white shadow-lg border border-blue-200 text-blue-600 rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-50 z-10"
-          >
-            ❯
-          </button>
-        </div>
+                {/* Icon panah */}
+                <svg
+                  className="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
