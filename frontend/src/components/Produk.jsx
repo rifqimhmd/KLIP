@@ -27,9 +27,9 @@ export default function Produk() {
             Trust me! 
           </h2>
           
-          <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
+          <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
             Di sini kamu bisa ngomong bebas, tanpa takut di-judge!
-          </h2>
+          </p>
             
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
             Patnal di sini buat bantu kamu cari solusi.
