@@ -20,16 +20,15 @@ export default function Produk() {
     "
         >
           <p className="text-blue-600 font-semibold text-sm md:text-base">
-            Dapatkan Layanan Konsultasi yang Profesional, Aman, dan Tepercaya
+            Konsultasi? Gampang! PATNAL ada kok.
           </p>
 
           <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
-            Bersama Kami, <br /> Kamu Tidak Sendiri Lagi
+            No cap, disini kamu bisa ngomong bebas, tanpa takut di judge
           </h2>
 
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
-            Manfaatkan layanan konsultasi kami untuk memenuhi kebutuhan Anda
-            secara optimal.
+            Kami di sini buat bantu kamu cari solusi.
           </p>
 
           <div className="flex md:justify-start justify-center mt-6">
