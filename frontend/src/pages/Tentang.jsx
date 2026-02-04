@@ -49,7 +49,7 @@ export default function Tentang() {
                 Patnal Integrity Hub merupakan unit layanan yang berada di
                 bawah Direktorat Kepatuhan Internal, berkomitmen untuk mendukung
                 pelaksanaan kepatuhan yang efektif dan berkelanjutan di dalam
-                organisasi. Klinik ini hadir sebagai pusat konsultasi, edukasi,
+                organisasi. Laman ini hadir sebagai pusat konsultasi, edukasi,
                 dan pemecahan masalah terkait kepatuhan internal, guna
                 memastikan seluruh proses dan aktivitas organisasi sesuai dengan
                 peraturan, standar, dan kebijakan yang berlaku.
@@ -60,7 +60,7 @@ export default function Tentang() {
                 terpercaya dalam penanganan isu-isu kepatuhan, serta mengedukasi
                 seluruh pemangku kepentingan agar tercipta budaya kepatuhan yang
                 kuat dan konsisten. Melalui pendekatan yang profesional dan
-                berorientasi pada solusi, Klinik Kepatuhan Internal membantu
+                berorientasi pada solusi,  Kepatuhan Internal membantu
                 mengidentifikasi, mencegah, dan mengatasi risiko kepatuhan
                 sehingga organisasi dapat beroperasi secara transparan dan
                 akuntabel.
