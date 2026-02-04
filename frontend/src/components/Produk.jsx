@@ -20,15 +20,16 @@ export default function Produk() {
     "
         >
           <p className="text-blue-600 font-semibold text-sm md:text-base">
-            Konsultasi? Gampang! PATNAL ada kok.
+            Konsultasi? Gampang kok! ada PATNAL disini.
           </p>
 
           <h2 className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
-            Trust me! di sini kamu bisa ngomong bebas, tanpa takut di-judge
+            Trust me! 
+            Di sini kamu bisa ngomong bebas, tanpa takut di-judge!
           </h2>
 
           <p className="text-gray-700 mt-4 mb-10 text-base md:text-lg">
-            Kami di sini buat bantu kamu cari solusi.
+            Patnal di sini buat bantu kamu cari solusi.
           </p>
 
           <div className="flex md:justify-start justify-center mt-6">
