@@ -27,7 +27,7 @@ export default function Produk() {
             Trust me! 
           </h2>
           
-        <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
+        <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug ">
             Di sini kamu bisa ngomong bebas,<br />
             tanpa takut di-judge!
         </p>
