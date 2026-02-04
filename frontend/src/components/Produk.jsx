@@ -28,10 +28,7 @@ export default function Produk() {
           </h2>
           
           <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
-            Di sini kamu bisa ngomong bebas, tanpa takut di-judge!
-          </p>
-          
-          <p className="text-3xl md:text-5xl font-bold text-blue-600 leading-snug mt-4 md:mt-6">
+            Di sini kamu bisa ngomong bebas, 
             tanpa takut di-judge!
           </p>
           
