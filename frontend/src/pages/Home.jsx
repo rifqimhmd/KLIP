@@ -2,7 +2,7 @@ import MainLayout from "../layouts/MainLayout";
 import Banner from "../components/Banner";
 import Produk from "../components/Produk";
 import PustakaDokumen from "../components/PustakaDokumen";
-// import VideoEdukasi from "../components/VideoEdukasi";
+import VideoEdukasi from "../components/VideoEdukasi";
 import { useEffect } from "react";
 
 export default function Home() {
@@ -14,7 +14,7 @@ export default function Home() {
       <Banner />
       <Produk />
       <PustakaDokumen />
-      //<VideoEdukasi />
+      <VideoEdukasi />
     </MainLayout>
   );
 }
