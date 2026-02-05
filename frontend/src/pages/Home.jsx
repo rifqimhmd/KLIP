@@ -14,7 +14,7 @@ export default function Home() {
       <Banner />
       <Produk />
       <PustakaDokumen />
-      // <VideoEdukasi />
+      //<VideoEdukasi />
     </MainLayout>
   );
 }
