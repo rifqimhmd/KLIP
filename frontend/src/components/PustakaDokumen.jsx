@@ -144,8 +144,8 @@ export default function PustakaDokumen({ itemsProp }) {
       <div className="container mx-auto px-6 md:px-12">
         <h2 className="text-3xl font-bold mb-3 text-center">Pustaka Dokumen</h2>
         <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8">
-          Kumpulan dokumen pendukung ini disiapkan sebagai referensi utama dalam
-          kegiatan konsultasi dan layanan di Klinik Patnal, guna memastikan
+          Kumpulan dokumen pendukung ini disusun sebagai referensi dalam
+          pelaksanaan konsultasi dan layanan di Klinik Patnal, guna memastikan
           setiap proses kepatuhan, pengambilan keputusan, dan prosedur
           operasional berjalan berdasarkan informasi yang akurat, jelas, dan
           terdokumentasi dengan baik.
