@@ -152,12 +152,26 @@ export default function PustakaDokumen({ itemsProp }) {
         </p>
 
         {/* Kategori List */}
-        <div className="max-w-4xl mx-auto space-y-3">
+        <div
+          className="  w-full 
+  max-w-screen-2xl 
+  mx-auto 
+  px-3 sm:px-4 md:px-6 lg:px-10 xl:px-16 
+  space-y-4 md:space-y-5"
+        >
           {/* === Kategori 1: Himpunan Peraturan Perundang-undangan === */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div
+            className="bg-white rounded-xl shadow-sm md:shadow-md
+border border-gray-200 overflow-hidden
+"
+          >
             <button
               onClick={() => toggleCategory("peraturan")}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-blue-50 transition-colors duration-200"
+              className="w-full flex items-center justify-between
+  px-4 sm:px-5 lg:px-6
+  py-3 sm:py-4
+  hover:bg-blue-50 active:bg-blue-100
+  transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -173,7 +187,7 @@ export default function PustakaDokumen({ itemsProp }) {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
                   Himpunan Peraturan Perundang-Undangan
                 </span>
               </div>
@@ -209,11 +223,12 @@ export default function PustakaDokumen({ itemsProp }) {
                     <button
                       onClick={() => openPdf(item.file)}
                       className="
-                        w-full flex items-center gap-4 
-                        px-6 py-3 
-                        hover:bg-blue-50 
-                        transition-all duration-200
-                        group
+w-full flex items-center gap-3 sm:gap-4
+  px-4 sm:px-6 lg:px-8
+  py-3
+  hover:bg-blue-50
+  transition-all duration-200
+  group
                       "
                     >
                       <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
@@ -223,7 +238,7 @@ export default function PustakaDokumen({ itemsProp }) {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <span className="flex-1 text-left text-gray-700 text-sm group-hover:text-blue-600 transition-colors">
+                      <span className="flex-1 text-left text-gray-700 text-xs sm:text-sm lg:text-base">
                         {item.title}
                       </span>
                       <svg
@@ -247,10 +262,18 @@ export default function PustakaDokumen({ itemsProp }) {
           </div>
 
           {/* === Kategori 2: E-book/Jurnal Pustaka === */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div
+            className="bg-white rounded-xl shadow-sm md:shadow-md
+border border-gray-200 overflow-hidden
+"
+          >
             <button
               onClick={() => toggleCategory("ebook")}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-blue-50 transition-colors duration-200"
+              className="w-full flex items-center justify-between
+  px-4 sm:px-5 lg:px-6
+  py-3 sm:py-4
+  hover:bg-blue-50 active:bg-blue-100
+  transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -266,7 +289,7 @@ export default function PustakaDokumen({ itemsProp }) {
                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                   />
                 </svg>
-                <span className="font-semibold text-gray-800">
+                <span className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
                   E-book/Jurnal Pustaka
                 </span>
               </div>
@@ -299,10 +322,18 @@ export default function PustakaDokumen({ itemsProp }) {
           </div>
 
           {/* === Kategori 3: Edukasi (dengan Video) === */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div
+            className="bg-white rounded-xl shadow-sm md:shadow-md
+border border-gray-200 overflow-hidden
+"
+          >
             <button
               onClick={() => toggleCategory("edukasi")}
-              className="w-full flex items-center justify-between px-5 py-4 hover:bg-blue-50 transition-colors duration-200"
+              className="w-full flex items-center justify-between
+  px-4 sm:px-5 lg:px-6
+  py-3 sm:py-4
+  hover:bg-blue-50 active:bg-blue-100
+  transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -318,7 +349,9 @@ export default function PustakaDokumen({ itemsProp }) {
                     d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
                   />
                 </svg>
-                <span className="font-semibold text-gray-800">Edukasi</span>
+                <span className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
+                  Edukasi
+                </span>
               </div>
               <svg
                 className={`w-5 h-5 text-blue-600 transition-transform duration-300 ${
@@ -345,7 +378,15 @@ export default function PustakaDokumen({ itemsProp }) {
             >
               <div className="border-t border-gray-100 p-4 md:p-6 bg-gradient-to-b from-blue-50/50 to-white">
                 {/* VIDEO UTAMA */}
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-6">
+                <div
+                  className=" relative w-full 
+  aspect-video 
+  rounded-xl 
+  overflow-hidden 
+  shadow-lg 
+  mb-6
+  max-h-[70vh]"
+                >
                   <iframe
                     key={videos[currentIndex].id}
                     className="w-full h-full"
