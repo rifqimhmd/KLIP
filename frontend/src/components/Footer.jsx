@@ -5,17 +5,9 @@ export default function Footer() {
     <footer className="bg-white text-gray-700 p-10 font-sans border-t border-gray-200">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
         
-        {/* Kolom 1: Logo, Deskripsi & Sosmed */}
+        {/* Kolom 1: Deskripsi & Sosmed (Logo sudah dihapus) */}
         <div className="space-y-6">
-          <div className="flex items-start space-x-3">
-            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-[10px] text-center p-1 border border-gray-200 text-gray-400 font-bold leading-tight">
-              PATNAL<br/>HUB
-            </div>
-            <div className="font-bold leading-tight text-sm tracking-wide text-gray-900 uppercase">
-              Patnal<br/>Integrity<br/>Hub
-            </div>
-          </div>
-          
+          {/* Bagian Deskripsi langsung di atas */}
           <p className="text-[14px] text-gray-500 leading-relaxed text-justify max-w-md">
             Direktorat Jenderal Pemasyarakatan berkomitmen dalam membangun integritas dan 
             memberikan edukasi berkelanjutan bagi seluruh jajaran demi terciptanya 
@@ -25,28 +17,24 @@ export default function Footer() {
           <div className="pt-2">
             <h4 className="font-bold text-sm mb-4 tracking-wide text-gray-900 uppercase">Terhubung dengan kami</h4>
             <div className="flex space-x-6 text-gray-600">
-              {/* Facebook */}
               <a href="https://facebook.com/ditjenpas" target="_blank" rel="noopener noreferrer">
                 <Facebook size={22} className="hover:text-blue-600 cursor-pointer transition" />
               </a>
 
-              {/* Instagram */}
               <a href="https://instagram.com/ditjenpas" target="_blank" rel="noopener noreferrer">
                 <Instagram size={22} className="hover:text-pink-600 cursor-pointer transition" />
               </a>
 
-              {/* Youtube */}
               <a href="https://youtube.com/@ditjenpas" target="_blank" rel="noopener noreferrer">
                 <Youtube size={22} className="hover:text-red-600 cursor-pointer transition" />
               </a>
 
-              {/* TikTok */}
               <a href="https://tiktok.com/@antikorupsi.ditjenpas" target="_blank" rel="noopener noreferrer">
                 <Music2 size={22} className="hover:text-black cursor-pointer transition" />
               </a>
             </div>
           </div>
-        </div> {/* <-- Penutup Kolom 1 yang tadi hilang */}
+        </div>
 
         {/* Kolom 2: Kotak Kontak Langsung */}
         <div className="flex justify-end">
