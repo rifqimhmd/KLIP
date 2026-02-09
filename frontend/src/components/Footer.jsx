@@ -25,7 +25,7 @@ export default function Footer() {
                 <Instagram size={22} className="hover:text-pink-600 cursor-pointer transition" />
               </a>
 
-              <a href="https://youtube.com/@ditjenpas" target="_blank" rel="noopener noreferrer">
+              <a href="https://youtube.com/@patnalditjenpas" target="_blank" rel="noopener noreferrer">
                 <Youtube size={22} className="hover:text-red-600 cursor-pointer transition" />
               </a>
 
