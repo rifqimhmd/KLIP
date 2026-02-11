@@ -1,47 +1,76 @@
 import React, { useState, useEffect } from "react";
 
 export default function PustakaDokumen({ itemsProp }) {
-  const defaultItems = [
+  // === DATA DOKUMEN BERDASARKAN SUB-KATEGORI ===
+  const subKategoriPeraturan = [
     {
-      id: "1",
-      title: "Kode Etik Pegawai Pemasyarakatan",
-      cover:
-        "https://i.ibb.co.com/BH4xyT8j/Cover-Kode-Etik-Pegawai-Pemasyarakatan.jpg",
-      file: "/pdf/Kode Etik Pegawai Pemasyarakatan.pdf",
+      id: "uud",
+      title: "Undang-Undang Dasar Negara Republik Indonesia Tahun 1945 (UUD 1945)",
+      items: [],
     },
     {
-      id: "2",
-      title: "Netralitas ASN dalam Pilkada",
-      cover:
-        "https://i.ibb.co.com/xSfwxmzG/Cover-Pelanggaran-Netralitas-dan-Wewenang-ASN-dalam-Pilkada.jpg",
-      file: "/pdf/Netralitas ASN dalam Pilkada.pdf",
+      id: "tap-mpr",
+      title: "Ketetapan Majelis Permusyawaratan Rakyat (TAP MPR)",
+      items: [],
     },
     {
-      id: "3",
-      title: "Permen Iminpas No. 1 Tahun 2024",
-      cover:
-        "https://i.ibb.co.com/XZmH47nT/Cover-Permen-Iminpas-No-1-Tahun-2024.jpg",
-      file: "/pdf/Permen Iminpas No. 1 Tahun 2024.pdf",
+      id: "uu-perppu",
+      title: "Undang-Undang (UU) / Peraturan Pemerintah Pengganti Undang-Undang (Perppu)",
+      items: [
+        {
+          id: "6",
+          title: "UU ASN No.20 Tahun 2023 Tentang ASN",
+          cover: "https://i.ibb.co.com/1Gk7b2nc/Cover-UU-ASN-No-20-Tahun-2023-Tentang-ASN.jpg",
+          file: "/pdf/UU ASN No.20 Tahun 2023 Tentang ASN.pdf",
+        },
+      ],
     },
     {
-      id: "4",
-      title: "PP No. 94 Tahun 2021 tentang Disiplin PNS",
-      cover:
-        "https://i.ibb.co.com/zTM85KyH/Cover-PP-No-94-Tahun-2021-tentang-Disiplin-PNS.jpg",
-      file: "/pdf/PP No. 94 Tahun 2021 tentang Disiplin PNS.pdf",
+      id: "pp",
+      title: "Peraturan Pemerintah (PP)",
+      items: [
+        {
+          id: "4",
+          title: "PP No. 94 Tahun 2021 tentang Disiplin PNS",
+          cover: "https://i.ibb.co.com/zTM85KyH/Cover-PP-No-94-Tahun-2021-tentang-Disiplin-PNS.jpg",
+          file: "/pdf/PP No. 94 Tahun 2021 tentang Disiplin PNS.pdf",
+        },
+      ],
     },
     {
-      id: "5",
-      title: "Disiplin Berat ASN: Perspektif Hukum",
-      cover: "https://i.ibb.co.com/tTZ0fRjh/Cover-Sanski.jpg",
-      file: "/pdf/Disiplin Berat ASN: Perspektif Hukum.pdf",
+      id: "perpres",
+      title: "Peraturan Presiden (Perpres)",
+      items: [],
     },
     {
-      id: "6",
-      title: "UU ASN No.20 Tahun 2023 Tentang ASN",
-      cover:
-        "https://i.ibb.co.com/1Gk7b2nc/Cover-UU-ASN-No-20-Tahun-2023-Tentang-ASN.jpg",
-      file: "/pdf/UU ASN No.20 Tahun 2023 Tentang ASN.pdf",
+      id: "permen",
+      title: "Peraturan Menteri (Permen)",
+      items: [
+        {
+          id: "1",
+          title: "Kode Etik Pegawai Pemasyarakatan",
+          cover: "https://i.ibb.co.com/BH4xyT8j/Cover-Kode-Etik-Pegawai-Pemasyarakatan.jpg",
+          file: "/pdf/Kode Etik Pegawai Pemasyarakatan.pdf",
+        },
+        {
+          id: "2",
+          title: "Netralitas ASN dalam Pilkada",
+          cover: "https://i.ibb.co.com/xSfwxmzG/Cover-Pelanggaran-Netralitas-dan-Wewenang-ASN-dalam-Pilkada.jpg",
+          file: "/pdf/Netralitas ASN dalam Pilkada.pdf",
+        },
+        {
+          id: "3",
+          title: "Permen Iminpas No. 1 Tahun 2024",
+          cover: "https://i.ibb.co.com/XZmH47nT/Cover-Permen-Iminpas-No-1-Tahun-2024.jpg",
+          file: "/pdf/Permen Iminpas No. 1 Tahun 2024.pdf",
+        },
+        {
+          id: "5",
+          title: "Disiplin Berat ASN: Perspektif Hukum",
+          cover: "https://i.ibb.co.com/tTZ0fRjh/Cover-Sanski.jpg",
+          file: "/pdf/Disiplin Berat ASN: Perspektif Hukum.pdf",
+        },
+      ],
     },
   ];
 
@@ -56,28 +85,24 @@ export default function PustakaDokumen({ itemsProp }) {
     { id: 7, url: "https://www.youtube.com/embed/XyBxnqWxWns" },
   ];
 
-  const items = itemsProp?.length ? itemsProp : defaultItems;
-
-  // State untuk kategori yang terbuka
+  // State untuk kategori utama
   const [openCategories, setOpenCategories] = useState({
     peraturan: false,
     ebook: false,
     edukasi: false,
   });
 
+  // State untuk sub-kategori (nested)
+  const [openSubs, setOpenSubs] = useState({});
+
   // State untuk video edukasi
   const [currentIndex, setCurrentIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
 
-  // === RESPONSIVE BREAKPOINT untuk video ===
   useEffect(() => {
     const update = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCount(2);
-      } else {
-        setVisibleCount(3);
-      }
+      setVisibleCount(window.innerWidth < 640 ? 2 : 3);
     };
     update();
     window.addEventListener("resize", update);
@@ -94,45 +119,35 @@ export default function PustakaDokumen({ itemsProp }) {
     setCarouselIndex((prev) => (prev > 0 ? prev - 1 : 0));
   };
 
-  // === SWIPE HANDLERS ===
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchEndX, setTouchEndX] = useState(0);
 
-  const handleTouchStart = (e) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e) => {
-    setTouchEndX(e.touches[0].clientX);
-  };
-
+  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
+  const handleTouchMove = (e) => setTouchEndX(e.touches[0].clientX);
   const handleTouchEnd = () => {
-    const swipeDistance = touchStartX - touchEndX;
-    if (swipeDistance > 50) nextThumb();
-    if (swipeDistance < -50) prevThumb();
+    const d = touchStartX - touchEndX;
+    if (d > 50) nextThumb();
+    if (d < -50) prevThumb();
   };
 
-  const toggleCategory = (category) => {
-    setOpenCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+  const toggleCategory = (cat) => {
+    setOpenCategories((prev) => ({ ...prev, [cat]: !prev[cat] }));
   };
 
-  // === fungsi buka PDF ===
+  const toggleSub = (subId) => {
+    setOpenSubs((prev) => ({ ...prev, [subId]: !prev[subId] }));
+  };
+
   const openPdf = async (fileUrl) => {
     try {
       const finalUrl = fileUrl.startsWith("http")
         ? fileUrl
         : window.location.origin + fileUrl;
-
       const response = await fetch(finalUrl, {
         headers: { "Cache-Control": "no-cache" },
       });
-
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
-
       window.open(blobUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error("PDF gagal dibuka:", err);
@@ -142,7 +157,9 @@ export default function PustakaDokumen({ itemsProp }) {
   return (
     <section id="pustakadokumen" className="py-12">
       <div className="container mx-auto px-6 md:px-12">
-        <h2 className="text-3xl font-bold mb-3 text-center">Pustaka Dokumen</h2>
+        <h2 className="text-3xl font-bold mb-3 text-center">
+          Pustaka Dokumen
+        </h2>
         <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8">
           Kumpulan dokumen pendukung ini disusun sebagai referensi dalam
           pelaksanaan konsultasi dan layanan di Klinik Patnal, guna memastikan
@@ -151,27 +168,21 @@ export default function PustakaDokumen({ itemsProp }) {
           terdokumentasi dengan baik.
         </p>
 
-        {/* Kategori List */}
         <div
-          className="  w-full 
-  max-w-screen-2xl 
-  mx-auto 
-  px-3 sm:px-4 md:px-6 lg:px-10 xl:px-16 
-  space-y-4 md:space-y-5"
+          className="w-full max-w-screen-2xl mx-auto
+          px-3 sm:px-4 md:px-6 lg:px-10 xl:px-16
+          space-y-4 md:space-y-5"
         >
-          {/* === Kategori 1: Himpunan Peraturan Perundang-undangan === */}
-          <div
-            className="bg-white rounded-xl shadow-sm md:shadow-md
-border border-gray-200 overflow-hidden
-"
-          >
+          {/* ========================================= */}
+          {/* KATEGORI 1: Himpunan Peraturan             */}
+          {/* ========================================= */}
+          <div className="bg-white rounded-xl shadow-sm md:shadow-md border border-gray-200 overflow-hidden">
             <button
               onClick={() => toggleCategory("peraturan")}
               className="w-full flex items-center justify-between
-  px-4 sm:px-5 lg:px-6
-  py-3 sm:py-4
-  hover:bg-blue-50 active:bg-blue-100
-  transition-colors duration-200"
+                px-4 sm:px-5 lg:px-6 py-3 sm:py-4
+                hover:bg-blue-50 active:bg-blue-100
+                transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -208,72 +219,127 @@ border border-gray-200 overflow-hidden
               </svg>
             </button>
 
-            {/* List Dokumen */}
+            {/* Sub-Kategori List */}
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                openCategories.peraturan ? "max-h-[1000px]" : "max-h-0"
+                openCategories.peraturan ? "max-h-[3000px]" : "max-h-0"
               }`}
             >
-              <ul className="border-t border-gray-100">
-                {items.map((item) => (
-                  <li
-                    key={item.id}
+              <div className="border-t border-gray-100">
+                {subKategoriPeraturan.map((sub) => (
+                  <div
+                    key={sub.id}
                     className="border-b border-gray-100 last:border-b-0"
                   >
+                    {/* Sub Header */}
                     <button
-                      onClick={() => openPdf(item.file)}
-                      className="
-w-full flex items-center gap-3 sm:gap-4
-  px-4 sm:px-6 lg:px-8
-  py-3
-  hover:bg-blue-50
-  transition-all duration-200
-  group
-                      "
+                      onClick={() => toggleSub(sub.id)}
+                      className="w-full flex items-center justify-between
+                        px-5 sm:px-7 lg:px-9
+                        py-3
+                        hover:bg-blue-50/70
+                        transition-colors duration-200"
                     >
-                      <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
-                        <img
-                          src={item.cover}
-                          alt={item.title}
-                          className="w-full h-full object-cover"
-                        />
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className={`w-4 h-4 text-blue-500 transition-transform duration-300 ${
+                            openSubs[sub.id] ? "rotate-90" : ""
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                        <span className="text-left text-gray-700 font-medium text-xs sm:text-sm lg:text-base">
+                          {sub.title}
+                        </span>
                       </div>
-                      <span className="flex-1 text-left text-gray-700 text-xs sm:text-sm lg:text-base">
-                        {item.title}
+                      <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                        {sub.items.length > 0
+                          ? `${sub.items.length} dokumen`
+                          : "Kosong"}
                       </span>
-                      <svg
-                        className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
                     </button>
-                  </li>
+
+                    {/* Sub Items */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        openSubs[sub.id] ? "max-h-[1000px]" : "max-h-0"
+                      }`}
+                    >
+                      {sub.items.length > 0 ? (
+                        <ul className="bg-gray-50/50">
+                          {sub.items.map((item) => (
+                            <li
+                              key={item.id}
+                              className="border-t border-gray-100"
+                            >
+                              <button
+                                onClick={() => openPdf(item.file)}
+                                className="w-full flex items-center gap-3 sm:gap-4
+                                  px-8 sm:px-10 lg:px-12
+                                  py-3
+                                  hover:bg-blue-50
+                                  transition-all duration-200
+                                  group"
+                              >
+                                <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
+                                  <img
+                                    src={item.cover}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <span className="flex-1 text-left text-gray-700 text-xs sm:text-sm lg:text-base group-hover:text-blue-600 transition-colors">
+                                  {item.title}
+                                </span>
+                                <svg
+                                  className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="bg-gray-50/50 border-t border-gray-100 px-10 py-4 text-center">
+                          <p className="text-gray-400 text-xs sm:text-sm">
+                            Belum ada dokumen
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 
-          {/* === Kategori 2: E-book/Jurnal Pustaka === */}
-          <div
-            className="bg-white rounded-xl shadow-sm md:shadow-md
-border border-gray-200 overflow-hidden
-"
-          >
+          {/* ========================================= */}
+          {/* KATEGORI 2: E-book/Jurnal Pustaka          */}
+          {/* ========================================= */}
+          <div className="bg-white rounded-xl shadow-sm md:shadow-md border border-gray-200 overflow-hidden">
             <button
               onClick={() => toggleCategory("ebook")}
               className="w-full flex items-center justify-between
-  px-4 sm:px-5 lg:px-6
-  py-3 sm:py-4
-  hover:bg-blue-50 active:bg-blue-100
-  transition-colors duration-200"
+                px-4 sm:px-5 lg:px-6 py-3 sm:py-4
+                hover:bg-blue-50 active:bg-blue-100
+                transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -309,7 +375,6 @@ border border-gray-200 overflow-hidden
                 />
               </svg>
             </button>
-
             <div
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
                 openCategories.ebook ? "max-h-40" : "max-h-0"
@@ -321,19 +386,16 @@ border border-gray-200 overflow-hidden
             </div>
           </div>
 
-          {/* === Kategori 3: Edukasi (dengan Video) === */}
-          <div
-            className="bg-white rounded-xl shadow-sm md:shadow-md
-border border-gray-200 overflow-hidden
-"
-          >
+          {/* ========================================= */}
+          {/* KATEGORI 3: Edukasi (Video)                */}
+          {/* ========================================= */}
+          <div className="bg-white rounded-xl shadow-sm md:shadow-md border border-gray-200 overflow-hidden">
             <button
               onClick={() => toggleCategory("edukasi")}
               className="w-full flex items-center justify-between
-  px-4 sm:px-5 lg:px-6
-  py-3 sm:py-4
-  hover:bg-blue-50 active:bg-blue-100
-  transition-colors duration-200"
+                px-4 sm:px-5 lg:px-6 py-3 sm:py-4
+                hover:bg-blue-50 active:bg-blue-100
+                transition-colors duration-200"
             >
               <div className="flex items-center gap-3">
                 <svg
@@ -370,23 +432,13 @@ border border-gray-200 overflow-hidden
               </svg>
             </button>
 
-            {/* Video Edukasi Content */}
             <div
               className={`overflow-hidden transition-all duration-500 ease-in-out ${
                 openCategories.edukasi ? "max-h-[800px]" : "max-h-0"
               }`}
             >
               <div className="border-t border-gray-100 p-4 md:p-6 bg-gradient-to-b from-blue-50/50 to-white">
-                {/* VIDEO UTAMA */}
-                <div
-                  className=" relative w-full 
-  aspect-video 
-  rounded-xl 
-  overflow-hidden 
-  shadow-lg 
-  mb-6
-  max-h-[70vh]"
-                >
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg mb-6 max-h-[70vh]">
                   <iframe
                     key={videos[currentIndex].id}
                     className="w-full h-full"
@@ -396,9 +448,7 @@ border border-gray-200 overflow-hidden
                   ></iframe>
                 </div>
 
-                {/* CAROUSEL THUMBNAIL */}
                 <div className="relative select-none">
-                  {/* Tombol Kiri */}
                   <button
                     onClick={prevThumb}
                     disabled={carouselIndex <= 0}
@@ -447,7 +497,6 @@ border border-gray-200 overflow-hidden
                     </div>
                   </div>
 
-                  {/* Tombol Kanan */}
                   <button
                     onClick={nextThumb}
                     disabled={carouselIndex >= maxIndex}
