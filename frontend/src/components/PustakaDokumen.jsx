@@ -162,10 +162,10 @@ export default function PustakaDokumen({ itemsProp }) {
         </h2>
         <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8">
           Kumpulan dokumen pendukung ini disusun sebagai referensi dalam
-          pelaksanaan konsultasi dan layanan di Klinik Patnal, guna memastikan
-          setiap proses kepatuhan, pengambilan keputusan, dan prosedur
-          operasional berjalan berdasarkan informasi yang akurat, jelas, dan
-          terdokumentasi dengan baik.
+          pelaksanaan konsultasi dan layanan di Patnal Integrity Hub, 
+          guna memastikan setiap proses kepatuhan, pengambilan keputusan, 
+          dan prosedur operasional berjalan berdasarkan informasi yang akurat, 
+          jelas, dan terdokumentasi dengan baik.
         </p>
 
         <div
