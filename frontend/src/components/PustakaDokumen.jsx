@@ -356,7 +356,7 @@ export default function PustakaDokumen({ itemsProp }) {
                   />
                 </svg>
                 <span className="font-semibold text-gray-800 text-sm sm:text-base lg:text-lg">
-                  E-book/Jurnal Pustaka
+                  Standar Operasional Pelaksanaan
                 </span>
               </div>
               <svg
