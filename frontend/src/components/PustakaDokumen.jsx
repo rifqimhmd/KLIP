@@ -331,7 +331,7 @@ export default function PustakaDokumen({ itemsProp }) {
           </div>
 
           {/* ========================================= */}
-          {/* KATEGORI 2: E-book/Jurnal Pustaka          */}
+          {/* KATEGORI 2: Standar Operasional Pelaksanaan          */}
           {/* ========================================= */}
           <div className="bg-white rounded-xl shadow-sm md:shadow-md border border-gray-200 overflow-hidden">
             <button
