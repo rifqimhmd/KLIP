@@ -4,11 +4,7 @@ import { useLocation } from "react-router-dom";
 export default function Header() {
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
   const [scrollHidden, setScrollHidden] = useState(false);
-  const [mobileDropdown, setMobileDropdown] = useState({
-    konten: false,
-  });
 
   // === HIDE HEADER ON SCROLL ===
   useEffect(() => {
@@ -22,24 +18,8 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const toggleDropdown = (menu) => {
-    setOpenDropdown(openDropdown === menu ? null : menu);
-  };
-
-  const toggleMobileMenu = () => {
-    setShowMobileMenu(!showMobileMenu);
-  };
-
   const closeMobileMenu = () => {
     setShowMobileMenu(false);
-    setMobileDropdown({ konten: false });
-  };
-
-  const toggleMobileDropdown = (menu) => {
-    setMobileDropdown((prev) => ({
-      ...prev,
-      [menu]: !prev[menu],
-    }));
   };
 
   return (
@@ -56,7 +36,7 @@ export default function Header() {
           {/* === KIRI: LOGO & HAMBURGER === */}
           <div className="flex items-center">
             <button
-              onClick={toggleMobileMenu}
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
               className="md:hidden focus:outline-none mr-4 relative w-6 h-5"
             >
               <span className={`absolute left-0 block h-[2px] w-6 bg-gray-700 transition-all duration-300 ${showMobileMenu ? "rotate-45 top-2.5" : "top-0"}`}></span>
@@ -73,35 +53,19 @@ export default function Header() {
             </a>
           </div>
 
-          {/* === NAVIGASI DESKTOP === */}
+          {/* === NAVIGASI DESKTOP (Tanpa Dropdown) === */}
           <nav className="hidden md:flex space-x-10 font-medium text-[15px] items-center">
             <a href="/" className="text-gray-700 hover:text-blue-600 transition">Beranda</a>
             
             <a href="https://konsultasi.klinikpatnal.com/" className="text-gray-700 hover:text-blue-600 transition">Konsultasi</a>
 
-            {/* Dropdown Media Informasi (Hanya Pustaka Dokumen) */}
-            <div className="relative group">
-              <button
-                onClick={() => toggleDropdown("konten")}
-                className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition focus:outline-none"
-              >
-                <span>Media Informasi</span>
-                <svg className={`h-4 w-4 transition-transform ${openDropdown === "konten" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openDropdown === "konten" && (
-                <div className="absolute left-0 mt-3 w-48 bg-white border border-gray-100 rounded-xl shadow-xl py-2 overflow-hidden">
-                  <a
-                    href={location.pathname === "/" ? "#pustakadokumen" : "/"}
-                    className="block px-5 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition"
-                  >
-                    Pustaka Dokumen
-                  </a>
-                </div>
-              )}
-            </div>
+            {/* Sekarang Media Informasi langsung berupa Link (bukan Button Dropdown) */}
+            <a 
+              href={location.pathname === "/" ? "#pustakadokumen" : "/#pustakadokumen"} 
+              className="text-gray-700 hover:text-blue-600 transition"
+            >
+              Media Informasi
+            </a>
 
             <a href="/tentang" className="text-gray-700 hover:text-blue-600 transition">Tentang Kami</a>
           </nav>
@@ -122,27 +86,13 @@ export default function Header() {
           <a href="/" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Beranda</a>
           <a href="https://konsultasi.klinikpatnal.com/" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Konsultasi</a>
           
-          <button
-            onClick={() => toggleMobileDropdown("konten")}
-            className="w-full text-left px-6 py-4 text-gray-700 hover:bg-blue-50 flex justify-between items-center font-medium border-b border-gray-50"
+          <a 
+            href={location.pathname === "/" ? "#pustakadokumen" : "/#pustakadokumen"} 
+            className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" 
+            onClick={closeMobileMenu}
           >
-            <span>Media Informasi</span>
-            <svg className={`w-4 h-4 transition-transform ${mobileDropdown.konten ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          
-          {mobileDropdown.konten && (
-            <div className="bg-gray-50">
-              <a
-                href={location.pathname === "/" ? "#pustakadokumen" : "/"}
-                className="block px-12 py-3 text-sm text-gray-600 hover:text-blue-600"
-                onClick={closeMobileMenu}
-              >
-                Pustaka Dokumen
-              </a>
-            </div>
-          )}
+            Media Informasi
+          </a>
 
           <a href="/tentang" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Tentang Kami</a>
         </nav>
