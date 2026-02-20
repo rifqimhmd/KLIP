@@ -69,7 +69,7 @@ export default function Footer() {
       
       {/* Garis Bawah & Copyright */}
       <div className="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} Patnal Integrity Hub • Direktorat Jenderal Pemasyarakatan
+        © {new Date().getFullYear()} Patnal Integrity Hub • Direktorat Jenderal Pemasyarakatan • Kementerian Imigrasi dan Pemasyarakatan
       </div>
     </footer>
   );
