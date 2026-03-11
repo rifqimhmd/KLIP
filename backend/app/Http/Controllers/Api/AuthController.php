@@ -50,16 +50,18 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        if ($user && $user->currentAccessToken()) {
-            $user->currentAccessToken()->delete();
-
-            // Set offline only when no other active tokens remain for this user.
-            if (! $user->tokens()->exists()) {
-                DB::table('users')->where('id', $user->id)->update([
-                    'is_online' => false,
-                    'last_seen_at' => now(),
-                ]);
+        if ($user) {
+            // Delete current token
+            if ($user->currentAccessToken()) {
+                $user->currentAccessToken()->delete();
             }
+
+            // If no active tokens remain, mark offline
+            // Also immediately mark offline so the admin dashboard reflects the logout
+            DB::table('users')->where('id', $user->id)->update([
+                'is_online' => false,
+                'last_seen_at' => now(),
+            ]);
         }
 
         return response()->json(['message' => 'Logged out']);
@@ -67,7 +69,16 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        if ($user) {
+            // Refresh online status on every /api/user call (heartbeat)
+            DB::table('users')->where('id', $user->id)->update([
+                'is_online' => true,
+                'last_seen_at' => now(),
+            ]);
+            $user = $user->fresh();
+        }
+        return response()->json($user);
     }
 
     public function updatePassword(Request $request)
