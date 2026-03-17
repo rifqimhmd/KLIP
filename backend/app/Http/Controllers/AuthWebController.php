@@ -36,6 +36,7 @@ class AuthWebController extends Controller
     {
         try {
             $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
                 'nip' => ['required', 'string', 'unique:users,nip'],
                 'email' => ['required', 'email', 'unique:users,email'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -49,7 +50,7 @@ class AuthWebController extends Controller
             ]);
 
             // Trim whitespace from all string fields to prevent login failures
-            foreach (['nip', 'email', 'pangkat_golongan', 'jabatan', 'bagian', 'no_wa', 'daftar_sebagai', 'status_pengguna'] as $field) {
+            foreach (['name', 'nip', 'email', 'pangkat_golongan', 'jabatan', 'bagian', 'no_wa', 'daftar_sebagai', 'status_pengguna'] as $field) {
                 if (isset($validated[$field])) {
                     $validated[$field] = trim($validated[$field]);
                 }
@@ -65,7 +66,7 @@ class AuthWebController extends Controller
 
             // Password will be automatically hashed by User model's cast
             $user = User::create([
-                'name' => $validated['nip'],
+                'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => $validated['password'],  // No manual hashing - let the cast handle it
                 'nip' => $validated['nip'],

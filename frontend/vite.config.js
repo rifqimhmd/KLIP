@@ -15,7 +15,7 @@ export default defineConfig({
       transformIndexHtml(html) {
         return html.replace(
           /<title>(.*?)<\/title>/,
-          `<title>Klinik Patnal – Konsultasi Aman, Respons Tepat</title>`
+          `<title>Patnal Integrity Hub– Konsultasi Aman, Respons Tepat</title>`
         );
       },
     },

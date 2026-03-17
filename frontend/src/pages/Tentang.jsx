@@ -4,7 +4,7 @@ import { ShieldCheck, BookOpenCheck, MessageSquare } from "lucide-react";
 
 export default function Tentang() {
   useEffect(() => {
-    document.title = "Klinik Patnal - Tentang Kami";
+    document.title = "Patnal Integrity Hub- Tentang Kami";
   }, []);
 
   return (

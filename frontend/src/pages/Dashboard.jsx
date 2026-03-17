@@ -13,7 +13,7 @@ export default function Dashboard() {
   const registeredName = (user?.name || user?.nama || "").trim() || "Teman";
 
   useEffect(() => {
-    document.title = "Klinik Patnal - Dashboard";
+    document.title = "Patnal Integrity Hub- Dashboard";
     fetchUser();
   }, []);
 
@@ -38,13 +38,13 @@ export default function Dashboard() {
       // Clear the stored token
       localStorage.removeItem("auth_token");
       delete api.defaults.headers.common["Authorization"];
-      navigate("/login");
+      navigate("/");
     } catch (err) {
       console.error("Logout failed:", err);
       // Still clear token even if logout fails
       localStorage.removeItem("auth_token");
       delete api.defaults.headers.common["Authorization"];
-      navigate("/login");
+      navigate("/");
     }
   };
 

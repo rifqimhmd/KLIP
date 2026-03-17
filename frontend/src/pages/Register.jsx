@@ -5,6 +5,7 @@ import { UPT_BY_PROVINCE, UPT_PROVINCES } from '../lib/uptOptions';
 
 export default function Register() {
   const [formData, setFormData] = useState({
+    name: '',
     nip: '',
     email: '',
     password: '',
@@ -166,6 +167,22 @@ export default function Register() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nama Lengkap */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nama Lengkap <span className="text-red-600">*</span>
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Nama lengkap sesuai identitas"
+                required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
             {/* NIP */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -76,7 +76,7 @@ export default function UpdatePassword() {
   const handleLogout = async () => {
     try {
       await api.post('/api/logout');
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       console.error('Logout failed:', err);
     }

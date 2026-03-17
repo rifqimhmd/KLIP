@@ -432,12 +432,12 @@ export default function Consultation() {
       await api.post('/api/logout');
       localStorage.removeItem('auth_token');
       delete api.defaults.headers.common['Authorization'];
-      navigate('/login');
+      navigate('/');
     } catch (err) {
       console.error('Logout failed:', err);
       localStorage.removeItem('auth_token');
       delete api.defaults.headers.common['Authorization'];
-      navigate('/login');
+      navigate('/');
     }
   };
 
@@ -474,7 +474,7 @@ export default function Consultation() {
 
             <div className="space-y-4 mb-8">
               {[
-                { key: 'c1', text: 'Bersedia untuk berpartisipasi mengikuti seluruh prosedur dalam proses konseling klinik patnal.' },
+                { key: 'c1', text: 'Bersedia untuk berpartisipasi mengikuti seluruh prosedur dalam proses konseling Patnal Integrity Hub.' },
                 { key: 'c2', text: 'Menyetujui adanya perekaman data terkait informasi yang diberikan sebagai keperluan administrasi layanan.' },
                 { key: 'c3', text: 'Seluruh informasi pribadi dan isi sesi konseling akan dijaga kerahasiaannya.' },
               ].map(({ key, text }, idx) => (
@@ -702,7 +702,18 @@ export default function Consultation() {
           
           {loading && <p className="text-sm text-gray-600">Memuat riwayat...</p>}
           
-          {error && <div className="mb-4 p-3 bg-red-50 text-red-700 rounded">{error}</div>}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={fetchConsultations}
+                className="text-sm font-medium underline hover:no-underline whitespace-nowrap"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
 
           {/* Notice for regular users when they have an active consultation */}
           {!isPsikolog && !isAdmin && !loading && consultations.length > 0 && (

@@ -172,7 +172,7 @@ export default function Produk() {
             {/* Image */}
             <img
               src="/images/produk.png"
-              alt="Produk Klinik Patnal"
+              alt="Produk Patnal Integrity Hub"
               className="
         relative z-10
         w-full

@@ -210,7 +210,7 @@ export default function Chat() {
     try { await api.post('/api/logout'); } catch (_) {/* ignore */}
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user_role');
-    navigate('/login');
+    navigate('/');
   };
 
   // â”€â”€â”€ Display helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

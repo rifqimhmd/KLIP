@@ -4,7 +4,7 @@ import api from "../lib/axios";
 
 export default function WBS() {
   useEffect(() => {
-    document.title = "Klinik Patnal - WBS";
+    document.title = "Patnal Integrity Hub- WBS";
   }, []);
   const [step, setStep] = useState(1);
   const [serverStatus, setServerStatus] = useState();

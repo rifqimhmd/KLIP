@@ -51,7 +51,7 @@ export default function Header() {
     } finally {
       localStorage.removeItem("auth_token");
       delete api.defaults.headers.common["Authorization"];
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   };
 
@@ -84,7 +84,7 @@ export default function Header() {
             <a href="/" className="flex items-center">
               <img
                 src="/Logo.png"
-                alt="Klinik Patnal"
+                alt="Patnal Integrity Hub"
                 className="h-10 md:h-12 w-auto object-contain"
               />
             </a>
@@ -125,7 +125,7 @@ export default function Header() {
         }`}
       >
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <span className="font-bold text-xl text-blue-600 uppercase tracking-tight">Klinik Patnal</span>
+          <span className="font-bold text-xl text-blue-600 uppercase tracking-tight">Patnal Integrity Hub</span>
         </div>
 
         <nav className="flex flex-col py-4">
