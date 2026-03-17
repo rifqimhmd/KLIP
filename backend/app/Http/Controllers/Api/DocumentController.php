@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Document;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -74,38 +75,53 @@ class DocumentController extends Controller
             return response()->json(['error' => 'Only admin can add documents'], 403);
         }
 
-        // Validate request
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|in:peraturan,ebook,edukasi',
+            'title'       => 'required|string|max:255',
+            'category'    => 'required|string|in:peraturan,ebook,edukasi',
             'sub_category' => 'required|string|max:255',
-            'cover' => 'nullable|string|max:500',
-            'file' => 'nullable|string|max:500',
             'description' => 'nullable|string',
-            'type' => 'required|string|in:pdf,video,ebook,other',
-            'video_url' => 'nullable|url',
+            'type'        => 'required|string|in:pdf,video,ebook,other',
+            'video_url'   => 'nullable|url',
         ]);
 
-        // Create document with user_id
+        // Handle cover: uploaded file takes priority over URL string
+        if ($request->hasFile('cover')) {
+            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
+            $coverPath = $request->file('cover')->store('documents/covers', 'public');
+            $coverValue = Storage::disk('public')->url($coverPath);
+        } else {
+            $request->validate(['cover' => 'nullable|string|max:500']);
+            $coverValue = $request->cover ?? null;
+        }
+
+        // Handle document file: uploaded file takes priority over URL string
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
+            $filePath = $request->file('file')->store('documents', 'public');
+            $fileValue = Storage::disk('public')->url($filePath);
+        } else {
+            $request->validate(['file' => 'nullable|string|max:500']);
+            $fileValue = $request->input('file') ?? null;
+        }
+
         $document = Document::create([
-            'user_id' => $request->user()->id,
-            'title' => $validated['title'],
-            'category' => $validated['category'],
+            'user_id'      => $request->user()->id,
+            'title'        => $validated['title'],
+            'category'     => $validated['category'],
             'sub_category' => $validated['sub_category'],
-            'cover' => $validated['cover'] ?? null,
-            'file' => $validated['file'] ?? null,
-            'description' => $validated['description'] ?? null,
-            'type' => $validated['type'],
-            'video_url' => $validated['video_url'] ?? null,
-            'status' => 'published',
+            'cover'        => $coverValue,
+            'file'         => $fileValue,
+            'description'  => $validated['description'] ?? null,
+            'type'         => $validated['type'],
+            'video_url'    => $validated['video_url'] ?? null,
+            'status'       => 'published',
         ]);
 
         return response()->json([
             'message' => 'Document uploaded successfully.',
-            'data' => $document->load('user'),
+            'data'    => $document->load('user'),
         ], 201);
     }
-
     /**
      * Display the specified resource.
      */
@@ -136,21 +152,39 @@ class DocumentController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'category' => 'sometimes|string|in:peraturan,ebook,edukasi',
+            'title'       => 'sometimes|string|max:255',
+            'category'    => 'sometimes|string|in:peraturan,ebook,edukasi',
             'sub_category' => 'sometimes|string|max:255',
-            'cover' => 'nullable|string|max:500',
-            'file' => 'nullable|string|max:500',
             'description' => 'nullable|string',
-            'type' => 'sometimes|string|in:pdf,video,ebook,other',
-            'video_url' => 'nullable|url',
+            'type'        => 'sometimes|string|in:pdf,video,ebook,other',
+            'video_url'   => 'nullable|url',
         ]);
+
+        // Handle cover file or URL
+        if ($request->hasFile('cover')) {
+            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
+            $coverPath = $request->file('cover')->store('documents/covers', 'public');
+            $validated['cover'] = Storage::disk('public')->url($coverPath);
+        } elseif ($request->has('cover')) {
+            $request->validate(['cover' => 'nullable|string|max:500']);
+            $validated['cover'] = $request->cover;
+        }
+
+        // Handle document file or URL
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
+            $filePath = $request->file('file')->store('documents', 'public');
+            $validated['file'] = Storage::disk('public')->url($filePath);
+        } elseif ($request->has('file')) {
+            $request->validate(['file' => 'nullable|string|max:500']);
+            $validated['file'] = $request->input('file');
+        }
 
         $document->update($validated);
 
         return response()->json([
             'message' => 'Document updated successfully',
-            'data' => $document->load('user'),
+            'data'    => $document->load('user'),
         ]);
     }
 

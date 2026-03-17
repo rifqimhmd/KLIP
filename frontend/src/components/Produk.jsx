@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from "react";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 export default function Produk() {
   const [role, setRole] = useState(null);
+  const [siteImages, setSiteImages] = useState({
+    konsultasi_image: null,
+    produk_image: null,
+  });
 
   useEffect(() => {
     setRole(localStorage.getItem('auth_user_role'));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/api/site-settings`)
+      .then((r) => r.json())
+      .then((data) => setSiteImages(data))
+      .catch(() => {/* keep defaults */});
   }, []);
 
   const showChat = role === 'User' || role === 'Psikolog';
@@ -123,7 +136,7 @@ export default function Produk() {
                 </div>
 
                 <img
-                  src="/images/konsultasi.png"
+                  src={siteImages.konsultasi_image || "/images/konsultasi.png"}
                   alt="Konsultasi"
                   className="w-16 h-16 object-contain relative z-10 flex-shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:-translate-y-0.5"
                 />
@@ -171,7 +184,7 @@ export default function Produk() {
 
             {/* Image */}
             <img
-              src="/images/produk.png"
+              src={siteImages.produk_image || "/images/produk.png"}
               alt="Produk Patnal Integrity Hub"
               className="
         relative z-10

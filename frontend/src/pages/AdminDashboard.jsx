@@ -50,6 +50,24 @@ export default function AdminDashboard() {
   const [docSubmitting, setDocSubmitting] = useState(false);
   const [docError, setDocError] = useState("");
   const [docSearchTerm, setDocSearchTerm] = useState("");
+  // File upload states for documents
+  const [docUploadFile, setDocUploadFile]   = useState(null);
+  const [docCoverFile, setDocCoverFile]     = useState(null);
+
+  // Banner management state
+  const [banners, setBanners]               = useState([]);
+  const [bannerLoading, setBannerLoading]   = useState(false);
+  const [bannerFormOpen, setBannerFormOpen] = useState(false);
+  const [editingBannerId, setEditingBannerId] = useState(null);
+  const [bannerForm, setBannerForm]         = useState({ title: "", subtitle: "", order: 0, is_active: true });
+  const [bannerFile, setBannerFile]         = useState(null);
+  const [bannerSubmitting, setBannerSubmitting] = useState(false);
+  const [bannerError, setBannerError]       = useState("");
+
+  // Site images state
+  const [siteImages, setSiteImages]         = useState({ konsultasi_image: null, produk_image: null });
+  const [siteImageUploading, setSiteImageUploading] = useState({});
+  const [siteImageError, setSiteImageError] = useState("");
 
   useEffect(() => {
     document.title = "Dashboard - KLIP";
@@ -136,6 +154,8 @@ export default function AdminDashboard() {
     setDocForm(emptyDocForm);
     setEditingDocId(null);
     setDocError("");
+    setDocUploadFile(null);
+    setDocCoverFile(null);
     setDocFormOpen(true);
   };
 
@@ -152,6 +172,8 @@ export default function AdminDashboard() {
     });
     setEditingDocId(doc.id);
     setDocError("");
+    setDocUploadFile(null);
+    setDocCoverFile(null);
     setDocFormOpen(true);
   };
 
@@ -169,17 +191,34 @@ export default function AdminDashboard() {
     setDocError("");
     if (!docForm.title.trim()) { setDocError("Judul harus diisi"); return; }
     if (!docForm.sub_category) { setDocError("Sub kategori harus dipilih"); return; }
-    if ((docForm.type === "pdf" || docForm.type === "ebook") && !docForm.file) { setDocError("URL File harus diisi"); return; }
+    if ((docForm.type === "pdf" || docForm.type === "ebook") && !docForm.file && !docUploadFile) { setDocError("File atau URL File harus diisi"); return; }
     if (docForm.type === "video" && !docForm.video_url) { setDocError("URL Video harus diisi"); return; }
     setDocSubmitting(true);
     try {
-      if (editingDocId) {
-        await api.put(`/api/documents/${editingDocId}`, docForm);
+      const useFormData = docUploadFile || docCoverFile;
+      if (useFormData) {
+        const fd = new FormData();
+        Object.entries(docForm).forEach(([k, v]) => { if (k !== "file" && k !== "cover" && v !== "") fd.append(k, v); });
+        if (docUploadFile) fd.append("file", docUploadFile);
+        else if (docForm.file) fd.append("file", docForm.file);
+        if (docCoverFile) fd.append("cover", docCoverFile);
+        else if (docForm.cover) fd.append("cover", docForm.cover);
+        if (editingDocId) {
+          await api.post(`/api/documents/${editingDocId}?_method=PUT`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        } else {
+          await api.post("/api/documents", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        }
       } else {
-        await api.post("/api/documents", docForm);
+        if (editingDocId) {
+          await api.put(`/api/documents/${editingDocId}`, docForm);
+        } else {
+          await api.post("/api/documents", docForm);
+        }
       }
       setDocFormOpen(false);
       setDocForm(emptyDocForm);
+      setDocUploadFile(null);
+      setDocCoverFile(null);
       setEditingDocId(null);
       fetchDocuments();
     } catch (err) {
@@ -196,6 +235,98 @@ export default function AdminDashboard() {
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       alert(err.response?.data?.error || "Gagal menghapus dokumen");
+    }
+  };
+
+  // ── Banner management ──────────────────────────────────────
+  const fetchBanners = async () => {
+    try {
+      setBannerLoading(true);
+      const res = await api.get("/api/admin/banners");
+      setBanners(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Failed to load banners:", err);
+    } finally {
+      setBannerLoading(false);
+    }
+  };
+
+  const openAddBanner = () => {
+    setBannerForm({ title: "", subtitle: "", order: (banners.length), is_active: true });
+    setBannerFile(null);
+    setEditingBannerId(null);
+    setBannerError("");
+    setBannerFormOpen(true);
+  };
+
+  const openEditBanner = (b) => {
+    setBannerForm({ title: b.title || "", subtitle: b.subtitle || "", order: b.order ?? 0, is_active: b.is_active !== false });
+    setBannerFile(null);
+    setEditingBannerId(b.id);
+    setBannerError("");
+    setBannerFormOpen(true);
+  };
+
+  const handleBannerSubmit = async (e) => {
+    e.preventDefault();
+    setBannerError("");
+    if (!editingBannerId && !bannerFile) { setBannerError("Gambar banner wajib dipilih."); return; }
+    setBannerSubmitting(true);
+    try {
+      const fd = new FormData();
+      if (bannerFile) fd.append("image", bannerFile);
+      fd.append("title", bannerForm.title);
+      fd.append("subtitle", bannerForm.subtitle);
+      fd.append("order", bannerForm.order);
+      fd.append("is_active", bannerForm.is_active ? "true" : "false");
+      if (editingBannerId) {
+        await api.post(`/api/admin/banners/${editingBannerId}`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      } else {
+        await api.post("/api/admin/banners", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      }
+      setBannerFormOpen(false);
+      setBannerFile(null);
+      fetchBanners();
+    } catch (err) {
+      setBannerError(err.response?.data?.message || err.response?.data?.error || "Gagal menyimpan banner.");
+    } finally {
+      setBannerSubmitting(false);
+    }
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (!window.confirm("Hapus banner ini?")) return;
+    try {
+      await api.delete(`/api/admin/banners/${id}`);
+      setBanners((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      alert(err.response?.data?.error || "Gagal menghapus banner.");
+    }
+  };
+
+  // ── Site images ────────────────────────────────────────────
+  const fetchSiteImages = async () => {
+    try {
+      const res = await api.get("/api/site-settings");
+      setSiteImages(res.data || {});
+    } catch (err) {
+      console.error("Failed to load site settings:", err);
+    }
+  };
+
+  const handleSiteImageUpload = async (key, file) => {
+    if (!file) return;
+    setSiteImageUploading((prev) => ({ ...prev, [key]: true }));
+    setSiteImageError("");
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      const res = await api.post(`/api/admin/site-settings/${key}`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+      setSiteImages((prev) => ({ ...prev, [key]: res.data?.data?.url }));
+    } catch (err) {
+      setSiteImageError(err.response?.data?.message || err.response?.data?.error || "Gagal mengupload gambar.");
+    } finally {
+      setSiteImageUploading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
@@ -567,6 +698,23 @@ export default function AdminDashboard() {
                     <p className="mt-3 text-sm font-semibold text-green-700">Total Dokumen: {documents.length}</p>
                   </button>
 
+                  <button
+                    onClick={() => { fetchBanners(); setView("banners"); }}
+                    className="text-left border border-yellow-200 bg-yellow-50 rounded-lg p-5 hover:bg-yellow-100 transition-colors"
+                  >
+                    <p className="text-lg font-semibold text-yellow-700 mb-1">Kelola Banner Homepage</p>
+                    <p className="text-sm text-gray-600">Upload dan atur gambar banner carousel di halaman utama.</p>
+                    <p className="mt-3 text-sm font-semibold text-yellow-700">Total Banner: {banners.length}</p>
+                  </button>
+
+                  <button
+                    onClick={() => { fetchSiteImages(); setView("site_images"); }}
+                    className="text-left border border-pink-200 bg-pink-50 rounded-lg p-5 hover:bg-pink-100 transition-colors"
+                  >
+                    <p className="text-lg font-semibold text-pink-700 mb-1">Kelola Gambar Halaman</p>
+                    <p className="text-sm text-gray-600">Ganti gambar ilustrasi pada halaman Beranda (Konsultasi & Produk).</p>
+                  </button>
+
                   <a
                     href="/dashboard"
                     className="text-left border border-gray-200 bg-gray-50 rounded-lg p-5 hover:bg-gray-100 transition-colors"
@@ -889,6 +1037,96 @@ export default function AdminDashboard() {
                 </div>
               )}
 
+              {/* ═══ BANNERS VIEW ═══ */}
+              {view === "banners" && (
+                <div>
+                  <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
+                    <h2 className="text-2xl font-bold text-gray-800">Kelola Banner Homepage</h2>
+                    <div className="flex gap-2">
+                      <button onClick={openAddBanner} className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm">+ Tambah Banner</button>
+                      <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">Kembali</button>
+                    </div>
+                  </div>
+                  {bannerLoading ? (
+                    <p className="text-gray-500 text-sm py-6 text-center">Memuat banner...</p>
+                  ) : banners.length === 0 ? (
+                    <p className="text-gray-400 text-sm py-10 text-center">Belum ada banner. Klik "+ Tambah Banner" untuk menambahkan.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {banners.map((b) => (
+                        <div key={b.id} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                          <img src={b.image_url} alt={b.title || "Banner"} className="w-full h-40 object-cover" />
+                          <div className="p-3">
+                            <p className="font-semibold text-gray-800 truncate">{b.title || <span className="text-gray-400 italic">Tanpa judul</span>}</p>
+                            {b.subtitle && <p className="text-xs text-gray-500 truncate">{b.subtitle}</p>}
+                            <div className="flex items-center justify-between mt-2">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${b.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                                {b.is_active ? "Aktif" : "Nonaktif"}
+                              </span>
+                              <span className="text-xs text-gray-400">Urutan: {b.order}</span>
+                            </div>
+                            <div className="flex gap-2 mt-3">
+                              <button onClick={() => openEditBanner(b)} className="flex-1 py-1 text-xs rounded bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200">Edit</button>
+                              <button onClick={() => handleDeleteBanner(b.id)} className="flex-1 py-1 text-xs rounded bg-red-50 text-red-700 hover:bg-red-100 border border-red-200">Hapus</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ═══ SITE IMAGES VIEW ═══ */}
+              {view === "site_images" && (
+                <div>
+                  <div className="mb-4 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-800">Kelola Gambar Halaman</h2>
+                    <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">Kembali</button>
+                  </div>
+                  {siteImageError && (
+                    <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{siteImageError}</div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { key: "konsultasi_image", label: "Gambar Ilustrasi Konsultasi", hint: "Ditampilkan di kartu Konsultasi pada halaman Beranda" },
+                      { key: "produk_image",     label: "Gambar Illustrasi Produk (Kanan)",  hint: "Ditampilkan di sisi kanan bagian hero Beranda" },
+                    ].map(({ key, label, hint }) => (
+                      <div key={key} className="border border-gray-200 rounded-xl p-5 space-y-3">
+                        <p className="font-semibold text-gray-800">{label}</p>
+                        <p className="text-xs text-gray-500">{hint}</p>
+                        {siteImages[key] ? (
+                          <img src={siteImages[key]} alt={label} className="w-full h-40 object-contain rounded-lg border border-gray-100 bg-gray-50" />
+                        ) : (
+                          <div className="w-full h-40 flex items-center justify-center rounded-lg border-2 border-dashed border-gray-200 text-gray-400 text-sm bg-gray-50">Menggunakan gambar default</div>
+                        )}
+                        <label className="block">
+                          <span className="sr-only">Upload gambar</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id={`site-img-${key}`}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleSiteImageUpload(key, file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <button
+                            onClick={() => document.getElementById(`site-img-${key}`).click()}
+                            disabled={!!siteImageUploading[key]}
+                            className="w-full py-2 rounded-lg bg-pink-600 text-white text-sm hover:bg-pink-700 disabled:opacity-50"
+                          >
+                            {siteImageUploading[key] ? "Mengupload..." : "Ganti Gambar"}
+                          </button>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>
@@ -914,7 +1152,7 @@ export default function AdminDashboard() {
               </div>
               <button
                 type="button"
-                onClick={() => { setDocFormOpen(false); setDocForm(emptyDocForm); setEditingDocId(null); }}
+                onClick={() => { setDocFormOpen(false); setDocForm(emptyDocForm); setEditingDocId(null); setDocUploadFile(null); setDocCoverFile(null); }}
                 className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -989,16 +1227,36 @@ export default function AdminDashboard() {
 
                     {(docForm.type === "pdf" || docForm.type === "ebook" || docForm.type === "other") && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">URL File <span className="text-red-500">*</span></label>
-                        <input
-                          type="url"
-                          name="file"
-                          value={docForm.file}
-                          onChange={handleDocFormChange}
-                          placeholder="https://drive.google.com/file/d/..."
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        />
-                        <p className="text-xs text-gray-400 mt-1">💡 Bisa gunakan link Google Drive, Dropbox, OneDrive, dll.</p>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          File Dokumen <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-2">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-green-400 transition-colors"
+                            onClick={() => document.getElementById("doc-file-input").click()}>
+                            {docUploadFile ? (
+                              <p className="text-sm text-green-700 font-medium">📄 {docUploadFile.name}</p>
+                            ) : (
+                              <p className="text-sm text-gray-400">Klik untuk upload file (PDF/DOC/XLS/PPT, maks 20MB)</p>
+                            )}
+                          </div>
+                          <input id="doc-file-input" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                            className="hidden"
+                            onChange={(e) => { setDocUploadFile(e.target.files?.[0] || null); setDocForm(p => ({ ...p, file: "" })); }}
+                          />
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <div className="flex-1 h-px bg-gray-200" /><span>atau masukkan URL</span><div className="flex-1 h-px bg-gray-200" />
+                          </div>
+                          <input
+                            type="url"
+                            name="file"
+                            value={docUploadFile ? "" : docForm.file}
+                            disabled={!!docUploadFile}
+                            onChange={handleDocFormChange}
+                            placeholder="https://drive.google.com/file/d/..."
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                          />
+                          <p className="text-xs text-gray-400">💡 Bisa gunakan link Google Drive, Dropbox, OneDrive, dll.</p>
+                        </div>
                       </div>
                     )}
 
@@ -1018,15 +1276,32 @@ export default function AdminDashboard() {
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">URL Cover <span className="text-gray-400 font-normal">(opsional)</span></label>
-                      <input
-                        type="url"
-                        name="cover"
-                        value={docForm.cover}
-                        onChange={handleDocFormChange}
-                        placeholder="https://... (gambar thumbnail)"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Cover <span className="text-gray-400 font-normal">(opsional)</span></label>
+                      <div className="space-y-2">
+                        <div className="border-2 border-dashed border-gray-200 rounded-lg p-2 text-center cursor-pointer hover:border-blue-300 transition-colors"
+                          onClick={() => document.getElementById("doc-cover-input").click()}>
+                          {docCoverFile ? (
+                            <p className="text-sm text-blue-700 font-medium">🖼 {docCoverFile.name}</p>
+                          ) : (
+                            <p className="text-xs text-gray-400">Upload gambar cover (opsional)</p>
+                          )}
+                        </div>
+                        <input id="doc-cover-input" type="file" accept="image/*" className="hidden"
+                          onChange={(e) => { setDocCoverFile(e.target.files?.[0] || null); setDocForm(p => ({ ...p, cover: "" })); }}
+                        />
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <div className="flex-1 h-px bg-gray-200" /><span>atau URL</span><div className="flex-1 h-px bg-gray-200" />
+                        </div>
+                        <input
+                          type="url"
+                          name="cover"
+                          value={docCoverFile ? "" : docForm.cover}
+                          disabled={!!docCoverFile}
+                          onChange={handleDocFormChange}
+                          placeholder="https://... (gambar thumbnail)"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400"
+                        />
+                      </div>
                     </div>
 
                     <div>
@@ -1049,7 +1324,7 @@ export default function AdminDashboard() {
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3 rounded-b-2xl">
               <button
                 type="button"
-                onClick={() => { setDocFormOpen(false); setDocForm(emptyDocForm); setEditingDocId(null); }}
+                onClick={() => { setDocFormOpen(false); setDocForm(emptyDocForm); setEditingDocId(null); setDocUploadFile(null); setDocCoverFile(null); }}
                 className="px-5 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-white hover:shadow-sm transition-all"
               >
                 Batal
@@ -1065,6 +1340,80 @@ export default function AdminDashboard() {
                 {docSubmitting ? (
                   <span className="flex items-center gap-2"><svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>Menyimpan...</span>
                 ) : (editingDocId ? "Simpan Perubahan" : "Tambah Dokumen")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ BANNER MODAL ═══ */}
+      {bannerFormOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 bg-yellow-500 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">{editingBannerId ? "Edit Banner" : "Tambah Banner Baru"}</h3>
+              <button onClick={() => { setBannerFormOpen(false); setBannerFile(null); }} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 px-6 py-5">
+              {bannerError && <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bannerError}</div>}
+              <form onSubmit={handleBannerSubmit} id="banner-form" className="space-y-4">
+                {/* Image upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gambar Banner {!editingBannerId && <span className="text-red-500">*</span>}
+                    {editingBannerId && <span className="text-gray-400 font-normal"> (opsional, biarkan kosong untuk tidak mengubah gambar)</span>}
+                  </label>
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center cursor-pointer hover:border-yellow-400 transition-colors"
+                    onClick={() => document.getElementById("banner-img-input").click()}
+                  >
+                    {bannerFile ? (
+                      <img src={URL.createObjectURL(bannerFile)} alt="preview" className="max-h-36 mx-auto rounded-lg object-cover" />
+                    ) : editingBannerId ? (
+                      <p className="text-sm text-gray-400">Klik untuk ganti gambar (opsional)</p>
+                    ) : (
+                      <p className="text-sm text-gray-400">Klik untuk pilih gambar (JPG/PNG/WEBP, maks 5MB)</p>
+                    )}
+                  </div>
+                  <input id="banner-img-input" type="file" accept="image/*" className="hidden"
+                    onChange={(e) => setBannerFile(e.target.files?.[0] || null)} />
+                </div>
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul <span className="text-gray-400 font-normal">(opsional)</span></label>
+                  <input type="text" value={bannerForm.title} onChange={(e) => setBannerForm(p => ({ ...p, title: e.target.value }))}
+                    placeholder="Judul banner..." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                {/* Subtitle */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Subjudul <span className="text-gray-400 font-normal">(opsional)</span></label>
+                  <input type="text" value={bannerForm.subtitle} onChange={(e) => setBannerForm(p => ({ ...p, subtitle: e.target.value }))}
+                    placeholder="Subjudul..." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                </div>
+                {/* Order */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Urutan</label>
+                  <input type="number" min="0" value={bannerForm.order} onChange={(e) => setBannerForm(p => ({ ...p, order: parseInt(e.target.value) || 0 }))}
+                    className="w-24 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  <p className="text-xs text-gray-400 mt-1">Angka lebih kecil = tampil lebih awal</p>
+                </div>
+                {/* Is Active */}
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" id="banner-active" checked={bannerForm.is_active}
+                    onChange={(e) => setBannerForm(p => ({ ...p, is_active: e.target.checked }))}
+                    className="w-4 h-4 text-yellow-500 border-gray-300 rounded" />
+                  <label htmlFor="banner-active" className="text-sm font-medium text-gray-700">Tampilkan di homepage</label>
+                </div>
+              </form>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-end gap-3 rounded-b-2xl">
+              <button type="button" onClick={() => { setBannerFormOpen(false); setBannerFile(null); }}
+                className="px-5 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-white">Batal</button>
+              <button type="submit" form="banner-form" disabled={bannerSubmitting}
+                className="px-5 py-2 rounded-lg text-sm text-white font-medium bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50">
+                {bannerSubmitting ? "Menyimpan..." : (editingBannerId ? "Simpan Perubahan" : "Tambah Banner")}
               </button>
             </div>
           </div>

@@ -11,12 +11,19 @@ export default function Header() {
   // === HIDE HEADER ON SCROLL ===
   useEffect(() => {
     let lastScroll = 0;
+    let ticking = false;
     const handleScroll = () => {
-      const currentScroll = window.pageYOffset;
-      setScrollHidden(currentScroll > lastScroll && currentScroll > 80);
-      lastScroll = currentScroll;
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScroll = window.pageYOffset;
+          setScrollHidden(currentScroll > lastScroll && currentScroll > 80);
+          lastScroll = currentScroll;
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

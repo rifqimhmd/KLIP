@@ -12,7 +12,7 @@ export default function Tentang() {
       <div className="min-h-screen w-full bg-gray-50 text-gray-800">
         {/* HERO */}
         <section className="relative w-full bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 text-white">
-          <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-20 mix-blend-overlay"></div>
+          <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10"></div>
 
           <div className="max-w-4xl mx-auto px-6 py-20 md:py-24 text-center relative z-10">
             <img
@@ -35,8 +35,8 @@ export default function Tentang() {
         <section className="max-w-4xl mx-auto px-6 -mt-8 md:-mt-10 relative">
           <div
             className="
-              bg-white/95 backdrop-blur-xl 
-              p-8 md:p-10 rounded-2xl md:rounded-3xl shadow-xl border border-white/40
+              bg-white
+              p-8 md:p-10 rounded-2xl md:rounded-3xl shadow-xl border border-gray-100
               animate-fadeInUp
             "
           >

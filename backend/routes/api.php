@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ConsultationController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\BannerController;
+use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\AuthWebController;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -21,6 +23,10 @@ Route::post('/reset-password',   [ResetPasswordController::class, 'reset']);
 // Public documents endpoint (published documents only)
 Route::get('/documents', [DocumentController::class, 'index']);
 Route::get('/documents/{id}', [DocumentController::class, 'show']);
+
+// Public banners & site settings
+Route::get('/banners', [BannerController::class, 'index']);
+Route::get('/site-settings', [SiteSettingController::class, 'index']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -60,6 +66,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/users', [AdminUserController::class, 'store']);
     Route::put('/admin/users/{id}', [AdminUserController::class, 'update']);
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+
+    // Admin banner management
+    Route::get('/admin/banners', [BannerController::class, 'adminIndex']);
+    Route::post('/admin/banners', [BannerController::class, 'store']);
+    Route::post('/admin/banners/{id}', [BannerController::class, 'update']);
+    Route::delete('/admin/banners/{id}', [BannerController::class, 'destroy']);
+
+    // Admin site settings (images)
+    Route::post('/admin/site-settings/{key}', [SiteSettingController::class, 'update']);
 
     // Real-time chat (per consultation room)
     Route::get('/chat/stats', [ChatController::class, 'stats']);

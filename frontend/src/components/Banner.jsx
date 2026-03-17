@@ -1,27 +1,50 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
+const STATIC_IMAGES = [
+  "/images/banner/1.png",
+  "/images/banner/2.png",
+  "/images/banner/3.png",
+];
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 export default function Banner() {
   const sliderRef = useRef(null);
   const [index, setIndex] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const autoSlideRef = useRef(null);
+  const [apiBanners, setApiBanners] = useState(null); // null = not yet fetched
 
-  const images = useMemo(
-    () => [
-      "/images/banner/1.png",
-      "/images/banner/2.png",
-      "/images/banner/3.png",
-    ],
-    []
-  );
+  // Fetch banners from API
+  useEffect(() => {
+    fetch(`${API_BASE}/api/banners`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setApiBanners(data.map((b) => b.image_url));
+        } else {
+          setApiBanners([]); // empty → use static
+        }
+      })
+      .catch(() => setApiBanners([])); // error → use static
+  }, []);
+
+  const images = useMemo(() => {
+    if (apiBanners === null) return []; // still loading
+    return apiBanners.length > 0 ? apiBanners : STATIC_IMAGES;
+  }, [apiBanners]);
 
   const slides = useMemo(
-    () => [images[images.length - 1], ...images, images[0], images[1]],
+    () =>
+      images.length > 0
+        ? [images[images.length - 1], ...images, images[0], images[1]]
+        : [],
     [images]
   );
 
   useEffect(() => {
+    if (images.length === 0) return;
     let loadedCount = 0;
     slides.forEach((src) => {
       const img = new Image();
