@@ -14,7 +14,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     document.title = "Patnal Integrity Hub- Dashboard";
+    // Blokir tombol Back browser agar tidak keluar dari dashboard
+    window.history.pushState(null, document.title, window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, document.title, window.location.href);
+    };
+    window.addEventListener('popstate', handlePopState);
     fetchUser();
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const fetchUser = async () => {

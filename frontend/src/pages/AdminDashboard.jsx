@@ -71,7 +71,14 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     document.title = "Dashboard - KLIP";
+    // Blokir tombol Back browser agar tidak keluar dari dashboard
+    window.history.pushState(null, document.title, window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, document.title, window.location.href);
+    };
+    window.addEventListener('popstate', handlePopState);
     checkAdmin();
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
   const isAdminUser = useCallback((userData) => {
