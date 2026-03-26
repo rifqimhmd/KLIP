@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../lib/axios';
 import { getPusher } from '../lib/pusher';
 import UserDropdownMenu from '../components/UserDropdownMenu';
+import { MessageCircle } from 'lucide-react';
 
 export default function Chat() {
   const { consultationId } = useParams();
@@ -257,20 +258,20 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* â”€â”€ Header â”€â”€ */}
-      <header className="bg-white shadow flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-12 w-auto object-contain" />
+            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
           </Link>
           {user && <UserDropdownMenu user={user} onLogout={handleLogout} />}
         </div>
       </header>
 
-      {/* â”€â”€ Chat window â”€â”€ */}
+      {/* Chat window */}
       <div className="flex-1 flex flex-col max-w-3xl w-full mx-auto px-4 py-6">
         {/* Room header */}
-        <div className="bg-blue-600 text-white rounded-t-lg px-5 py-3 flex items-center justify-between flex-shrink-0">
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl px-5 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
           <div>
             <p className="font-semibold truncate">Sesi #{consultationId} &ndash; {partnerName()}</p>
             <p className="text-xs text-blue-200 mt-0.5">{roleTag(user?.status_pengguna).label}</p>
@@ -437,12 +438,12 @@ export default function Chat() {
 
         {/* Input / Completed notice */}
         {consultation?.status === 'completed' ? (
-          <div className="bg-green-50 border border-green-200 rounded-b-lg p-4 text-center flex-shrink-0">
+          <div className="bg-green-50 border border-green-200 rounded-b-2xl p-4 text-center flex-shrink-0">
             <p className="text-sm text-green-700 font-medium">Sesi chat telah selesai.</p>
             <p className="text-xs text-green-600 mt-1">Pesan di atas tersimpan sebagai riwayat chat.</p>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-b-lg p-3 flex items-end gap-2 flex-shrink-0">
+          <div className="bg-white border border-gray-200 rounded-b-2xl p-3 flex items-end gap-2 flex-shrink-0">
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -553,10 +554,10 @@ function ConsultationPicker({ user, onLogout }) {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white shadow flex-shrink-0">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-12 w-auto object-contain" />
+            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
           </Link>
           {user && <UserDropdownMenu user={user} onLogout={onLogout} />}
         </div>

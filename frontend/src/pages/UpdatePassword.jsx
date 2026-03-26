@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import UserDropdownMenu from '../components/UserDropdownMenu';
+import { LayoutDashboard, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function UpdatePassword() {
   const [user, setUser] = useState(null);
@@ -14,6 +15,9 @@ export default function UpdatePassword() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,53 +93,48 @@ export default function UpdatePassword() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <a href="/" className="flex items-center">
-              <img
-                src="/Logo.png"
-                alt="Patnal Integrity Hub"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
-            </a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <UserDropdownMenu user={user} onLogout={handleLogout} />
-          </div>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <a href="/" className="flex items-center">
+            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
+          </a>
+          <UserDropdownMenu user={user} onLogout={handleLogout} />
         </div>
       </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar Menu */}
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <nav className="py-2">
-                <a
-                  href="/dashboard"
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50"
-                >
-                  Dashboard
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="md:w-64 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Menu</p>
+              </div>
+              <nav className="pb-2">
+                <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <LayoutDashboard className="w-4 h-4 flex-shrink-0" /> Dashboard
+                </a>
+                <a href="/update-password" className="flex items-center gap-3 px-4 py-2.5 text-blue-700 bg-blue-50 font-semibold text-sm border-l-4 border-blue-600">
+                  <Lock className="w-4 h-4 flex-shrink-0" /> Ubah Password
                 </a>
               </nav>
             </div>
-          </div>
+          </aside>
 
           {/* Update Password Form */}
-          <div className="md:col-span-3">
-            <div className="bg-white rounded-lg shadow p-6">
+          <main className="flex-1 min-w-0">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-2xl font-bold mb-6">Ubah Password</h2>
 
               {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
                   {success}
                 </div>
               )}
@@ -145,43 +144,58 @@ export default function UpdatePassword() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Password Saat Ini <span className="text-red-600">*</span>
                   </label>
-                  <input
-                    type="password"
-                    name="current_password"
-                    value={formData.current_password}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCurrent ? 'text' : 'password'}
+                      name="current_password"
+                      value={formData.current_password}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Password Baru <span className="text-red-600">*</span>
                   </label>
-                  <input
-                    type="password"
-                    name="new_password"
-                    value={formData.new_password}
-                    onChange={handleChange}
-                    required
-                    placeholder="Minimal 8 karakter"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNew ? 'text' : 'password'}
+                      name="new_password"
+                      value={formData.new_password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Minimal 8 karakter"
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Konfirmasi Password Baru <span className="text-red-600">*</span>
                   </label>
-                  <input
-                    type="password"
-                    name="new_password_confirmation"
-                    value={formData.new_password_confirmation}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirm ? 'text' : 'password'}
+                      name="new_password_confirmation"
+                      value={formData.new_password_confirmation}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                      {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -193,7 +207,7 @@ export default function UpdatePassword() {
                 </button>
               </form>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </div>

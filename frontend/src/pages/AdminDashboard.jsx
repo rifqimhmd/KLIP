@@ -3,6 +3,20 @@ import { useNavigate } from "react-router-dom";
 import api from "../lib/axios";
 import UserDropdownMenu from "../components/UserDropdownMenu";
 import { UPT_BY_PROVINCE, UPT_PROVINCES } from "../lib/uptOptions";
+import {
+  LayoutDashboard,
+  FileBarChart2,
+  ClipboardList,
+  Users,
+  MessageSquare,
+  BookOpen,
+  Image,
+  ImagePlay,
+  ArrowLeft,
+  LayoutGrid,
+  Sparkles,
+  RefreshCw,
+} from "lucide-react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -597,147 +611,203 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <a href="/" className="flex items-center">
             <img
               src="/Logo.png"
               alt="Patnal Integrity Hub"
-              className="h-10 md:h-12 w-auto object-contain"
+              className="h-10 md:h-11 w-auto object-contain"
             />
           </a>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Admin Panel
+            </span>
             <UserDropdownMenu user={user} onLogout={handleLogout} />
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <nav className="py-2">
-                <a href="/admin/dashboard" className="block px-4 py-3 text-blue-600 bg-blue-50 font-medium border-l-4 border-blue-600">
+        <div className="flex flex-col md:flex-row gap-6">
+
+          {/* Sidebar */}
+          <aside className="md:w-64 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Navigasi</p>
+              </div>
+              <nav className="pb-2">
+                <a href="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-blue-700 bg-blue-50 font-semibold border-l-4 border-blue-600 text-sm">
+                  <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
                   Dashboard
                 </a>
-                <a href="/admin/reports" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                <a href="/admin/reports" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <FileBarChart2 className="w-4 h-4 flex-shrink-0" />
                   Laporan
+                </a>
+                <div className="mx-4 my-2 border-t border-gray-100" />
+                <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+                  Dashboard Pengguna
                 </a>
               </nav>
             </div>
-          </div>
+          </aside>
 
-          <div className="md:col-span-3">
-            <div className="bg-white rounded-lg shadow p-6 space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-                  <p className="text-sm text-gray-600 mt-1">Pusat data master dan monitoring operasional admin.</p>
+          {/* Main Content */}
+          <main className="flex-1 min-w-0 space-y-6">
+            {/* Welcome + Refresh */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 p-5 text-white shadow-lg flex-1">
+                <div className="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full" />
+                <div className="absolute -bottom-6 right-10 w-20 h-20 bg-white/10 rounded-full" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles className="w-4 h-4 text-yellow-300" />
+                    <span className="text-xs text-blue-100">
+                      {new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                    </span>
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold">Halo, {registeredName}! 👋</h2>
+                  <p className="text-blue-100 text-xs mt-1">Pusat data master dan monitoring operasional admin.</p>
                 </div>
-                <button
-                  onClick={fetchAdminData}
-                  disabled={dataLoading}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {dataLoading ? "Memuat..." : "Refresh Data"}
-                </button>
               </div>
+              <button
+                onClick={fetchAdminData}
+                disabled={dataLoading}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 shadow-sm text-sm font-medium transition"
+              >
+                <RefreshCw className={`w-4 h-4 ${dataLoading ? "animate-spin" : ""}`} />
+                {dataLoading ? "Memuat..." : "Refresh"}
+              </button>
+            </div>
 
-              <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-5">
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-                  Halo, {registeredName}. Bagaimana harimu?
-                </h2>
-                <p className="mt-1 text-sm text-gray-600">
-                  Semoga sehat selalu yaa!
-                </p>
-              </div>
-
-              {view === "menu" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {view === "menu" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {/* Monitoring Konsultasi */}
                   <button
                     onClick={() => setView("consultation")}
-                    className="text-left border border-purple-200 bg-purple-50 rounded-lg p-5 hover:bg-purple-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-purple-700 mb-1">Monitoring Konsultasi</p>
-                    <p className="text-sm text-gray-600">Pantau status konsultasi klien secara menyeluruh.</p>
-                    <p className="mt-3 text-sm font-semibold text-purple-700">
-                      Tunggu: {consultationStats.pending} | Diproses: {consultationStats.inProgress} | Perlu Rujukan: {consultationStats.needsReferral} | Selesai: {consultationStats.completed}
-                    </p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-purple-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center mb-3 group-hover:bg-purple-600 transition-colors">
+                      <ClipboardList className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Monitoring Konsultasi</p>
+                    <p className="text-xs text-gray-500 mb-3">Pantau status konsultasi klien secara menyeluruh.</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full font-medium">Tunggu: {consultationStats.pending}</span>
+                      <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-medium">Proses: {consultationStats.inProgress}</span>
+                      <span className="text-xs bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-medium">Rujukan: {consultationStats.needsReferral}</span>
+                      <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-medium">Selesai: {consultationStats.completed}</span>
+                    </div>
                   </button>
 
+                  {/* Management Users */}
                   <button
                     onClick={() => setView("users")}
-                    className="text-left border border-orange-200 bg-orange-50 rounded-lg p-5 hover:bg-orange-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-orange-700 mb-1">Management Users</p>
-                    <p className="text-sm text-gray-600">Tambah, ubah, dan hapus data user dari dashboard admin.</p>
-                    <p className="mt-3 text-sm font-semibold text-orange-700">
-                      Total User: {users.length} | Online: {onlineUsersCount} | Offline: {Math.max(users.length - onlineUsersCount, 0)}
-                    </p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-orange-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center mb-3 group-hover:bg-orange-500 transition-colors">
+                      <Users className="w-5 h-5 text-orange-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Management Users</p>
+                    <p className="text-xs text-gray-500 mb-3">Tambah, ubah, dan hapus data user.</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-xs bg-gray-100 text-gray-700 border border-gray-200 px-2 py-0.5 rounded-full font-medium">Total: {users.length}</span>
+                      <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-medium">Online: {onlineUsersCount}</span>
+                      <span className="text-xs bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-medium">Offline: {Math.max(users.length - onlineUsersCount, 0)}</span>
+                    </div>
                   </button>
 
+                  {/* Monitoring Chat */}
                   <button
                     onClick={() => setView("chat")}
-                    className="text-left border border-indigo-200 bg-indigo-50 rounded-lg p-5 hover:bg-indigo-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-indigo-700 mb-1">Monitoring Chat</p>
-                    <p className="text-sm text-gray-600">Pantau sesi chat aktif yang sedang dikerjakan psikolog.</p>
-                    <p className="mt-3 text-sm font-semibold text-indigo-700">
-                      Chat Aktif: {chatStats?.active_total ?? "…"} | Selesai: {chatStats?.completed_total ?? "…"}
-                    </p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center mb-3 group-hover:bg-indigo-600 transition-colors">
+                      <MessageSquare className="w-5 h-5 text-indigo-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Monitoring Chat</p>
+                    <p className="text-xs text-gray-500 mb-3">Pantau sesi chat aktif per psikolog.</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">Aktif: {chatStats?.active_total ?? "…"}</span>
+                      <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-medium">Selesai: {chatStats?.completed_total ?? "…"}</span>
+                    </div>
                   </button>
 
+                  {/* Laporan */}
                   <a
                     href="/admin/reports"
-                    className="text-left border border-teal-200 bg-teal-50 rounded-lg p-5 hover:bg-teal-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-teal-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-teal-700 mb-1">Laporan Harian/Bulanan/Tahunan</p>
-                    <p className="text-sm text-gray-600">Buka halaman laporan terpisah untuk melihat tren konsultasi.</p>
-                    <p className="mt-3 text-sm font-semibold text-teal-700">Total Laporan: {consultations.length}</p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-teal-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center mb-3 group-hover:bg-teal-600 transition-colors">
+                      <FileBarChart2 className="w-5 h-5 text-teal-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Laporan Harian/Bulanan/Tahunan</p>
+                    <p className="text-xs text-gray-500 mb-3">Tren konsultasi dalam berbagai rentang waktu.</p>
+                    <span className="text-xs bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full font-medium">Total: {consultations.length}</span>
                   </a>
 
+                  {/* Pustaka Dokumen */}
                   <button
                     onClick={() => { setDocSearchTerm(""); fetchDocuments(); setView("documents"); }}
-                    className="text-left border border-green-200 bg-green-50 rounded-lg p-5 hover:bg-green-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-green-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-green-700 mb-1">Kelola Pustaka Dokumen</p>
-                    <p className="text-sm text-gray-600">Tambah, edit, dan hapus dokumen di pustaka.</p>
-                    <p className="mt-3 text-sm font-semibold text-green-700">Total Dokumen: {documents.length}</p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-green-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center mb-3 group-hover:bg-green-600 transition-colors">
+                      <BookOpen className="w-5 h-5 text-green-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Pustaka Dokumen</p>
+                    <p className="text-xs text-gray-500 mb-3">Tambah, edit, dan hapus dokumen di pustaka.</p>
+                    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-medium">Total: {documents.length} dokumen</span>
                   </button>
 
+                  {/* Banner Homepage */}
                   <button
                     onClick={() => { fetchBanners(); setView("banners"); }}
-                    className="text-left border border-yellow-200 bg-yellow-50 rounded-lg p-5 hover:bg-yellow-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-yellow-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-yellow-700 mb-1">Kelola Banner Homepage</p>
-                    <p className="text-sm text-gray-600">Upload dan atur gambar banner carousel di halaman utama.</p>
-                    <p className="mt-3 text-sm font-semibold text-yellow-700">Total Banner: {banners.length}</p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center mb-3 group-hover:bg-yellow-500 transition-colors">
+                      <ImagePlay className="w-5 h-5 text-yellow-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Banner Homepage</p>
+                    <p className="text-xs text-gray-500 mb-3">Upload dan atur gambar banner carousel.</p>
+                    <span className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 px-2 py-0.5 rounded-full font-medium">Total: {banners.length} banner</span>
                   </button>
 
+                  {/* Gambar Halaman */}
                   <button
                     onClick={() => { fetchSiteImages(); setView("site_images"); }}
-                    className="text-left border border-pink-200 bg-pink-50 rounded-lg p-5 hover:bg-pink-100 transition-colors"
+                    className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all duration-200 p-5 overflow-hidden relative"
                   >
-                    <p className="text-lg font-semibold text-pink-700 mb-1">Kelola Gambar Halaman</p>
-                    <p className="text-sm text-gray-600">Ganti gambar ilustrasi pada halaman Beranda (Konsultasi & Produk).</p>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-pink-50 rounded-bl-full opacity-70" />
+                    <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center mb-3 group-hover:bg-pink-600 transition-colors">
+                      <Image className="w-5 h-5 text-pink-600 group-hover:text-white transition-colors" />
+                    </div>
+                    <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Gambar Halaman</p>
+                    <p className="text-xs text-gray-500">Ganti gambar ilustrasi pada halaman Beranda.</p>
                   </button>
-
-                  <a
-                    href="/dashboard"
-                    className="text-left border border-gray-200 bg-gray-50 rounded-lg p-5 hover:bg-gray-100 transition-colors"
-                  >
-                    <p className="text-lg font-semibold text-gray-800 mb-1">Kembali ke Dashboard Pengguna</p>
-                    <p className="text-sm text-gray-600">Buka tampilan dashboard standar pengguna.</p>
-                  </a>
                 </div>
               )}
 
               {view === "consultation" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-800">Monitoring Konsultasi</h2>
-                    <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">
-                      Kembali
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="mb-5 flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <ClipboardList className="w-5 h-5 text-purple-600" />
+                      Monitoring Konsultasi
+                    </h2>
+                    <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                      <ArrowLeft className="w-4 h-4" /> Kembali
                     </button>
                   </div>
 
@@ -781,11 +851,14 @@ export default function AdminDashboard() {
               )}
 
               {view === "chat" && (
-                <div>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                   <div className="mb-5 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-800">Monitoring Chat</h2>
-                    <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">
-                      Kembali
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-indigo-600" />
+                      Monitoring Chat
+                    </h2>
+                    <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                      <ArrowLeft className="w-4 h-4" /> Kembali
                     </button>
                   </div>
 
@@ -833,18 +906,21 @@ export default function AdminDashboard() {
               )}
 
               {view === "users" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h2 className="text-2xl font-bold text-gray-800">Management Users</h2>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="mb-5 flex items-center justify-between gap-3">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <Users className="w-5 h-5 text-orange-500" />
+                      Management Users
+                    </h2>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={openCreateUserForm}
-                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                        className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition"
                       >
-                        Tambah User
+                        + Tambah User
                       </button>
-                      <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">
-                        Kembali
+                      <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                        <ArrowLeft className="w-4 h-4" /> Kembali
                       </button>
                     </div>
                   </div>
@@ -947,18 +1023,21 @@ export default function AdminDashboard() {
               )}
 
               {view === "documents" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-                    <h2 className="text-2xl font-bold text-gray-800">Kelola Pustaka Dokumen</h2>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-green-600" />
+                      Kelola Pustaka Dokumen
+                    </h2>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={openAddDoc}
-                        className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                        className="px-4 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 text-sm font-medium transition"
                       >
                         + Tambah Dokumen
                       </button>
-                      <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">
-                        Kembali
+                      <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                        <ArrowLeft className="w-4 h-4" /> Kembali
                       </button>
                     </div>
                   </div>
@@ -1046,12 +1125,15 @@ export default function AdminDashboard() {
 
               {/* ═══ BANNERS VIEW ═══ */}
               {view === "banners" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-                    <h2 className="text-2xl font-bold text-gray-800">Kelola Banner Homepage</h2>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="mb-5 flex items-center justify-between flex-wrap gap-2">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <ImagePlay className="w-5 h-5 text-yellow-500" />
+                      Kelola Banner Homepage
+                    </h2>
                     <div className="flex gap-2">
-                      <button onClick={openAddBanner} className="px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 text-sm">+ Tambah Banner</button>
-                      <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">Kembali</button>
+                      <button onClick={openAddBanner} className="px-4 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 text-sm font-medium transition">+ Tambah Banner</button>
+                      <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition"><ArrowLeft className="w-4 h-4" /> Kembali</button>
                     </div>
                   </div>
                   {bannerLoading ? (
@@ -1086,10 +1168,13 @@ export default function AdminDashboard() {
 
               {/* ═══ SITE IMAGES VIEW ═══ */}
               {view === "site_images" && (
-                <div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-800">Kelola Gambar Halaman</h2>
-                    <button onClick={() => setView("menu")} className="text-sm text-gray-600 hover:underline">Kembali</button>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="mb-5 flex items-center justify-between">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <Image className="w-5 h-5 text-pink-600" />
+                      Kelola Gambar Halaman
+                    </h2>
+                    <button onClick={() => setView("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition"><ArrowLeft className="w-4 h-4" /> Kembali</button>
                   </div>
                   {siteImageError && (
                     <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{siteImageError}</div>
@@ -1134,8 +1219,7 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-            </div>
-          </div>
+          </main>
         </div>
       </div>
 

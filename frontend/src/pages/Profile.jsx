@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import UserDropdownMenu from '../components/UserDropdownMenu';
 import { UPT_BY_PROVINCE, UPT_PROVINCES } from '../lib/uptOptions';
+import { LayoutDashboard, User } from 'lucide-react';
 
 const directorates = [
   'Sekretariat Direktorat Jenderal Pemasyarakatan',
@@ -304,43 +305,38 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <a href="/" className="flex items-center">
-              <img
-                src="/Logo.png"
-                alt="Patnal Integrity Hub"
-                className="h-10 md:h-12 w-auto object-contain"
-              />
-            </a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <UserDropdownMenu user={user} onLogout={handleLogout} />
-          </div>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          <a href="/" className="flex items-center">
+            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
+          </a>
+          <UserDropdownMenu user={user} onLogout={handleLogout} />
         </div>
       </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Sidebar Menu */}
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <nav className="py-2">
-                <a
-                  href="/dashboard"
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-50"
-                >
-                  Dashboard
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="md:w-64 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Menu</p>
+              </div>
+              <nav className="pb-2">
+                <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <LayoutDashboard className="w-4 h-4 flex-shrink-0" /> Dashboard
+                </a>
+                <a href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-blue-700 bg-blue-50 font-semibold text-sm border-l-4 border-blue-600">
+                  <User className="w-4 h-4 flex-shrink-0" /> Profil Saya
                 </a>
               </nav>
             </div>
-          </div>
+          </aside>
 
           {/* Profile Content */}
-          <div className="md:col-span-3">
-            <div className="bg-white rounded-lg shadow p-6">
+          <main className="flex-1 min-w-0">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <h2 className="text-2xl font-bold mb-6">Profil Saya</h2>
 
               {error && (
@@ -607,7 +603,7 @@ export default function Profile() {
                 </form>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </div>
