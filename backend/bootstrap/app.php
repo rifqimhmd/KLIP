@@ -16,12 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         attributes: ['middleware' => ['auth:sanctum']],
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        
+        // 1. TAMBAHKAN INI: Agar Laravel mengenali HTTPS dari Load Balancer Railway
+        $middleware->trustProxies(at: '*');
+
         // Enable CORS for all routes
         $middleware->use([
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
 
-        // Exclude CSRF from login/register and authenticated API routes that use token-based auth
+        // Exclude CSRF from login/register and authenticated API routes
         $middleware->validateCsrfTokens(except: [
             'api/login',
             'api/register',
@@ -38,9 +42,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/chat/*',
             'broadcasting/auth',
         ]);
-
-        // API uses Bearer token auth (Sanctum personal access tokens),
-        // so stateful SPA/session CSRF middleware is not required.
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

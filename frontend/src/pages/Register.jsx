@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import { UPT_BY_PROVINCE, UPT_PROVINCES } from '../lib/uptOptions';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,8 @@ export default function Register() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [selectedUptProvince, setSelectedUptProvince] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const navigate = useNavigate();
 
   // List of directorates
@@ -118,6 +121,12 @@ export default function Register() {
       return;
     }
 
+    if (!/[a-zA-Z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      setError('Password harus mengandung kombinasi huruf dan angka');
+      setLoading(false);
+      return;
+    }
+
     try {
       console.log('Submitting registration with data:', {
         ...formData,
@@ -144,322 +153,383 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-10 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-center text-blue-600 mb-2">
-            Daftar Akun
-          </h1>
-          <p className="text-center text-gray-600 mb-8">
-            Bergabunglah dengan platform kami
-          </p>
 
-          {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-              {error}
-            </div>
-          )}
+        {/* Header */}
+        <div className="text-center mb-8">
+          <img src="/Logo.png" alt="KLIP Logo" className="h-14 w-auto mx-auto mb-4 drop-shadow" />
+          <h1 className="text-3xl font-bold text-blue-700">Daftar Akun</h1>
+          <p className="text-gray-500 mt-1 text-sm">Isi data diri Anda untuk bergabung dengan KLIP</p>
+        </div>
 
-          {success && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
-              Registrasi berhasil! Anda akan dialihkan ke halaman login...
-            </div>
-          )}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Nama Lengkap */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nama Lengkap <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Nama lengkap sesuai identitas"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+          {/* Progress bar top */}
+          <div className="h-1.5 bg-gradient-to-r from-blue-500 to-blue-400" />
 
-            {/* NIP */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                NIP <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                name="nip"
-                value={formData.nip}
-                onChange={handleChange}
-                placeholder="Nomor Induk Pegawai"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="contoh@klinikpatnal.com"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Password */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Minimal 8 karakter"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Konfirmasi Password <span className="text-red-600">*</span>
-                </label>
-                <input
-                  type="password"
-                  name="password_confirmation"
-                  value={formData.password_confirmation}
-                  onChange={handleChange}
-                  placeholder="Konfirmasi password"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            {/* Daftar Sebagai */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Daftar Sebagai <span className="text-red-600">*</span>
-              </label>
-              <select
-                name="daftar_sebagai"
-                value={formData.daftar_sebagai}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">-- Pilih Unit --</option>
-                <option value="UPT">UPT: Daerah</option>
-                <option value="Kanwil">Kanwil: Provinsi</option>
-                <option value="Ditjenpas">Ditjenpas: Direktorat Jenderal Pemasyarakatan</option>
-              </select>
-            </div>
-
-            {/* Pangkat/Golongan */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pangkat/Golongan <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                name="pangkat_golongan"
-                value={formData.pangkat_golongan}
-                onChange={handleChange}
-                placeholder="Contoh: Penata / III-C"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Jabatan */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Jabatan <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                name="jabatan"
-                value={formData.jabatan}
-                onChange={handleChange}
-                placeholder="Contoh: Staf Pengawasan"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Bagian */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bagian <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="text"
-                name="bagian"
-                value={formData.bagian}
-                onChange={handleChange}
-                placeholder="Contoh: Kepatuhan Internal"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Directorat Selection - Only show if Ditjenpas is selected */}
-            {formData.daftar_sebagai === 'Ditjenpas' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Pilih Direktorat <span className="text-red-600">*</span>
-                </label>
-                <select
-                  name="organization_detail"
-                  value={formData.organization_detail}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">-- Pilih Direktorat --</option>
-                  {directorates.map((dir, index) => (
-                    <option key={index} value={dir}>
-                      {dir}
-                    </option>
-                  ))}
-                </select>
+          <div className="p-8">
+            {error && (
+              <div className="mb-6 flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                {error}
               </div>
             )}
 
-            {formData.daftar_sebagai === 'Kanwil' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Pilih Kanwil <span className="text-red-600">*</span>
-                </label>
-                <select
-                  name="organization_detail"
-                  value={formData.organization_detail}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">-- Pilih Kanwil --</option>
-                  {kanwilList.map((kanwil, index) => (
-                    <option key={index} value={kanwil}>
-                      {kanwil}
-                    </option>
-                  ))}
-                </select>
+            {success && (
+              <div className="mb-6 flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
+                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Registrasi berhasil! Anda akan dialihkan ke halaman login...
               </div>
             )}
 
-            {formData.daftar_sebagai === 'UPT' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pilih Provinsi UPT <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    value={selectedUptProvince}
-                    onChange={handleUptProvinceChange}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">-- Pilih Provinsi --</option>
-                    {UPT_PROVINCES.map((province) => (
-                      <option key={province} value={province}>
-                        {province}
-                      </option>
-                    ))}
-                  </select>
+            <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* ── Seksi: Informasi Akun ── */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</div>
+                  <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Informasi Akun</h2>
+                  <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Pilih UPT <span className="text-red-600">*</span>
-                  </label>
-                  <select
-                    value={selectedUptName}
-                    onChange={handleUptDetailChange}
-                    required
-                    disabled={!selectedUptProvince}
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  >
-                    <option value="">-- Pilih UPT --</option>
-                    {(UPT_BY_PROVINCE[selectedUptProvince] || []).map((upt, index) => (
-                      <option key={`${selectedUptProvince}-${index}`} value={upt}>
-                        {upt}
-                      </option>
-                    ))}
-                  </select>
+                <div className="space-y-4">
+                  {/* Nama */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Nama Lengkap <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Nama lengkap sesuai identitas"
+                      required
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* NIP */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        NIP <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="nip"
+                        value={formData.nip}
+                        onChange={handleChange}
+                        placeholder="Nomor Induk Pegawai"
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="nama@email.com"
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Password <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          placeholder="Min. 8 karakter"
+                          required
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-1">Kombinasi huruf &amp; angka, min. 8 karakter</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Konfirmasi Password <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPasswordConfirm ? 'text' : 'password'}
+                          name="password_confirmation"
+                          value={formData.password_confirmation}
+                          onChange={handleChange}
+                          placeholder="Ulangi password"
+                          required
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                        />
+                        <button type="button" onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                          className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition">
+                          {showPasswordConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </>
-            )}
+              </div>
 
-            {/* No WA */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nomor WhatsApp <span className="text-red-600">*</span>
-              </label>
-              <input
-                type="tel"
-                name="no_wa"
-                value={formData.no_wa}
-                onChange={handleChange}
-                placeholder="+62 812-3456-7890"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              {/* ── Seksi: Informasi Kepegawaian ── */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">2</div>
+                  <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Informasi Kepegawaian</h2>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
 
-            {/* Status Pengguna */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipe Pengguna <span className="text-red-600">*</span>
-              </label>
-              <select
-                name="status_pengguna"
-                value={formData.status_pengguna}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">-- Pilih Tipe Pengguna --</option>
-                <option value="User">User</option>
-                <option value="Admin">Admin</option>
-                <option value="Psikolog">Psikolog</option>
-                <option value="Asisten Psikolog">Asisten Psikolog</option>
-              </select>
-            </div>
+                <div className="space-y-4">
+                  {/* Daftar Sebagai */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Daftar Sebagai <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="daftar_sebagai"
+                      value={formData.daftar_sebagai}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                    >
+                      <option value="">-- Pilih Unit --</option>
+                      <option value="UPT">UPT: Daerah</option>
+                      <option value="Kanwil">Kanwil: Provinsi</option>
+                      <option value="Ditjenpas">Ditjenpas: Direktorat Jenderal Pemasyarakatan</option>
+                    </select>
+                  </div>
 
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-              >
-                {loading ? 'Mendaftar...' : 'Daftar'}
-              </button>
-            </div>
+                  {formData.daftar_sebagai === 'Ditjenpas' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Pilih Direktorat <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="organization_detail"
+                        value={formData.organization_detail}
+                        onChange={handleChange}
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                      >
+                        <option value="">-- Pilih Direktorat --</option>
+                        {directorates.map((dir, index) => (
+                          <option key={index} value={dir}>{dir}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
-            {/* Link ke Login */}
-            <p className="text-center text-sm text-gray-600">
-              Sudah punya akun?{' '}
-              <a href="/login" className="text-blue-600 hover:underline font-medium">
-                Login di sini
-              </a>
-            </p>
-          </form>
+                  {formData.daftar_sebagai === 'Kanwil' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Pilih Kanwil <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        name="organization_detail"
+                        value={formData.organization_detail}
+                        onChange={handleChange}
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                      >
+                        <option value="">-- Pilih Kanwil --</option>
+                        {kanwilList.map((kanwil, index) => (
+                          <option key={index} value={kanwil}>{kanwil}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {formData.daftar_sebagai === 'UPT' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Pilih Provinsi UPT <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={selectedUptProvince}
+                          onChange={handleUptProvinceChange}
+                          required
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                        >
+                          <option value="">-- Pilih Provinsi --</option>
+                          {UPT_PROVINCES.map((province) => (
+                            <option key={province} value={province}>{province}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Pilih UPT <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={selectedUptName}
+                          onChange={handleUptDetailChange}
+                          required
+                          disabled={!selectedUptProvince}
+                          className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white disabled:bg-gray-50 disabled:text-gray-400"
+                        >
+                          <option value="">-- Pilih UPT --</option>
+                          {(UPT_BY_PROVINCE[selectedUptProvince] || []).map((upt, index) => (
+                            <option key={`${selectedUptProvince}-${index}`} value={upt}>{upt}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Pangkat */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Pangkat/Golongan <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="pangkat_golongan"
+                        value={formData.pangkat_golongan}
+                        onChange={handleChange}
+                        placeholder="Contoh: Penata / III-C"
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+
+                    {/* Jabatan */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Jabatan <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="jabatan"
+                        value={formData.jabatan}
+                        onChange={handleChange}
+                        placeholder="Contoh: Staf Pengawasan"
+                        required
+                        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Bagian */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Bagian <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="bagian"
+                      value={formData.bagian}
+                      onChange={handleChange}
+                      placeholder="Contoh: Kepatuhan Internal"
+                      required
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Seksi: Kontak & Tipe ── */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">3</div>
+                  <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Kontak &amp; Tipe Pengguna</h2>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* No WA */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Nomor WhatsApp <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="no_wa"
+                      value={formData.no_wa}
+                      onChange={handleChange}
+                      placeholder="+62 812-3456-7890"
+                      required
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    />
+                  </div>
+
+                  {/* Status Pengguna */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      Tipe Pengguna <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="status_pengguna"
+                      value={formData.status_pengguna}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white"
+                    >
+                      <option value="">-- Pilih Tipe Pengguna --</option>
+                      <option value="User">User</option>
+                      <option value="Psikolog">Psikolog</option>
+                      <option value="Asisten Psikolog">Asisten Psikolog</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-200 hover:shadow-lg"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      Mendaftar...
+                    </>
+                  ) : 'Daftar Sekarang'}
+                </button>
+              </div>
+
+              <p className="text-center text-sm text-gray-500">
+                Sudah punya akun?{' '}
+                <a href="/login" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline">
+                  Login di sini
+                </a>
+              </p>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

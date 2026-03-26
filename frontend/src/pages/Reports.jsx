@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/axios";
 import UserDropdownMenu from "../components/UserDropdownMenu";
+import { LayoutDashboard, ClipboardList, FileBarChart2, RefreshCw } from "lucide-react";
 
 export default function Reports() {
   const navigate = useNavigate();
@@ -268,44 +269,39 @@ export default function Reports() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <a href="/" className="flex items-center">
-            <img
-              src="/Logo.png"
-              alt="Patnal Integrity Hub"
-              className="h-10 md:h-12 w-auto object-contain"
-            />
+            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
           </a>
-          <div className="flex items-center space-x-4">
-            <UserDropdownMenu user={user} onLogout={handleLogout} />
-          </div>
+          <UserDropdownMenu user={user} onLogout={handleLogout} />
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow">
-              <nav className="py-2">
-                <a href="/dashboard" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                  Dashboard
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Sidebar */}
+          <aside className="md:w-64 flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="px-4 pt-4 pb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Menu</p>
+              </div>
+              <nav className="pb-2">
+                <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <LayoutDashboard className="w-4 h-4 flex-shrink-0" /> Dashboard
                 </a>
-                <a href="/consultation" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
-                  Konsultasi
+                <a href="/consultation" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                  <ClipboardList className="w-4 h-4 flex-shrink-0" /> Konsultasi
                 </a>
-                <a
-                  href="/reports"
-                  className="block px-4 py-3 text-blue-600 bg-blue-50 font-medium border-l-4 border-blue-600"
-                >
-                  Laporan
+                <a href="/reports" className="flex items-center gap-3 px-4 py-2.5 text-blue-700 bg-blue-50 font-semibold text-sm border-l-4 border-blue-600">
+                  <FileBarChart2 className="w-4 h-4 flex-shrink-0" /> Laporan
                 </a>
               </nav>
             </div>
-          </div>
+          </aside>
 
-          <div className="md:col-span-3">
-            <div className="bg-white rounded-lg shadow p-6">
+          <main className="flex-1 min-w-0">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-800">Laporan Konsultasi</h1>
@@ -316,7 +312,7 @@ export default function Reports() {
                     type="button"
                     onClick={() => handleExportConsultations("pdf")}
                     disabled={exportingType !== ""}
-                    className="px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                    className="px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                   >
                     {exportingType === "pdf" ? "Mengunduh..." : "Export PDF"}
                   </button>
@@ -324,16 +320,17 @@ export default function Reports() {
                     type="button"
                     onClick={() => handleExportConsultations("excel")}
                     disabled={exportingType !== ""}
-                    className="px-3 py-2 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50"
+                    className="px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
                   >
                     {exportingType === "excel" ? "Mengunduh..." : "Export Excel"}
                   </button>
                   <button
                     onClick={fetchConsultations}
                     disabled={dataLoading}
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm"
                   >
-                    {dataLoading ? "Memuat..." : "Refresh Data"}
+                    <RefreshCw className={`w-3.5 h-3.5 ${dataLoading ? 'animate-spin' : ''}`} />
+                    {dataLoading ? "Memuat..." : "Refresh"}
                   </button>
                 </div>
               </div>
@@ -342,27 +339,27 @@ export default function Reports() {
                 <button
                   type="button"
                   onClick={() => setChartRange("daily")}
-                  className={`px-3 py-1.5 rounded border ${chartRange === "daily" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300"}`}
+                  className={`px-3 py-1.5 rounded-lg border text-sm ${chartRange === "daily" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}`}
                 >
                   Harian
                 </button>
                 <button
                   type="button"
                   onClick={() => setChartRange("monthly")}
-                  className={`px-3 py-1.5 rounded border ${chartRange === "monthly" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300"}`}
+                  className={`px-3 py-1.5 rounded-lg border text-sm ${chartRange === "monthly" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}`}
                 >
                   Bulanan
                 </button>
                 <button
                   type="button"
                   onClick={() => setChartRange("yearly")}
-                  className={`px-3 py-1.5 rounded border ${chartRange === "yearly" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300"}`}
+                  className={`px-3 py-1.5 rounded-lg border text-sm ${chartRange === "yearly" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}`}
                 >
                   Tahunan
                 </button>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                 <p className="text-sm text-gray-600 mb-3">
                   {chartRange === "daily" && "Menampilkan tren 14 hari terakhir."}
                   {chartRange === "monthly" && "Menampilkan tren 12 bulan terakhir."}
@@ -401,7 +398,7 @@ export default function Reports() {
                 )}
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     </div>
