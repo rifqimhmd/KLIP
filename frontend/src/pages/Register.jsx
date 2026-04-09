@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import { UPT_BY_PROVINCE, UPT_PROVINCES } from '../lib/uptOptions';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -25,6 +25,8 @@ export default function Register() {
   const [selectedUptProvince, setSelectedUptProvince] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const navigate = useNavigate();
 
   // List of directorates
@@ -127,6 +129,18 @@ export default function Register() {
       return;
     }
 
+    if (formData.status_pengguna !== 'Admin' && !/^\d{16}$/.test(formData.nip)) {
+      setError('NIP harus tepat 16 digit angka');
+      setLoading(false);
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setError('Anda harus menyetujui Syarat dan Ketentuan sebelum mendaftar');
+      setLoading(false);
+      return;
+    }
+
     try {
       console.log('Submitting registration with data:', {
         ...formData,
@@ -158,9 +172,11 @@ export default function Register() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <img src="/Logo.png" alt="KLIP Logo" className="h-14 w-auto mx-auto mb-4 drop-shadow" />
+          <a href="/" className="inline-block cursor-pointer">
+            <img src="/Logo.png" alt="KLIP Logo" className="h-14 w-auto mx-auto mb-4 drop-shadow hover:opacity-80 transition-opacity" />
+          </a>
           <h1 className="text-3xl font-bold text-blue-700">Daftar Akun</h1>
-          <p className="text-gray-500 mt-1 text-sm">Isi data diri Anda untuk bergabung dengan KLIP</p>
+          <p className="text-gray-500 mt-1 text-sm">Isi data diri Anda untuk bergabung dengan kami</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -229,6 +245,9 @@ export default function Register() {
                         required
                         className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                       />
+                      {formData.status_pengguna !== 'Admin' && (
+                        <p className="text-xs text-gray-400 mt-1">Harus tepat 16 digit angka</p>
+                      )}
                     </div>
 
                     {/* Email */}
@@ -500,11 +519,35 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* Terms and Conditions */}
+              <div className="pt-2">
+                <div className="flex items-start gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded cursor-pointer flex-shrink-0"
+                  />
+                  <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-relaxed">
+                    Saya telah membaca dan menyetujui{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-blue-600 font-semibold hover:text-blue-700 hover:underline"
+                    >
+                      Syarat dan Ketentuan
+                    </button>
+                    {' '}penggunaan aplikasi KLIP. Saya menyatakan bahwa data yang diisi adalah benar dan dapat dipertanggungjawabkan.
+                  </label>
+                </div>
+              </div>
+
               {/* Submit */}
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !agreedToTerms}
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-200 hover:shadow-lg"
                 >
                   {loading ? (
@@ -529,6 +572,93 @@ export default function Register() {
           </div>
         </div>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-800">Syarat dan Ketentuan Penggunaan website</h2>
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="overflow-y-auto px-6 py-5 space-y-5 text-sm text-gray-600 leading-relaxed">
+              <p className="text-gray-500 text-xs">Berlaku sejak: 1 Januari 2025</p>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">1. Penerimaan Syarat</h3>
+                <p>Dengan mendaftar dan menggunakan aplikasi <strong>KLIP (Konsultasi Layanan Informasi Pemasyarakatan)</strong>, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh syarat dan ketentuan yang berlaku di bawah ini.</p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">2. Penggunaan Akun</h3>
+                <ul className="list-disc list-inside space-y-1 pl-1">
+                  <li>Akun hanya dapat digunakan oleh pegawai yang berwenang di lingkungan Pemasyarakatan.</li>
+                  <li>Anda bertanggung jawab penuh atas kerahasiaan kata sandi dan aktivitas yang terjadi pada akun Anda.</li>
+                  <li>Dilarang keras meminjamkan, mengalihkan, atau menyalahgunakan akun kepada pihak lain.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">3. Kebenaran Data</h3>
+                <p>Pengguna wajib mengisi data registrasi secara lengkap dan benar sesuai identitas resmi. Pemalsuan data dapat mengakibatkan penonaktifan akun dan tindakan hukum sesuai peraturan yang berlaku.</p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">4. Kerahasiaan Informasi</h3>
+                <p>Seluruh informasi, dokumen, dan materi yang tersedia di dalam aplikasi bersifat rahasia dan hanya diperuntukkan bagi pengguna yang berwenang. Dilarang menyebarluaskan informasi tersebut kepada pihak yang tidak berkepentingan.</p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">5. Privasi Data</h3>
+                <p>Data pribadi yang Anda berikan akan digunakan semata-mata untuk keperluan operasional aplikasi Patnal Integrity Hub dan tidak akan diberikan kepada pihak ketiga tanpa persetujuan Anda, kecuali diwajibkan oleh hukum atau peraturan yang berlaku.</p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">6. Kewajiban Pengguna</h3>
+                <ul className="list-disc list-inside space-y-1 pl-1">
+                  <li>Menggunakan aplikasi sesuai dengan tujuan yang ditetapkan.</li>
+                  <li>Tidak melakukan tindakan yang dapat merusak, mengganggu, atau mencuri data sistem.</li>
+                  <li>Segera melaporkan kepada administrator jika menemukan celah keamanan atau penyalahgunaan.</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">7. Perubahan Syarat</h3>
+                <p>Pengelola Patnal Integrity Hub berhak mengubah syarat dan ketentuan ini sewaktu-waktu. Perubahan akan diberitahukan melalui aplikasi dan berlaku sejak tanggal pengumuman.</p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-gray-800 mb-1">8. Hukum yang Berlaku</h3>
+                <p>Syarat dan ketentuan ini tunduk pada hukum Republik Indonesia dan peraturan perundang-undangan terkait penyelenggaraan Pemasyarakatan.</p>
+              </section>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex gap-3 px-6 py-4 border-t border-gray-100">
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-300 text-gray-600 text-sm font-medium hover:bg-gray-50 transition"
+              >
+                Tutup
+              </button>
+              <button
+                onClick={() => { setAgreedToTerms(true); setShowTermsModal(false); }}
+                className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition"
+              >
+                Saya Setuju
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

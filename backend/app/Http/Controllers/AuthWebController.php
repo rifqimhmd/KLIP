@@ -37,7 +37,12 @@ class AuthWebController extends Controller
         try {
             $validated = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'nip' => ['required', 'string', 'unique:users,nip'],
+                'nip' => array_merge(
+                    ['required', 'string', 'unique:users,nip'],
+                    strtolower($request->input('status_pengguna', '')) !== 'admin'
+                        ? ['regex:/^\d{16}$/']
+                        : []
+                ),
                 'email' => ['required', 'email', 'unique:users,email'],
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'pangkat_golongan' => ['required', 'string', 'max:255'],
