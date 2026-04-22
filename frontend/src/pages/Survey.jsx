@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Logo from '../components/Logo';
 import { Send, User, MessageSquare, CheckCircle } from 'lucide-react';
 
 const Survey = () => {
@@ -38,7 +39,7 @@ const Survey = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validasi semua pertanyaan skala harus diisi
     const scaleQuestions = [
       'kemudahanPenggunaan', 'kemudahanInformasi', 'tampilanWebsite',
@@ -46,9 +47,9 @@ const Survey = () => {
       'kepuasanInformasi', 'tingkatKepuasan', 'keinginanMenggunakan',
       'kemungkinanRekomendasi'
     ];
-    
+
     const unansweredQuestions = scaleQuestions.filter(q => formData[q] === 0);
-    
+
     if (unansweredQuestions.length > 0) {
       alert('Silakan jawab semua pertanyaan skala 1-5 terlebih dahulu');
       return;
@@ -108,7 +109,7 @@ const Survey = () => {
             </div>
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Terima Kasih!</h2>
             <p className="text-gray-600 mb-6">
-              Survey kepuasan Anda telah berhasil dikirim. 
+              Survey kepuasan Anda telah berhasil dikirim.
               Feedback Anda sangat berharga untuk meningkatkan kualitas layanan kami.
             </p>
             <button
@@ -140,11 +141,10 @@ const Survey = () => {
                   onChange={() => onChange(name, scale)}
                   className="sr-only"
                 />
-                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
-                  value === scale 
-                    ? 'border-blue-600 bg-blue-600 text-white' 
+                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${value === scale
+                    ? 'border-blue-600 bg-blue-600 text-white'
                     : 'border-gray-300 bg-white hover:border-blue-400'
-                }`}>
+                  }`}>
                   {scale}
                 </div>
               </label>
@@ -163,16 +163,14 @@ const Survey = () => {
         <div className="text-center mb-8">
           <div className="mb-6">
             <a href="/" className="inline-flex items-center gap-3 group">
-              <img 
-                src="/Logo.png" 
-                alt="Patnal Integrity Hub" 
-                className="h-12 w-auto object-contain transition-transform group-hover:scale-105"
+              <Logo
+                className="h-12 w-auto transition-transform group-hover:scale-105"
+                alt="Patnal Integrity Hub"
               />
               <div className="text-left">
                 <h2 className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
                   Patnal Integrity Hub
                 </h2>
-                <p className="text-xs text-gray-600">Klinik Psikologi Ditjen Pemasyarakatan</p>
               </div>
             </a>
           </div>
@@ -187,169 +185,169 @@ const Survey = () => {
           <div>
             <div className="bg-white rounded-2xl shadow-xl p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nama/NIP Section */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center mb-3">
-                <User className="w-5 h-5 text-blue-600 mr-2" />
-                <label className="text-sm font-semibold text-blue-800">
-                  Identitas (Opsional)
-                </label>
-              </div>
-              <p className="text-xs text-blue-600 mb-3">
-                Lebih baik anonim agar jujur dalam memberikan feedback
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama
-                  </label>
-                  <input
-                    type="text"
-                    name="nama"
-                    value={formData.nama}
-                    onChange={handleInputChange}
-                    placeholder="Opsional"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                {/* Nama/NIP Section */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center mb-3">
+                    <User className="w-5 h-5 text-blue-600 mr-2" />
+                    <label className="text-sm font-semibold text-blue-800">
+                      Identitas (Opsional)
+                    </label>
+                  </div>
+                  <p className="text-xs text-blue-600 mb-3">
+                    Lebih baik anonim agar jujur dalam memberikan feedback
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nama
+                      </label>
+                      <input
+                        type="text"
+                        name="nama"
+                        value={formData.nama}
+                        onChange={handleInputChange}
+                        placeholder="Opsional"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        NIP
+                      </label>
+                      <input
+                        type="text"
+                        name="nip"
+                        value={formData.nip}
+                        onChange={handleInputChange}
+                        placeholder="Opsional"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Skala Questions */}
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
+                      Pertanyaan Skala Kepuasan
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Menggunakan skala: <span className="font-semibold">1 (Sangat Tidak Setuju)</span> hingga <span className="font-semibold">5 (Sangat Setuju)</span>
+                    </p>
+                  </div>
+
+                  <ScaleQuestion
+                    name="kemudahanPenggunaan"
+                    question="Seberapa mudah Anda menggunakan website ini?"
+                    value={formData.kemudahanPenggunaan}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="kemudahanInformasi"
+                    question="Seberapa mudah Anda menemukan informasi yang Anda cari di website ini?"
+                    value={formData.kemudahanInformasi}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="tampilanWebsite"
+                    question="Bagaimana pendapat Anda tentang tampilan website ini?"
+                    value={formData.tampilanWebsite}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="kenyamananPenggunaan"
+                    question="Seberapa nyaman Anda saat menggunakan website ini?"
+                    value={formData.kenyamananPenggunaan}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="pemahamanInformasi"
+                    question="Menurut Anda, apakah informasi yang tersedia mudah dipahami?"
+                    value={formData.pemahamanInformasi}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="kesesuaianKebutuhan"
+                    question="Sejauh mana informasi di website ini sesuai dengan kebutuhan Anda?"
+                    value={formData.kesesuaianKebutuhan}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="kepuasanInformasi"
+                    question="Seberapa membantu website ini dalam memenuhi kebutuhan informasi Anda?"
+                    value={formData.kepuasanInformasi}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="tingkatKepuasan"
+                    question="Bagaimana tingkat kepuasan Anda saat menggunakan website ini?"
+                    value={formData.tingkatKepuasan}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="keinginanMenggunakan"
+                    question="Seberapa besar keinginan Anda untuk menggunakan website ini kembali?"
+                    value={formData.keinginanMenggunakan}
+                    onChange={handleRadioChange}
+                  />
+
+                  <ScaleQuestion
+                    name="kemungkinanRekomendasi"
+                    question="Seberapa besar kemungkinan Anda merekomendasikan website ini kepada orang lain?"
+                    value={formData.kemungkinanRekomendasi}
+                    onChange={handleRadioChange}
                   />
                 </div>
+
+                {/* Saran dan Harapan */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    NIP
-                  </label>
-                  <input
-                    type="text"
-                    name="nip"
-                    value={formData.nip}
+                  <div className="flex items-center mb-3">
+                    <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
+                    <label className="text-sm font-semibold text-gray-800">
+                      Apa saran atau harapan Anda terhadap Website ini?
+                    </label>
+                  </div>
+                  <textarea
+                    name="saranHarapan"
+                    value={formData.saranHarapan}
                     onChange={handleInputChange}
-                    placeholder="Opsional"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={4}
+                    placeholder="Bagikan saran dan harapan Anda untuk perbaikan website kami..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Skala Questions */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
-                  Pertanyaan Skala Kepuasan
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Menggunakan skala: <span className="font-semibold">1 (Sangat Tidak Setuju)</span> hingga <span className="font-semibold">5 (Sangat Setuju)</span>
-                </p>
-              </div>
-
-              <ScaleQuestion
-                name="kemudahanPenggunaan"
-                question="Seberapa mudah Anda menggunakan website ini?"
-                value={formData.kemudahanPenggunaan}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="kemudahanInformasi"
-                question="Seberapa mudah Anda menemukan informasi yang Anda cari di website ini?"
-                value={formData.kemudahanInformasi}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="tampilanWebsite"
-                question="Bagaimana pendapat Anda tentang tampilan website ini?"
-                value={formData.tampilanWebsite}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="kenyamananPenggunaan"
-                question="Seberapa nyaman Anda saat menggunakan website ini?"
-                value={formData.kenyamananPenggunaan}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="pemahamanInformasi"
-                question="Menurut Anda, apakah informasi yang tersedia mudah dipahami?"
-                value={formData.pemahamanInformasi}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="kesesuaianKebutuhan"
-                question="Sejauh mana informasi di website ini sesuai dengan kebutuhan Anda?"
-                value={formData.kesesuaianKebutuhan}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="kepuasanInformasi"
-                question="Seberapa membantu website ini dalam memenuhi kebutuhan informasi Anda?"
-                value={formData.kepuasanInformasi}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="tingkatKepuasan"
-                question="Bagaimana tingkat kepuasan Anda saat menggunakan website ini?"
-                value={formData.tingkatKepuasan}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="keinginanMenggunakan"
-                question="Seberapa besar keinginan Anda untuk menggunakan website ini kembali?"
-                value={formData.keinginanMenggunakan}
-                onChange={handleRadioChange}
-              />
-
-              <ScaleQuestion
-                name="kemungkinanRekomendasi"
-                question="Seberapa besar kemungkinan Anda merekomendasikan website ini kepada orang lain?"
-                value={formData.kemungkinanRekomendasi}
-                onChange={handleRadioChange}
-              />
-            </div>
-
-            {/* Saran dan Harapan */}
-            <div>
-              <div className="flex items-center mb-3">
-                <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
-                <label className="text-sm font-semibold text-gray-800">
-                  Apa saran atau harapan Anda terhadap Website ini?
-                </label>
-              </div>
-              <textarea
-                name="saranHarapan"
-                value={formData.saranHarapan}
-                onChange={handleInputChange}
-                rows={4}
-                placeholder="Bagikan saran dan harapan Anda untuk perbaikan website kami..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Mengirim...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5 mr-2" />
-                    Kirim Survey
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Mengirim...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5 mr-2" />
+                        Kirim Survey
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

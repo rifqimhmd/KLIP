@@ -16,9 +16,23 @@ class ChatController extends Controller
      */
     public function index(Request $request, int $consultationId)
     {
+        $user = $request->user();
+
+        \Log::info('Chat index called', [
+            'consultation_id' => $consultationId,
+            'user_id' => $user?->id,
+            'user_status' => $user?->status_pengguna,
+            'auth_header' => $request->header('Authorization') ? 'Present' : 'Missing',
+        ]);
+
+        if (!$user) {
+            \Log::error('No authenticated user');
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $consultation = Consultation::findOrFail($consultationId);
 
-        if (!$this->canAccess($request->user(), $consultation)) {
+        if (!$this->canAccess($user, $consultation)) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -46,6 +60,23 @@ class ChatController extends Controller
         $validated = $request->validate([
             'message' => ['required', 'string', 'max:2000'],
         ]);
+
+        // Auto-assign untuk konsultasi teknis yang belum diassign
+        // ketika konsultan teknis mengirim pesan pertama
+        if ($consultation->type === 'teknis' && is_null($consultation->assigned_to)) {
+            $isKonsultanTeknis = strtolower((string) ($user->status_pengguna ?? '')) === 'konsultan teknis'
+                || strtolower((string) ($user->daftar_sebagai ?? '')) === 'konsultan teknis'
+                || str_contains(strtolower((string) ($user->status_pengguna ?? '')), 'konsultan')
+                || str_contains(strtolower((string) ($user->daftar_sebagai ?? '')), 'konsultan');
+
+            if ($isKonsultanTeknis && $consultation->user_id !== $user->id) {
+                $consultation->update(['assigned_to' => $user->id]);
+                \Log::info('Auto-assigned teknis consultation', [
+                    'consultation_id' => $consultation->id,
+                    'assigned_to' => $user->id,
+                ]);
+            }
+        }
 
         $chatMessage = ChatMessage::create([
             'consultation_id' => $consultationId,
@@ -168,12 +199,81 @@ class ChatController extends Controller
 
     private function canAccess($user, Consultation $consultation): bool
     {
+        // Log untuk debug
+        \Log::info('Checking chat access', [
+            'user_id' => $user->id,
+            'user_status' => $user->status_pengguna,
+            'user_daftar_sebagai' => $user->daftar_sebagai ?? null,
+            'consultation_id' => $consultation->id,
+            'consultation_type' => $consultation->type,
+            'consultation_user_id' => $consultation->user_id,
+            'consultation_assigned_to' => $consultation->assigned_to,
+        ]);
+
+        // Admin bisa akses semua
         if ($user->status_pengguna === 'Admin') {
+            \Log::info('Access granted: Admin');
             return true;
         }
 
-        return $consultation->user_id === $user->id
-            || $consultation->psikolog_id === $user->id;
+        // User pemilik konsultasi selalu bisa akses
+        if ($consultation->user_id === $user->id) {
+            \Log::info('Access granted: Owner');
+            return true;
+        }
+
+        // Konsultasi psikolog: psikolog yang ditugaskan bisa akses
+        if ($consultation->type === 'psikolog' || $consultation->psikolog_id) {
+            $granted = $consultation->psikolog_id === $user->id;
+            \Log::info('Psikolog access check', ['granted' => $granted]);
+            return $granted;
+        }
+
+        // Konsultasi teknis: konsultan teknis bisa akses
+        if ($consultation->type === 'teknis') {
+            // Cek apakah user adalah konsultan teknis (case insensitive)
+            $statusPengguna = strtolower((string) ($user->status_pengguna ?? ''));
+            $daftarSebagai = strtolower((string) ($user->daftar_sebagai ?? ''));
+
+            $isKonsultanTeknis = $statusPengguna === 'konsultan teknis'
+                || $daftarSebagai === 'konsultan teknis'
+                || str_contains($statusPengguna, 'konsultan')
+                || str_contains($daftarSebagai, 'konsultan');
+
+            \Log::info('Konsultan teknis check', [
+                'isKonsultanTeknis' => $isKonsultanTeknis,
+                'statusPengguna' => $statusPengguna,
+                'daftarSebagai' => $daftarSebagai,
+            ]);
+
+            // Konsultan teknis bisa akses konsultasi teknis yang:
+            // 1. Belum diassign (unassigned)
+            // 2. Sudah diassign ke mereka
+            // 3. Sudah ada chat message dari mereka sebelumnya
+            if ($isKonsultanTeknis) {
+                // Cek apakah sudah pernah chat di konsultasi ini
+                $hasReplied = ChatMessage::where('consultation_id', $consultation->id)
+                    ->where('user_id', $user->id)
+                    ->exists();
+
+                $isUnassigned = is_null($consultation->assigned_to);
+                $isAssignedToMe = $consultation->assigned_to === $user->id;
+
+                $granted = $isUnassigned || $isAssignedToMe || $hasReplied;
+
+                \Log::info('Access check result', [
+                    'isUnassigned' => $isUnassigned,
+                    'isAssignedToMe' => $isAssignedToMe,
+                    'hasReplied' => $hasReplied,
+                    'granted' => $granted,
+                ]);
+
+                return $granted;
+            }
+        }
+
+        \Log::info('Access denied');
+        return false;
     }
 
     private function formatMessage(ChatMessage $msg): array

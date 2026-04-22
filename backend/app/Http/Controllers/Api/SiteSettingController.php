@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SiteSettingController extends Controller
 {
-    private const ALLOWED_KEYS = ['konsultasi_image', 'produk_image', 'produk_image_1', 'produk_image_2', 'produk_image_3', 'produk_image_4'];
+    private const ALLOWED_KEYS = ['konsultasi_image', 'produk_image', 'produk_image_1', 'produk_image_2', 'produk_image_3', 'produk_image_4', 'login_logo_kemenkumham', 'login_logo_ditjen', 'home_logo'];
 
     private function isAdmin($user): bool
     {
@@ -228,6 +228,99 @@ class SiteSettingController extends Controller
             ]);
             return response()->json([
                 'message' => 'Error updating produk images: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /** POST /api/admin/logos — admin, upload logo images for login and home */
+    public function updateLogos(Request $request)
+    {
+        try {
+            if (!$this->isAdmin($request->user())) {
+                return response()->json(['error' => 'Forbidden'], 403);
+            }
+
+            $request->validate([
+                'login_logo_kemenkumham' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'login_logo_ditjen' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'home_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+
+            $updatedLogos = [];
+            $logoKeys = ['login_logo_kemenkumham', 'login_logo_ditjen', 'home_logo'];
+
+            // Ensure images directory exists
+            $imagesPath = public_path('images');
+            if (!file_exists($imagesPath)) {
+                mkdir($imagesPath, 0755, true);
+                \Log::info('Created images directory', ['path' => $imagesPath]);
+            }
+
+            foreach ($logoKeys as $key) {
+                if ($request->hasFile($key)) {
+                    $image = $request->file($key);
+                    
+                    \Log::info('Processing logo', [
+                        'key' => $key,
+                        'original_name' => $image->getClientOriginalName(),
+                        'size' => $image->getSize(),
+                        'mime_type' => $image->getMimeType()
+                    ]);
+                    
+                    $imageName = time() . "_{$key}." . $image->getClientOriginalExtension();
+                    
+                    // Hapus gambar lama jika ada
+                    $oldSetting = SiteSetting::where('key', $key)->first();
+                    if ($oldSetting && $oldSetting->value) {
+                        $oldImagePath = public_path($oldSetting->value);
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                            \Log::info('Deleted old logo', ['path' => $oldImagePath]);
+                        }
+                    }
+
+                    // Simpan gambar baru
+                    $image->move($imagesPath, $imageName);
+                    \Log::info('Saved new logo', ['path' => $imagesPath . '/' . $imageName]);
+
+                    // Simpan ke database
+                    SiteSetting::updateOrCreate(
+                        ['key' => $key],
+                        ['value' => 'images/' . $imageName]
+                    );
+
+                    $updatedLogos[$key] = [
+                        'url' => 'images/' . $imageName,
+                        'full_url' => asset('images/' . $imageName)
+                    ];
+                    
+                    \Log::info('Updated logo record', ['key' => $key, 'url' => 'images/' . $imageName]);
+                }
+            }
+
+            \Log::info('Logos update completed', ['updated_count' => count($updatedLogos)]);
+
+            return response()->json([
+                'message' => 'Logo berhasil diperbarui.',
+                'updated_logos' => $updatedLogos
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed for logos', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error updating logos', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Error updating logos: ' . $e->getMessage()
             ], 500);
         }
     }

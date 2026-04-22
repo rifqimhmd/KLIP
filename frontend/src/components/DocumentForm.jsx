@@ -23,6 +23,7 @@ export default function DocumentForm({ onSuccess, onCancel }) {
       { id: "pp", label: "Peraturan Pemerintah (PP)" },
       { id: "perpres", label: "Peraturan Presiden (Perpres)" },
       { id: "permen", label: "Peraturan Menteri (Permen)" },
+      { id: "peraturan-lainnya", label: "Peraturan Lainnya" },
     ],
     ebook: [
       { id: "sop", label: "Standar Operasional Prosedur (SOP)" },

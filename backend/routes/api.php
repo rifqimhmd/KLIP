@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\SurveyController;
+use App\Http\Controllers\Api\KasubditController;
+use App\Http\Controllers\Api\PengaduanController;
 use App\Http\Controllers\AuthWebController;
 use App\Http\Controllers\Admin\UserApprovalController;
 
@@ -33,6 +35,13 @@ Route::get('/site-settings', [SiteSettingController::class, 'index']);
 // Public survey endpoint
 Route::post('/survey', [SurveyController::class, 'store']);
 
+// Public kasubdit info
+Route::get('/kasubdit', [KasubditController::class, 'getInfo']);
+
+// Admin kasubdit photo upload
+Route::post('/kasubdit/{id}/upload-photo', [KasubditController::class, 'uploadPhoto'])
+    ->middleware(['auth:sanctum', \App\Http\Middleware\AdminMiddleware::class]);
+
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthWebController::class, 'logout']);
@@ -53,7 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Consultation management
     Route::get('/consultations', [ConsultationController::class, 'index']); // Get user's consultations
-    Route::get('/consultations/psychologists', [ConsultationController::class, 'psychologists']); // Get available psychologist profiles
+    Route::get('/psychologists', [ConsultationController::class, 'psychologists']); // Get available psychologist profiles
+    Route::get('/consultations/psychologists', [ConsultationController::class, 'psychologists']); // Get available psychologist profiles (alias)
     Route::get('/consultations/assistants', [ConsultationController::class, 'assistants']); // Psikolog fetches asisten list
     Route::get('/consultations/admin/pending', [ConsultationController::class, 'pending']); // Get pending consultations (psikolog/admin)
     Route::get('/consultations/export/pdf', [ConsultationController::class, 'exportPdf']);
@@ -62,9 +72,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/consultations', [ConsultationController::class, 'store']); // Create consultation
     Route::get('/consultations/{id}', [ConsultationController::class, 'show']); // Get specific consultation
     Route::put('/consultations/{id}', [ConsultationController::class, 'update']); // Update consultation (psikolog/admin)
+    Route::put('/consultations/{id}/teknis', [ConsultationController::class, 'updateTeknis']); // Update teknis consultation (konsultan teknis)
     Route::post('/consultations/{id}/complete', [ConsultationController::class, 'markCompleted']); // User marks needs_referral as completed
     Route::post('/consultations/{id}/assign', [ConsultationController::class, 'assignToAssistant']); // Psikolog assigns to asisten
     Route::delete('/consultations/{id}', [ConsultationController::class, 'destroy']); // Delete consultation
+
+    // Admin consultations management
+    Route::get('/admin/consultations', [ConsultationController::class, 'adminIndex'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+
+    // Admin documents management
+    Route::get('/admin/documents', [DocumentController::class, 'adminIndex'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+    Route::post('/admin/documents', [DocumentController::class, 'store'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+    Route::post('/admin/documents/{id}', [DocumentController::class, 'update'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+    Route::delete('/admin/documents/{id}', [DocumentController::class, 'destroy'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
 
     // Admin user management
     Route::get('/admin/users', [AdminUserController::class, 'index'])
@@ -74,6 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/users/{id}', [AdminUserController::class, 'update'])
         ->middleware(\App\Http\Middleware\AdminMiddleware::class);
     Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+    Route::post('/admin/users/{id}/update-foto', [AdminUserController::class, 'updateFoto'])
         ->middleware(\App\Http\Middleware\AdminMiddleware::class);
 
     // User approval management
@@ -103,6 +130,8 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware(\App\Http\Middleware\AdminMiddleware::class);
     Route::post('/admin/produk-images', [SiteSettingController::class, 'updateProdukImages'])
         ->middleware(\App\Http\Middleware\AdminMiddleware::class);
+    Route::post('/admin/logos', [SiteSettingController::class, 'updateLogos'])
+        ->middleware(\App\Http\Middleware\AdminMiddleware::class);
 
     // Admin survey management
     Route::get('/admin/surveys', [SurveyController::class, 'index'])
@@ -117,6 +146,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/chat/{consultationId}/end', [ChatController::class, 'endChat']);
     Route::delete('/chat/{consultationId}/messages', [ChatController::class, 'destroyAllMessages']);
     Route::delete('/chat/{consultationId}/messages/{messageId}', [ChatController::class, 'destroyMessage']);
+
+    // Pengaduan routes
+    Route::get('/pengaduan', [PengaduanController::class, 'index']);
+    Route::post('/pengaduan', [PengaduanController::class, 'store']);
+    Route::get('/pengaduan/{id}', [PengaduanController::class, 'show']);
+    
+    // Admin pengaduan routes
+    Route::get('/admin/pengaduan', [PengaduanController::class, 'adminIndex']);
+    Route::put('/admin/pengaduan/{id}/status', [PengaduanController::class, 'updateStatus']);
 });
 
 // Simple example public endpoint

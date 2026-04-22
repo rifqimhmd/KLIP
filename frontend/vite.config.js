@@ -19,5 +19,20 @@ export default defineConfig({
         );
       },
     },
-  ]
+  ],
+  server: {
+    headers: {
+      'Permissions-Policy': 'compute-pressure=()',
+    },
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+      "/storage": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
+    },
+  },
 });

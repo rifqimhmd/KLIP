@@ -178,6 +178,10 @@ export default function PustakaDokumenDynamic() {
   };
 
   const openPdf = async (fileUrl) => {
+    if (!fileUrl) {
+      alert("Maaf, file dokumen ini tidak tersedia.");
+      return;
+    }
     // External URLs (Google Drive, etc.) — open directly to avoid CORS
     if (fileUrl.startsWith("http")) {
       window.open(fileUrl, "_blank", "noopener,noreferrer");
@@ -226,6 +230,7 @@ export default function PustakaDokumenDynamic() {
     { id: "pp", title: "Peraturan Pemerintah (PP)" },
     { id: "perpres", title: "Peraturan Presiden (Perpres)" },
     { id: "permen", title: "Peraturan Menteri (Permen)" },
+    { id: "peraturan-lainnya", title: "Peraturan Lainnya" },
   ];
 
   if (loading) {
@@ -369,19 +374,23 @@ export default function PustakaDokumenDynamic() {
                               className="border-t border-gray-100"
                             >
                               <div className="flex items-center gap-3 sm:gap-4 px-8 sm:px-10 lg:px-12 py-3">
-                                {item.file && (
+                                {item.file ? (
                                   <button
                                     onClick={() => openPdf(item.file)}
                                     className="w-full flex items-center gap-3 hover:bg-blue-50 
                                       transition-all duration-200 group -mx-3 px-3 py-2 rounded"
                                   >
-                                    {item.cover && (
+                                    {item.cover ? (
                                       <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
                                         <img
                                           src={item.cover}
                                           alt={item.title}
                                           className="w-full h-full object-cover"
                                         />
+                                      </div>
+                                    ) : (
+                                      <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0 bg-blue-50 border border-blue-200 flex flex-col items-center justify-center">
+                                        <span className="text-[10px] font-bold text-blue-600">PDF</span>
                                       </div>
                                     )}
                                     <span className="flex-1 text-left text-gray-700 text-xs sm:text-sm lg:text-base group-hover:text-blue-600 transition-colors">
@@ -401,6 +410,26 @@ export default function PustakaDokumenDynamic() {
                                       />
                                     </svg>
                                   </button>
+                                ) : (
+                                  <div className="w-full flex items-center gap-3 -mx-3 px-3 py-2 rounded opacity-70">
+                                    {item.cover ? (
+                                      <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
+                                        <img
+                                          src={item.cover}
+                                          alt={item.title}
+                                          className="w-full h-full object-cover grayscale opacity-80"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0 bg-gray-100 border border-gray-200 flex flex-col items-center justify-center opacity-80">
+                                        <span className="text-[10px] font-bold text-gray-400">PDF</span>
+                                      </div>
+                                    )}
+                                    <span className="flex-1 text-left text-gray-700 text-xs sm:text-sm lg:text-base">
+                                      {item.title}
+                                      <span className="ml-2 text-xs text-red-500 font-medium italic">(File tidak tersedia)</span>
+                                    </span>
+                                  </div>
                                 )}
                                 {item.status === "draft" && (
                                   <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full ml-2">
@@ -574,15 +603,19 @@ export default function PustakaDokumenDynamic() {
                               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-50
                                 transition-colors duration-200 group rounded-lg text-left"
                             >
-                              {item.cover && (
-                                <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
-                                  <img
-                                    src={item.cover}
-                                    alt={item.title}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
+                                {item.cover ? (
+                                  <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0">
+                                    <img
+                                      src={item.cover}
+                                      alt={item.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="w-8 h-11 rounded overflow-hidden shadow-sm flex-shrink-0 bg-blue-50 border border-blue-200 flex flex-col items-center justify-center">
+                                    <span className="text-[10px] font-bold text-blue-600">PDF</span>
+                                  </div>
+                                )}
                               <svg
                                 className="w-5 h-5 text-red-500 flex-shrink-0"
                                 fill="none"

@@ -17,7 +17,7 @@ export default function TestRegister() {
       password_confirmation: 'Password123',
       pangkat_golongan: 'Test Pangkat',
       jabatan: 'Test Jabatan',
-      bagian: 'Test Bagian',
+      instansi: 'Test Instansi',
       no_wa: '081234567894',
       daftar_sebagai: 'UPT',
       organization_detail: 'Test Organization',

@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import api from '../lib/axios';
-import { Eye, EyeOff, Lock, User, ArrowRight, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, ArrowRight, CheckCircle, MessageCircle, Settings } from 'lucide-react';
 
 export default function Login() {
   const [nip, setNip] = useState('');
@@ -9,7 +9,31 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [logos, setLogos] = useState({
+    home_logo: null,
+    login_logo_kemenkumham: null,
+    login_logo_ditjen: null
+  });
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  // Fetch logos from site-settings
+  useEffect(() => {
+    const fetchLogos = async () => {
+      try {
+        const res = await api.get("/site-settings");
+        setLogos({
+          home_logo: res.data?.home_logo || null,
+          login_logo_kemenkumham: res.data?.login_logo_kemenkumham || null,
+          login_logo_ditjen: res.data?.login_logo_ditjen || null
+        });
+      } catch (err) {
+        console.error("Failed to fetch logos:", err);
+      }
+    };
+    fetchLogos();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,22 +60,19 @@ export default function Login() {
 
       // On success redirect based on user role
       const role = currentUser?.status_pengguna || currentUser?.daftar_sebagai || response?.data?.user?.status_pengguna || response?.data?.user?.daftar_sebagai;
-      
+
       // Normalize role to consistent format - preserve actual role
-      const normalizedRole = role ? 
-        (role.toLowerCase() === 'admin' ? 'Admin' : 
-         role.toLowerCase() === 'psikolog' ? 'Psikolog' : 
-         role.toLowerCase() === 'asisten psikolog' ? 'Asisten Psikolog' : 
-         'User') : 'User';
-      
+      const normalizedRole = role ?
+        (role.toLowerCase() === 'admin' ? 'Admin' :
+          role.toLowerCase() === 'psikolog' ? 'Psikolog' :
+            role.toLowerCase() === 'asisten psikolog' ? 'Asisten Psikolog' :
+              'User') : 'User';
+
       localStorage.setItem('auth_user_role', normalizedRole);
       localStorage.setItem('auth_user_data', JSON.stringify(currentUser || response?.data?.user));
-      
-      if (normalizedRole === 'Admin') {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+
+      const defaultPath = normalizedRole === 'Admin' ? '/admin/dashboard' : '/dashboard';
+      navigate(from !== '/dashboard' ? from : defaultPath, { replace: true });
     } catch (err) {
       const backendMessage =
         err?.response?.data?.errors?.nip?.[0] ||
@@ -74,21 +95,25 @@ export default function Login() {
 
         {/* Logo */}
         <Link to="/" className="relative z-10 flex items-center gap-3">
-          <img src="/Logo.png" alt="KLIP Logo" className="h-10 w-auto drop-shadow-md" />
+          <img 
+            src={logos.home_logo || "/Logo.png"} 
+            alt="KLIP Logo" 
+            className="h-10 w-auto drop-shadow-md" 
+          />
         </Link>
 
         {/* Center content */}
         <div className="relative z-10 space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
-            Selamat Datang<br />di Patnal Integrty Hub
+            Selamat Datang<br />di Patnal Integrity Hub
           </h1>
           <p className="text-blue-100 text-lg leading-relaxed">
-            Klinik Psikologi Ditjen Pemasyarakatan — platform konsultasi dan layanan psikologi digital untuk pegawai pemasyarakatan.
+            Platform konsultasi psikologi dan teknis kepatuhan internal digital untuk pegawai pemasyarakatan.
           </p>
           <div className="space-y-3">
             {[
-              'Konsultasi dengan Psikolog',
-              'Layanan Psikologi Terpercaya',
+              'Konsultasi Psikologi & Teknis',
+              'Layanan Psikologi & Teknis Terpercaya',
               'Data Aman & Terjamin',
             ].map((item) => (
               <div key={item} className="flex items-center gap-2 text-blue-100">
@@ -99,9 +124,28 @@ export default function Login() {
           </div>
         </div>
 
-        <p className="relative z-10 text-blue-200 text-xs">
-          © {new Date().getFullYear()} Ditjen Pemasyarakatan
-        </p>
+        {/* Logos */}
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-4">
+            {logos.login_logo_kemenkumham && (
+              <img 
+                src={logos.login_logo_kemenkumham} 
+                alt="Kementerian Imigrasi dan Pemasyarakatan" 
+                className="h-16 w-auto drop-shadow-md"
+              />
+            )}
+            {logos.login_logo_ditjen && (
+              <img 
+                src={logos.login_logo_ditjen} 
+                alt="Direktorat Jenderal Pemasyarakatan" 
+                className="h-14 w-auto drop-shadow-md"
+              />
+            )}
+          </div>
+          <p className="text-blue-200 text-xs">
+            © {new Date().getFullYear()} Kementerian Imigrasi dan Pemasyarakatan - Direktorat Jenderal Pemasyarakatan
+          </p>
+        </div>
       </div>
 
       {/* Right Panel — Form */}
@@ -214,13 +258,37 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-gray-100 text-center">
-              <p className="text-sm text-gray-500">
-                Belum punya akun?{' '}
-                <a href="/register" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline">
-                  Daftar sekarang
-                </a>
-              </p>
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              {/* Quick Access - Konsultasi */}
+              <div className="mb-6 text-center">
+                <p className="text-xs text-gray-500 mb-3">Akses Cepat Konsultasi</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <a
+                    href="/consultation-psikolog"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-sm font-medium rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-sm hover:shadow-purple-200"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Konsultasi Psikolog
+                  </a>
+                  <a
+                    href="/consultation-teknis"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-sm hover:shadow-blue-200"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Konsultasi Teknis
+                  </a>
+                </div>
+              </div>
+
+              {/* Register Link */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500">
+                  Belum punya akun?{' '}
+                  <a href="/register" className="text-blue-600 font-semibold hover:text-blue-700 hover:underline">
+                    Daftar sekarang
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>

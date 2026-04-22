@@ -15,8 +15,35 @@ import {
   RefreshCw,
   Star,
   TrendingUp,
+  LogOut,
+  Plus,
+  CheckCircle,
+  Shield,
 } from "lucide-react";
 import api from "../services/api";
+import Logo from "../components/Logo";
+
+const categoryOptions = {
+  peraturan: [
+    { id: "uu-perppu", label: "UU / Perppu" },
+    { id: "pp", label: "Peraturan Pemerintah (PP)" },
+    { id: "perpres", label: "Peraturan Presiden (Perpres)" },
+    { id: "permen", label: "Peraturan Menteri (Permen)" },
+    { id: "peraturan-lainnya", label: "Peraturan Lainnya" },
+  ],
+  ebook: [
+    { id: "sop", label: "Standar Operasional Prosedur (SOP)" },
+    { id: "panduan", label: "Panduan & Petunjuk" },
+    { id: "modul", label: "Modul Pembelajaran" },
+    { id: "lainnya", label: "Lainnya" },
+  ],
+  edukasi: [
+    { id: "video-training", label: "Video Training" },
+    { id: "video-tutorial", label: "Video Tutorial" },
+    { id: "webinar", label: "Webinar" },
+    { id: "lainnya", label: "Lainnya" },
+  ],
+};
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -25,11 +52,9 @@ export default function AdminDashboard() {
     nip: "",
     email: "",
     no_wa: "",
+    instansi: "",
     pangkat_golongan: "",
     jabatan: "",
-    unit_kerja: "",
-    eselon: "",
-    instansi: "",
     daftar_sebagai: "User",
     organization_detail: "",
     password: "",
@@ -60,6 +85,7 @@ export default function AdminDashboard() {
   const [bannerFile, setBannerFile] = useState(null);
   const [bannerSubmitting, setBannerSubmitting] = useState(false);
   const [bannerError, setBannerError] = useState("");
+  const [bannerFormOpen, setBannerFormOpen] = useState(false);
   const [siteImages, setSiteImages] = useState({ konsultasi_image: null, produk_image: null });
   const [siteImageUploading, setSiteImageUploading] = useState({});
   const [siteImageError, setSiteImageError] = useState("");
@@ -67,6 +93,19 @@ export default function AdminDashboard() {
   const [produkImageUploading, setProdukImageUploading] = useState({});
   const [produkImageError, setProdukImageError] = useState("");
   const [produkImageFiles, setProdukImageFiles] = useState({});
+  const [kasubditPhotos, setKasubditPhotos] = useState({});
+  const [kasubditPhotoUploading, setKasubditPhotoUploading] = useState({});
+  const [kasubditPhotoError, setKasubditPhotoError] = useState("");
+  const [logos, setLogos] = useState({
+    login_logo_kemenkumham: null,
+    login_logo_ditjen: null,
+    home_logo: null
+  });
+  const [logoUploading, setLogoUploading] = useState({});
+  const [logoError, setLogoError] = useState("");
+  const [psychologistPhotos, setPsychologistPhotos] = useState({});
+  const [psychologistPhotoUploading, setPsychologistPhotoUploading] = useState({});
+  const [psychologistPhotoError, setPsychologistPhotoError] = useState("");
 
   useEffect(() => {
     document.title = "Dashboard - KLIP";
@@ -87,6 +126,20 @@ export default function AdminDashboard() {
       setView(newView);
       setIsTransitioning(false);
     }, 100);
+  };
+
+  const handleLogout = async () => {
+    if (!confirm("Yakin ingin logout?")) return;
+    
+    try {
+      await api.post("/logout");
+    } catch (err) {
+      void err;
+    } finally {
+      localStorage.removeItem("auth_token");
+      delete api.defaults.headers.common["Authorization"];
+      navigate("/login");
+    }
   };
 
   const checkAdmin = async () => {
@@ -122,6 +175,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchBanners = async () => {
+    try {
+      const res = await api.get("/admin/banners");
+      setBanners(res.data?.banners || []);
+    } catch (err) {
+      console.error("Failed to fetch banners:", err);
+      setBannerError("Gagal memuat data banner.");
+    }
+  };
+
   const fetchAdminData = async () => {
     setDataLoading(true);
     try {
@@ -142,6 +205,12 @@ export default function AdminDashboard() {
       setSiteImages({
         konsultasi_image: siteData.konsultasi_image || null,
         produk_image: siteData.produk_image || null
+      });
+      
+      setLogos({
+        login_logo_kemenkumham: siteData.login_logo_kemenkumham || null,
+        login_logo_ditjen: siteData.login_logo_ditjen || null,
+        home_logo: siteData.home_logo || null
       });
       
       setProdukImages({
@@ -191,22 +260,20 @@ export default function AdminDashboard() {
   };
 
   const openEditUser = (user) => {
+    setEditingUserId(user.id);
     setUserForm({
-      name: user.name || "",
+      name: user.name,
       nip: user.nip || "",
-      email: user.email || "",
+      email: user.email,
       no_wa: user.no_wa || "",
+      instansi: user.instansi || "",
       pangkat_golongan: user.pangkat_golongan || "",
       jabatan: user.jabatan || "",
-      unit_kerja: user.unit_kerja || "",
-      eselon: user.eselon || "",
-      instansi: user.instansi || "",
       daftar_sebagai: user.daftar_sebagai || "User",
       organization_detail: user.organization_detail || "",
       password: "",
       password_confirmation: "",
     });
-    setEditingUserId(user.id);
     setUserFormOpen(true);
   };
 
@@ -221,9 +288,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleApproveUser = async (userId) => {
+    if (!confirm("Yakin ingin approve user ini?")) return;
+    
+    try {
+      await api.post(`/admin/users/${userId}/approve`);
+      await fetchAdminData();
+      alert("User berhasil diapprove!");
+    } catch (error) {
+      alert("Gagal approve user: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleRejectUser = async (userId) => {
+    const reason = prompt("Masukkan alasan penolakan:");
+    if (!reason) return;
+    
+    try {
+      await api.post(`/admin/users/${userId}/reject`, { rejection_reason: reason });
+      await fetchAdminData();
+      alert("User berhasil direject!");
+    } catch (error) {
+      alert("Gagal reject user: " + (error.response?.data?.message || error.message));
+    }
+  };
+
   const handleDocFormChange = (e) => {
     const { name, value } = e.target;
-    setDocForm(prev => ({ ...prev, [name]: value }));
+    setDocForm(prev => {
+      const newForm = { ...prev, [name]: value };
+      if (name === "category") {
+        newForm.sub_category = "";
+      }
+      return newForm;
+    });
   };
 
   const handleDocSubmit = async (e) => {
@@ -231,12 +329,36 @@ export default function AdminDashboard() {
     setDocSubmitting(true);
     setDocError("");
 
+    if ((docForm.type === "pdf" || docForm.type === "ebook" || docForm.type === "other") && !docUploadFile && !editingDocId) {
+      setDocError("Mohon unggah file dokumen terlebih dahulu.");
+      setDocSubmitting(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
-      if (docUploadFile) {
-        formData.append("file", docUploadFile);
+      if (docForm.type === "video") {
+        let finalUrl = docForm.url;
+        if (finalUrl && finalUrl.includes("youtube.com/watch?v=")) {
+          try {
+            const videoId = new URL(finalUrl).searchParams.get("v");
+            if (videoId) finalUrl = `https://www.youtube.com/embed/${videoId}`;
+          } catch (e) {}
+        } else if (finalUrl && finalUrl.includes("youtu.be/")) {
+          const videoId = finalUrl.split("youtu.be/")[1]?.split("?")[0];
+          if (videoId) finalUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+        formData.append("video_url", finalUrl);
       } else {
-        formData.append("url", docForm.url);
+        if (docUploadFile) {
+          formData.append("file", docUploadFile);
+          formData.append("file_type", "upload");
+        } else if (docForm.url) {
+          formData.append("file", docForm.url);
+          formData.append("file_type", "url");
+        } else {
+          formData.append("file", "");
+        }
       }
       formData.append("title", docForm.title);
       formData.append("category", docForm.category);
@@ -244,9 +366,13 @@ export default function AdminDashboard() {
       formData.append("type", docForm.type);
 
       if (editingDocId) {
-        await api.post(`/admin/documents/${editingDocId}`, formData);
+        await api.post(`/admin/documents/${editingDocId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await api.post("/admin/documents", formData);
+        await api.post("/admin/documents", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
       
       await fetchAdminData();
@@ -338,17 +464,6 @@ export default function AdminDashboard() {
     setBannerFormOpen(true);
   };
 
-  const handleDeleteBanner = async (bannerId) => {
-    if (!confirm("Yakin ingin menghapus banner ini?")) return;
-    
-    try {
-      await api.delete(`/admin/banners/${bannerId}`);
-      await fetchAdminData();
-    } catch (error) {
-      alert("Gagal menghapus banner");
-    }
-  };
-
   const handleSiteImageUpload = async (key, file) => {
     if (!file) return;
     setSiteImageUploading((prev) => ({ ...prev, [key]: true }));
@@ -420,21 +535,183 @@ export default function AdminDashboard() {
     }
   };
 
+  // Handle Kasubdit Photo Upload
+  const handleKasubditPhotoFileChange = (id, file) => {
+    setKasubditPhotos(prev => ({ ...prev, [id]: file }));
+  };
+
+  const handleKasubditPhotoUpload = async (id) => {
+    const file = kasubditPhotos[id];
+    if (!file) {
+      alert('Pilih foto terlebih dahulu');
+      return;
+    }
+
+    setKasubditPhotoUploading(prev => ({ ...prev, [id]: true }));
+    setKasubditPhotoError("");
+
+    try {
+      const fd = new FormData();
+      fd.append('photo', file);
+
+      const res = await api.post(`/kasubdit/${id}/upload-photo`, fd);
+
+      alert('Foto berhasil diupload!');
+      setKasubditPhotos(prev => ({ ...prev, [id]: null }));
+    } catch (err) {
+      console.error('Upload error:', err);
+      const errorMessage = err.response?.data?.message || 
+                        err.response?.data?.error || 
+                        "Gagal mengupload foto.";
+      setKasubditPhotoError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setKasubditPhotoUploading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Handle Psychologist Photo Upload
+  const handlePsychologistPhotoFileChange = (id, file) => {
+    setPsychologistPhotos(prev => ({ ...prev, [id]: file }));
+  };
+
+  const handlePsychologistPhotoUpload = async (id) => {
+    const file = psychologistPhotos[id];
+    if (!file) {
+      alert('Pilih foto terlebih dahulu');
+      return;
+    }
+
+    setPsychologistPhotoUploading(prev => ({ ...prev, [id]: true }));
+    setPsychologistPhotoError("");
+
+    try {
+      const fd = new FormData();
+      fd.append('foto', file);
+
+      await api.post(`/admin/users/${id}/update-foto`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      alert('Foto psikolog berhasil diupload!');
+      setPsychologistPhotos(prev => ({ ...prev, [id]: null }));
+      fetchAdminData(); // Refresh user list to get updated photo URLs
+    } catch (err) {
+      console.error('Upload error:', err);
+      const errorMessage = err.response?.data?.message || 
+                        err.response?.data?.error || 
+                        "Gagal mengupload foto.";
+      setPsychologistPhotoError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setPsychologistPhotoUploading(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // Handle Banner Upload
+  const handleBannerUpload = async (order, file) => {
+    if (!file) return;
+    setBannerSubmitting(true);
+    setBannerError("");
+
+    try {
+      const fd = new FormData();
+      fd.append("image", file);
+      fd.append("order", order);
+
+      const res = await api.post("/admin/banners", fd);
+
+      alert(`Banner ${order} berhasil diupload!`);
+      fetchBanners();
+    } catch (err) {
+      console.error("Banner upload error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Gagal mengupload banner.";
+      setBannerError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setBannerSubmitting(false);
+    }
+  };
+
+  // Handle Toggle Banner Active
+  const handleToggleBannerActive = async (id, isActive) => {
+    try {
+      await api.put(`/admin/banners/${id}`, { is_active: isActive });
+      fetchBanners();
+      alert(`Banner ${isActive ? "diaktifkan" : "dinonaktifkan"}!`);
+    } catch (err) {
+      console.error("Toggle banner error:", err);
+      alert("Gagal mengubah status banner.");
+    }
+  };
+
+  // Handle Delete Banner
+  const handleDeleteBanner = async (id) => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus banner ini?")) {
+      return;
+    }
+
+    try {
+      await api.delete(`/admin/banners/${id}`);
+      fetchBanners();
+      alert("Banner berhasil dihapus!");
+    } catch (err) {
+      console.error("Delete banner error:", err);
+      alert("Gagal menghapus banner.");
+    }
+  };
+
+  // Handle Logo Upload
+  const handleLogoUpload = async (logoKey, file) => {
+    if (!file) return;
+    
+    setLogoUploading({ ...logoUploading, [logoKey]: true });
+    setLogoError("");
+
+    try {
+      const fd = new FormData();
+      fd.append(logoKey, file);
+
+      const res = await api.post("/admin/logos", fd);
+      
+      alert("Logo berhasil diupload!");
+      fetchAdminData();
+    } catch (err) {
+      console.error("Logo upload error:", err);
+      const errorMessage = err.response?.data?.message || "Gagal mengupload logo.";
+      setLogoError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setLogoUploading({ ...logoUploading, [logoKey]: false });
+    }
+  };
+
+  const kasubditPersons = [
+    { id: 1, name: 'LILIK SUJANDI, Bc.IP., S.IP., M.Si', position: 'Direktur Kepatuhan Internal' },
+    { id: 2, name: 'ERIES SUGIANTO, A.Md.IP., S.H., M.Si.', position: 'Subdirektorat Pencegahan dan Pengendalian' },
+    { id: 3, name: 'RIKO PURNAMA CANDRA, A.Md.IP., S.H', position: 'Subdirektorat Fasilitasi Advokasi dan Investigasi Internal' },
+    { id: 4, name: 'ERWAN PRASETYO, A.Md.IP., S.H., M.H.', position: 'Ketua Kelompok Kerja Edukasi Pencegahan Korupsi dan Pengendalian Gratifikasi' },
+    { id: 5, name: 'IDAM WAHJU KUNTJORO, A.Md.IP, SH, MH', position: 'Ketua Kelompok Kerja Pemantauan Kinerja dan Zona Integritas' },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-lg h-screen sticky top-0 border-r border-gray-200">
+        <aside className="w-64 flex-shrink-0 bg-white shadow-lg h-screen sticky top-0 border-r border-gray-200 z-10">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <LayoutGrid className="w-6 h-6 text-white" />
+            <button 
+              onClick={() => handleViewChange("menu")}
+              className="flex flex-col items-start gap-2 mb-8 text-left hover:opacity-80 transition-opacity w-full outline-none overflow-hidden"
+            >
+              <Logo className="h-10 max-w-full" alt="Logo Patnal" />
+              <div className="w-full">
+                <h1 className="font-bold text-gray-800 text-sm truncate">Admin Panel</h1>
               </div>
-              <div>
-                <h1 className="font-bold text-gray-800">Admin Panel</h1>
-                <p className="text-xs text-gray-500">Patnal Integrity Hub</p>
-              </div>
-            </div>
+            </button>
             <nav className="pb-2">
               <a href="/admin/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-blue-700 bg-blue-50 font-semibold border-l-4 border-blue-600 text-sm">
                 <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
@@ -448,6 +725,10 @@ export default function AdminDashboard() {
                 <Star className="w-4 h-4 flex-shrink-0" />
                 Survey Kepuasan
               </a>
+              <a href="/admin/pengaduan" className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
+                <Shield className="w-4 h-4 flex-shrink-0" />
+                Pengaduan
+              </a>
               <div className="mx-4 my-2 border-t border-gray-100" />
               <a href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-gray-500 hover:bg-gray-50 transition text-sm border-l-4 border-transparent">
                 <ArrowLeft className="w-4 h-4 flex-shrink-0" />
@@ -458,7 +739,7 @@ export default function AdminDashboard() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 min-w-0 space-y-6">
+        <main className="flex-1 min-w-0 p-6 md:p-8 space-y-6">
           {/* Welcome + Refresh */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 p-5 text-white shadow-lg flex-1">
@@ -475,14 +756,23 @@ export default function AdminDashboard() {
                 <p className="text-blue-100 text-xs mt-1">Pusat data master dan monitoring operasional admin.</p>
               </div>
             </div>
-            <button
-              onClick={fetchAdminData}
-              disabled={dataLoading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 shadow-sm text-sm font-medium transition"
-            >
-              <RefreshCw className={`w-4 h-4 ${dataLoading ? "animate-spin" : ""}`} />
-              {dataLoading ? "Memuat..." : "Refresh"}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={fetchAdminData}
+                disabled={dataLoading}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 shadow-sm text-sm font-medium transition"
+              >
+                <RefreshCw className={`w-4 h-4 ${dataLoading ? "animate-spin" : ""}`} />
+                {dataLoading ? "Memuat..." : "Refresh"}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 shadow-sm text-sm font-medium transition"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
           </div>
 
           {view === "menu" && (
@@ -556,22 +846,67 @@ export default function AdminDashboard() {
                 <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center mb-3 group-hover:bg-indigo-600 transition-colors">
                   <Image className="w-5 h-5 text-indigo-600 group-hover:text-white transition-colors" />
                 </div>
-                <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Gambar Produk</p>
-                <p className="text-xs text-gray-500 mb-3">Upload dan atur 4 gambar produk Patnal.</p>
-                <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">4 Images</span>
+                <p className="font-semibold text-gray-800 text-sm mb-1">Gambar Produk</p>
+                <p className="text-xs text-gray-500 mb-3">Upload 4 gambar produk layanan.</p>
+                <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full font-medium">4 Slot</span>
               </button>
 
-              {/* Gambar Halaman */}
+              {/* Kelola Foto Psikolog */}
               <button
-                onClick={() => { fetchAdminData(); handleViewChange("site_images"); }}
+                onClick={() => { fetchAdminData(); handleViewChange("psychologist_photos"); }}
+                className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 p-5 overflow-hidden relative"
+              >
+                <div className="absolute top-0 right-0 w-20 h-20 bg-purple-50 rounded-bl-full opacity-70" />
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center mb-3 group-hover:bg-purple-600 transition-colors">
+                  <Plus className="w-5 h-5 text-purple-600 group-hover:text-white transition-colors" />
+                </div>
+                <p className="font-semibold text-gray-800 text-sm mb-1">Foto Psikolog</p>
+                <p className="text-xs text-gray-500 mb-3">Upload foto profil tim psikolog.</p>
+                <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-medium">
+                  {users.filter(u => (u.status_pengguna || u.daftar_sebagai) === 'Psikolog').length} Psikolog
+                </span>
+              </button>
+
+              {/* Kelola Banner */}
+              <button
+                onClick={() => { fetchBanners(); handleViewChange("banners"); }}
                 className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-pink-200 transition-all duration-200 p-5 overflow-hidden relative"
               >
                 <div className="absolute top-0 right-0 w-20 h-20 bg-pink-50 rounded-bl-full opacity-70" />
                 <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center mb-3 group-hover:bg-pink-600 transition-colors">
                   <Image className="w-5 h-5 text-pink-600 group-hover:text-white transition-colors" />
                 </div>
-                <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Gambar Halaman</p>
-                <p className="text-xs text-gray-500">Ganti gambar ilustrasi pada halaman Beranda.</p>
+                <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Gambar Banner</p>
+                <p className="text-xs text-gray-500 mb-2">Upload dan atur 4 banner pada halaman Beranda.</p>
+                <span className="text-xs bg-pink-50 text-pink-700 border border-pink-200 px-2 py-0.5 rounded-full font-medium">4 Banners</span>
+              </button>
+
+              {/* Kelola Logo */}
+              <button
+                onClick={() => { fetchAdminData(); handleViewChange("logos"); }}
+                className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all duration-200 p-5 overflow-hidden relative"
+              >
+                <div className="absolute top-0 right-0 w-20 h-20 bg-purple-50 rounded-bl-full opacity-70" />
+                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center mb-3 group-hover:bg-purple-600 transition-colors">
+                  <span className="text-lg">🏛️</span>
+                </div>
+                <p className="font-semibold text-gray-800 text-sm mb-1">Kelola Logo</p>
+                <p className="text-xs text-gray-500 mb-2">Upload logo untuk halaman login dan beranda.</p>
+                <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-medium">3 Logos</span>
+              </button>
+
+              {/* Upload Foto Kasubdit */}
+              <button
+                onClick={() => handleViewChange("kasubdit_photos")}
+                className="group text-left bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-cyan-200 transition-all duration-200 p-5 overflow-hidden relative"
+              >
+                <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-50 rounded-bl-full opacity-70" />
+                <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center mb-3 group-hover:bg-cyan-600 transition-colors">
+                  <Users className="w-5 h-5 text-cyan-600 group-hover:text-white transition-colors" />
+                </div>
+                <p className="font-semibold text-gray-800 text-sm mb-1">Upload Foto Kasubdit</p>
+                <p className="text-xs text-gray-500">Upload foto untuk 5 pimpinan Direktorat Kepatuhan Internal.</p>
+                <span className="text-xs bg-cyan-50 text-cyan-700 border border-cyan-200 px-2 py-0.5 rounded-full font-medium">5 Photos</span>
               </button>
             </div>
           )}
@@ -636,6 +971,12 @@ export default function AdminDashboard() {
                   >
                     + Tambah User
                   </button>
+                  <button
+                    onClick={() => handleViewChange("pending_users")}
+                    className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm font-medium"
+                  >
+                    Pending Users
+                  </button>
                   <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
                     <ArrowLeft className="w-4 h-4" /> Kembali
                   </button>
@@ -672,13 +1013,33 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                              user.status_approval === "approved" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                              user.status_approval === "approved" 
+                                ? "bg-green-100 text-green-700" 
+                                : user.status_approval === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
                             }`}>
                               {user.status_approval || "pending"}
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                              {user.status_approval === "pending" && (
+                                <>
+                                  <button
+                                    onClick={() => handleApproveUser(user.id)}
+                                    className="px-3 py-1 text-xs rounded bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleRejectUser(user.id)}
+                                    className="px-3 py-1 text-xs rounded bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200"
+                                  >
+                                    Reject
+                                  </button>
+                                </>
+                              )}
                               <button
                                 onClick={() => openEditUser(user)}
                                 className="px-3 py-1 text-xs rounded bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200"
@@ -759,6 +1120,18 @@ export default function AdminDashboard() {
                             name="no_wa"
                             value={userForm.no_wa}
                             onChange={handleUserFormChange}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Instansi <span className="text-red-500">*</span></label>
+                          <input
+                            type="text"
+                            name="instansi"
+                            value={userForm.instansi || ""}
+                            onChange={handleUserFormChange}
+                            required
+                            placeholder="Masukkan instansi"
                             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
                           />
                         </div>
@@ -871,6 +1244,76 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {view === "pending_users" && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-yellow-500" />
+                  User Pending Approval
+                </h2>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => handleViewChange("users")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                    <ArrowLeft className="w-4 h-4" /> Kembali ke Semua User
+                  </button>
+                </div>
+              </div>
+
+              {users.filter(u => u.status_approval === "pending").length === 0 ? (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center text-gray-600 text-sm">
+                  Tidak ada user yang menunggu approval.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">Nama</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">Email</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">NIP</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">Daftar Sebagai</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">Tanggal Daftar</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.filter(u => u.status_approval === "pending").map((user) => (
+                        <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-800">{user.name}</td>
+                          <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                          <td className="px-4 py-3 text-gray-600">{user.nip}</td>
+                          <td className="px-4 py-3">
+                            <span className="px-2 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700">
+                              {user.daftar_sebagai}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-500 text-xs">
+                            {new Date(user.created_at).toLocaleDateString('id-ID')}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleApproveUser(user.id)}
+                                className="px-3 py-1 text-xs rounded bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleRejectUser(user.id)}
+                                className="px-3 py-1 text-xs rounded bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
           {view === "documents" && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <div className="mb-5 flex items-center justify-between">
@@ -925,9 +1368,37 @@ export default function AdminDashboard() {
                         .filter((d) =>
                           d.title?.toLowerCase().includes(docSearchTerm.toLowerCase())
                         )
-                        .map((doc) => (
+                        .map((doc) => {
+                          // Ekstrak YouTube video ID dari embed URL atau watch URL
+                          const getYtId = (url) => {
+                            if (!url) return null;
+                            const embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+                            if (embedMatch) return embedMatch[1];
+                            try {
+                              const u = new URL(url);
+                              return u.searchParams.get('v') || u.pathname.split('/').pop();
+                            } catch { return null; }
+                          };
+                          const ytId = doc.type === 'video' ? getYtId(doc.video_url || doc.url) : null;
+                          return (
                           <tr key={doc.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="px-4 py-3 font-medium text-gray-800 max-w-xs truncate">{doc.title}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                {ytId ? (
+                                  <div className="relative flex-shrink-0 w-20 h-12 rounded overflow-hidden bg-gray-100 group">
+                                    <img
+                                      src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
+                                      alt={doc.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-50 transition">
+                                      <svg className="w-5 h-5 text-white drop-shadow" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
+                                  </div>
+                                ) : null}
+                                <span className="font-medium text-gray-800 max-w-xs truncate">{doc.title}</span>
+                              </div>
+                            </td>
                             <td className="px-4 py-3 text-gray-600 capitalize">{doc.category}</td>
                             <td className="px-4 py-3 text-gray-600">{doc.sub_category}</td>
                             <td className="px-4 py-3">
@@ -958,7 +1429,8 @@ export default function AdminDashboard() {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1007,8 +1479,10 @@ export default function AdminDashboard() {
                               name="category"
                               value={docForm.category}
                               onChange={handleDocFormChange}
+                              required
                               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             >
+                              <option value="">-- Pilih Kategori --</option>
                               <option value="peraturan">Himpunan Peraturan</option>
                               <option value="ebook">Standar Operasional</option>
                               <option value="edukasi">Edukasi</option>
@@ -1024,8 +1498,11 @@ export default function AdminDashboard() {
                               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             >
                               <option value="">-- Pilih Sub Kategori --</option>
-                              <option value="sub1">Sub Kategori 1</option>
-                              <option value="sub2">Sub Kategori 2</option>
+                              {(categoryOptions[docForm.category] || []).map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.label}
+                                </option>
+                              ))}
                             </select>
                           </div>
                         </div>
@@ -1081,17 +1558,52 @@ export default function AdminDashboard() {
                           )}
 
                           {docForm.type === "video" && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">URL Video <span className="text-red-500">*</span></label>
-                              <input
-                                type="url"
-                                name="url"
-                                value={docForm.url}
-                                onChange={handleDocFormChange}
-                                placeholder="https://youtube.com/watch?v=..."
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                required
-                              />
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">URL Video <span className="text-red-500">*</span></label>
+                                <input
+                                  type="url"
+                                  name="url"
+                                  value={docForm.url}
+                                  onChange={handleDocFormChange}
+                                  placeholder="https://youtube.com/watch?v=..."
+                                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                  required
+                                />
+                              </div>
+                              {/* Preview thumbnail YouTube secara real-time */}
+                              {(() => {
+                                const url = docForm.url || "";
+                                let ytId = null;
+                                const embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+                                if (embedMatch) ytId = embedMatch[1];
+                                else {
+                                  try {
+                                    const u = new URL(url);
+                                    ytId = u.searchParams.get('v') || (url.includes('youtu.be') ? u.pathname.split('/').pop() : null);
+                                  } catch { /* invalid url */ }
+                                }
+                                if (!ytId) return null;
+                                return (
+                                  <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                    <div className="relative w-full" style={{paddingBottom: '56.25%'}}>
+                                      <img
+                                        src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
+                                        alt="Preview"
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                      />
+                                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-25">
+                                        <div className="bg-red-600 rounded-full p-3 shadow-lg">
+                                          <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="px-3 py-2">
+                                      <p className="text-xs text-gray-500 truncate">youtube.com/watch?v={ytId}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
                             </div>
                           )}
                         </div>
@@ -1129,93 +1641,262 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {view === "site_images" && (
+          {view === "banners" && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <Image className="w-5 h-5 text-pink-600" />
-                  Kelola Gambar Halaman
+                  Kelola Gambar Banner (4 Banner)
                 </h2>
                 <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
                   <ArrowLeft className="w-4 h-4" /> Kembali
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Konsultasi Image */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-800">Gambar Halaman Konsultasi</h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {siteImages.konsultasi_image ? (
-                      <img
-                        src={`http://localhost:8000/${siteImages.konsultasi_image}`}
-                        alt="Konsultasi"
-                        className="w-full h-48 object-cover rounded-lg"
+              <p className="text-gray-600 mb-6">Upload dan atur 4 banner untuk ditampilkan di halaman Beranda. Setiap banner memiliki gambar, judul, dan subtitle.</p>
+
+              {bannerError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-700 text-sm">{bannerError}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4].map((bannerNum) => {
+                  const banner = banners.find(b => b.order === bannerNum);
+                  return (
+                    <div key={bannerNum} className="bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-200 rounded-xl p-5 hover:shadow-lg transition-all">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-gray-900">Banner {bannerNum}</h3>
+                        {banner?.is_active && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Aktif</span>
+                        )}
+                      </div>
+
+                      <div className="space-y-4">
+                        {/* Banner Preview */}
+                        <div className="border-2 border-dashed border-pink-300 rounded-lg p-4 bg-white">
+                          {banner?.image_url ? (
+                            <img
+                              src={banner.image_url}
+                              alt={`Banner ${bannerNum}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                          ) : (
+                            <div className="w-full h-32 bg-gray-100 rounded-lg flex flex-col items-center justify-center text-gray-400">
+                              <Image className="w-10 h-10 mb-2" />
+                              <p className="text-xs">Belum ada gambar</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Banner Info */}
+                        {banner && (
+                          <div className="space-y-1 text-sm">
+                            <p className="font-medium text-gray-800 truncate">{banner.title || "Tidak ada judul"}</p>
+                            <p className="text-gray-500 text-xs truncate">{banner.subtitle || "Tidak ada subtitle"}</p>
+                          </div>
+                        )}
+
+                        {/* Upload Button */}
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleBannerUpload(bannerNum, e.target.files[0])}
+                            className="hidden"
+                            id={`banner-input-${bannerNum}`}
+                          />
+                          <button
+                            onClick={() => document.getElementById(`banner-input-${bannerNum}`).click()}
+                            disabled={bannerSubmitting}
+                            className="w-full px-3 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition disabled:bg-gray-400 text-sm font-medium"
+                          >
+                            {bannerSubmitting ? "Mengupload..." : (banner ? "Ganti Gambar" : "Upload Gambar")}
+                          </button>
+                        </div>
+
+                        {/* Toggle Active */}
+                        {banner && (
+                          <button
+                            onClick={() => handleToggleBannerActive(banner.id, !banner.is_active)}
+                            className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition ${
+                              banner.is_active
+                                ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            }`}
+                          >
+                            {banner.is_active ? "Nonaktifkan" : "Aktifkan"}
+                          </button>
+                        )}
+
+                        {/* Delete Button */}
+                        {banner && (
+                          <button
+                            onClick={() => handleDeleteBanner(banner.id)}
+                            className="w-full px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition text-sm font-medium"
+                          >
+                            Hapus Banner
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Info Note */}
+              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-700 text-sm">
+                  <strong>Tips:</strong> Ukuran gambar banner yang disarankan adalah <strong>1600x800 pixels</strong> (ratio 2:1) untuk tampilan terbaik di berbagai perangkat.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {view === "logos" && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="text-2xl">🏛️</span>
+                  Kelola Logo
+                </h2>
+                <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                  <ArrowLeft className="w-4 h-4" /> Kembali
+                </button>
+              </div>
+
+              {logoError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 mb-4">
+                  {logoError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Login Logo Kemenkumham */}
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 hover:shadow-lg transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-800">Logo Login Kemenkumham</h3>
+                    <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">Halaman Login</span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    {logos.login_logo_kemenkumham ? (
+                      <img 
+                        src={logos.login_logo_kemenkumham} 
+                        alt="Logo Kemenkumham"
+                        className="w-full h-20 object-contain rounded-lg border border-gray-200 bg-white"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                        <Image className="w-12 h-12" />
+                      <div className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                        <span className="text-gray-400 text-sm">Belum ada logo</span>
                       </div>
                     )}
                   </div>
-                  <div>
+
+                  <div className="space-y-2">
                     <input
                       type="file"
+                      id="logo-kemenkumham-input"
                       accept="image/*"
-                      onChange={(e) => handleSiteImageUpload("konsultasi_image", e.target.files[0])}
                       className="hidden"
-                      id="konsultasi-image-input"
+                      onChange={(e) => handleLogoUpload('login_logo_kemenkumham', e.target.files[0])}
                     />
                     <button
-                      onClick={() => document.getElementById("konsultasi-image-input").click()}
-                      disabled={siteImageUploading.konsultasi_image}
-                      className="w-full px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      onClick={() => document.getElementById('logo-kemenkumham-input').click()}
+                      disabled={logoUploading['login_logo_kemenkumham']}
+                      className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 text-sm font-medium"
                     >
-                      {siteImageUploading.konsultasi_image ? "Mengupload..." : "Ganti Gambar"}
+                      {logoUploading['login_logo_kemenkumham'] ? "Mengupload..." : (logos.login_logo_kemenkumham ? "Ganti Logo" : "Upload Logo")}
                     </button>
                   </div>
                 </div>
 
-                {/* Produk Image */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-800">Gambar Halaman Produk</h3>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    {siteImages.produk_image ? (
-                      <img
-                        src={`http://localhost:8000/${siteImages.produk_image}`}
-                        alt="Produk"
-                        className="w-full h-48 object-cover rounded-lg"
+                {/* Login Logo Ditjen */}
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-5 hover:shadow-lg transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-800">Logo Login Ditjen</h3>
+                    <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">Halaman Login</span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    {logos.login_logo_ditjen ? (
+                      <img 
+                        src={logos.login_logo_ditjen} 
+                        alt="Logo Ditjen"
+                        className="w-full h-20 object-contain rounded-lg border border-gray-200 bg-white"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                        <Image className="w-12 h-12" />
+                      <div className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                        <span className="text-gray-400 text-sm">Belum ada logo</span>
                       </div>
                     )}
                   </div>
-                  <div>
+
+                  <div className="space-y-2">
                     <input
                       type="file"
+                      id="logo-ditjen-input"
                       accept="image/*"
-                      onChange={(e) => handleSiteImageUpload("produk_image", e.target.files[0])}
                       className="hidden"
-                      id="produk-image-input"
+                      onChange={(e) => handleLogoUpload('login_logo_ditjen', e.target.files[0])}
                     />
                     <button
-                      onClick={() => document.getElementById("produk-image-input").click()}
-                      disabled={siteImageUploading.produk_image}
-                      className="w-full px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      onClick={() => document.getElementById('logo-ditjen-input').click()}
+                      disabled={logoUploading['login_logo_ditjen']}
+                      className="w-full px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 text-sm font-medium"
                     >
-                      {siteImageUploading.produk_image ? "Mengupload..." : "Ganti Gambar"}
+                      {logoUploading['login_logo_ditjen'] ? "Mengupload..." : (logos.login_logo_ditjen ? "Ganti Logo" : "Upload Logo")}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Home Logo */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-5 hover:shadow-lg transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-800">Logo Halaman Awal</h3>
+                    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">Beranda</span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    {logos.home_logo ? (
+                      <img 
+                        src={logos.home_logo} 
+                        alt="Logo Beranda"
+                        className="w-full h-20 object-contain rounded-lg border border-gray-200 bg-white"
+                      />
+                    ) : (
+                      <div className="w-full h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                        <span className="text-gray-400 text-sm">Belum ada logo</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      id="logo-home-input"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleLogoUpload('home_logo', e.target.files[0])}
+                    />
+                    <button
+                      onClick={() => document.getElementById('logo-home-input').click()}
+                      disabled={logoUploading['home_logo']}
+                      className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 text-sm font-medium"
+                    >
+                      {logoUploading['home_logo'] ? "Mengupload..." : (logos.home_logo ? "Ganti Logo" : "Upload Logo")}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {siteImageError && (
-                <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-red-700 text-sm">{siteImageError}</p>
-                </div>
-              )}
+              {/* Info Note */}
+              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-700 text-sm">
+                  <strong>Tips:</strong> Ukuran logo yang disarankan adalah <strong>200x200 pixels</strong> atau <strong>400x400 pixels</strong> untuk tampilan terbaik.
+                </p>
+              </div>
             </div>
           )}
 
@@ -1392,6 +2073,189 @@ export default function AdminDashboard() {
                   <p>Fitur analisis survey kepuasan akan segera tersedia.</p>
                 </div>
               </div>
+            </div>
+          )}
+
+          {view === "kasubdit_photos" && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-cyan-600" />
+                  Upload Foto Kasubdit
+                </h2>
+                <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                  <ArrowLeft className="w-4 h-4" /> Kembali
+                </button>
+              </div>
+
+              <p className="text-gray-600 mb-6">Upload foto untuk 5 pimpinan Direktorat Kepatuhan Internal. Foto akan ditampilkan di halaman Konsultasi Teknis.</p>
+
+              {kasubditPhotoError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-700 text-sm">{kasubditPhotoError}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {kasubditPersons.map((person) => (
+                  <div key={person.id} className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-2xl border border-cyan-100 shadow-lg">
+                    <div className="text-center mb-4">
+                      <h3 className="font-bold text-gray-800 text-sm mb-1">{person.name}</h3>
+                      <p className="text-xs text-cyan-600">{person.position}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="border-2 border-dashed border-cyan-300 rounded-lg p-4 bg-white">
+                        {kasubditPhotos[person.id] ? (
+                          <div className="text-center">
+                            <img
+                              src={URL.createObjectURL(kasubditPhotos[person.id])}
+                              alt="Preview"
+                              className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+                            />
+                            <p className="text-xs text-gray-600">{kasubditPhotos[person.id].name}</p>
+                          </div>
+                        ) : (
+                          <div className="text-center text-gray-500">
+                            <Users className="w-12 h-12 mx-auto mb-2 text-cyan-300" />
+                            <p className="text-sm">Pilih foto untuk upload</p>
+                            <p className="text-xs text-gray-400">JPG, PNG (Max 5MB)</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleKasubditPhotoFileChange(person.id, e.target.files[0])}
+                        className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-cyan-100 file:text-cyan-700 hover:file:bg-cyan-200"
+                      />
+
+                      <button
+                        onClick={() => handleKasubditPhotoUpload(person.id)}
+                        disabled={kasubditPhotoUploading[person.id] || !kasubditPhotos[person.id]}
+                        className="w-full px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {kasubditPhotoUploading[person.id] ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Mengupload...
+                          </>
+                        ) : (
+                          <>
+                            <Image className="w-4 h-4" />
+                            Upload Foto
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {view === "psychologist_photos" && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  Upload Foto Tim Psikolog
+                </h2>
+                <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
+                  <ArrowLeft className="w-4 h-4" /> Kembali
+                </button>
+              </div>
+
+              <p className="text-gray-600 mb-6">Upload foto untuk tim Psikolog PATNAL. Foto ini akan ditampilkan pada halaman "Pilih Psikolog" bagi pengguna.</p>
+
+              {psychologistPhotoError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-700 text-sm">{psychologistPhotoError}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {users
+                  .filter(user => (user.status_pengguna || user.daftar_sebagai) === 'Psikolog')
+                  .map((psikolog) => (
+                  <div key={psikolog.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-2xl border border-purple-100 shadow-lg">
+                    <div className="text-center mb-4">
+                      <h3 className="font-bold text-gray-800 text-sm mb-1">{psikolog.name}</h3>
+                      <p className="text-xs text-purple-600">{psikolog.jabatan || 'Psikolog'}</p>
+                      <p className="text-[10px] text-gray-400 mt-1 font-mono">{psikolog.nip || 'NIP: -'}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="border-2 border-dashed border-purple-300 rounded-lg p-4 bg-white">
+                        {psychologistPhotos[psikolog.id] ? (
+                          <div className="text-center">
+                            <img
+                              src={URL.createObjectURL(psychologistPhotos[psikolog.id])}
+                              alt="Preview"
+                              className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+                            />
+                            <p className="text-xs text-gray-600 truncate max-w-full">{psychologistPhotos[psikolog.id].name}</p>
+                          </div>
+                        ) : (
+                          <div className="text-center text-gray-500">
+                            {psikolog.foto ? (
+                              <img
+                                src={`http://localhost:8000/${psikolog.foto}`}
+                                alt={psikolog.name}
+                                className="w-24 h-24 object-cover rounded-full mx-auto mb-2 border border-purple-200"
+                                onError={(e) => { e.target.src = '/placeholder-avatar.svg'; }}
+                              />
+                            ) : (
+                              <Users className="w-12 h-12 mx-auto mb-2 text-purple-200" />
+                            )}
+                            <p className="text-sm">Pilih foto untuk {psikolog.foto ? 'ganti' : 'upload'}</p>
+                            <p className="text-xs text-gray-400">JPG, PNG (Max 2MB)</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handlePsychologistPhotoFileChange(psikolog.id, e.target.files[0])}
+                        className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200 cursor-pointer"
+                      />
+
+                      <button
+                        onClick={() => handlePsychologistPhotoUpload(psikolog.id)}
+                        disabled={psychologistPhotoUploading[psikolog.id] || !psychologistPhotos[psikolog.id]}
+                        className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {psychologistPhotoUploading[psikolog.id] ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Mengupload...
+                          </>
+                        ) : (
+                          <>
+                            <Image className="w-4 h-4" />
+                            {psikolog.foto ? 'Perbarui Foto' : 'Simpan Foto'}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {users.filter(user => (user.status_pengguna || user.daftar_sebagai) === 'Psikolog').length === 0 && (
+                <div className="text-center py-10 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                  <Users className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                  <p className="text-gray-500">Belum ada user dengan peran "Psikolog" yang ditemukan.</p>
+                  <button 
+                    onClick={() => handleViewChange("users")}
+                    className="mt-4 text-purple-600 font-semibold hover:underline"
+                  >
+                    Tambah Psikolog di Manajemen User
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </main>

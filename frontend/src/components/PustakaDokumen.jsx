@@ -62,6 +62,11 @@ export default function PustakaDokumen() {
         },
       ],
     },
+    {
+      id: "peraturan-lainnya",
+      title: "Peraturan Lainnya",
+      items: [],
+    },
   ];
 
   // === DATA VIDEO EDUKASI ===

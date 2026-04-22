@@ -9,6 +9,7 @@ export default function Header() {
   const [scrollHidden, setScrollHidden] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showKonsultasiDropdown, setShowKonsultasiDropdown] = useState(false);
+  const [homeLogo, setHomeLogo] = useState(null);
 
   // === HIDE HEADER ON SCROLL ===
   useEffect(() => {
@@ -48,6 +49,19 @@ export default function Header() {
     };
 
     fetchCurrentUser();
+
+    // Fetch home logo from site-settings
+    const fetchHomeLogo = async () => {
+      try {
+        const res = await api.get("/site-settings");
+        if (res.data?.home_logo) {
+          setHomeLogo(res.data.home_logo);
+        }
+      } catch (err) {
+        console.error("Failed to fetch home logo:", err);
+      }
+    };
+    fetchHomeLogo();
   }, []);
 
   const dashboardPath =
@@ -93,7 +107,7 @@ export default function Header() {
 
             <a href="/" className="flex items-center">
               <img
-                src="/Logo.png"
+                src={homeLogo || "/Logo.png"}
                 alt="Patnal Integrity Hub"
                 className="h-10 md:h-12 w-auto object-contain"
               />
@@ -144,6 +158,8 @@ export default function Header() {
             >
               Media Informasi
             </a>
+
+            <a href="/pengaduan" className="text-gray-700 hover:text-blue-600 transition">Pengaduan</a>
 
             <a href="/survey" className="text-gray-700 hover:text-blue-600 transition">Survey Kepuasan</a>
 
@@ -197,6 +213,8 @@ export default function Header() {
           >
             Media Informasi
           </a>
+
+          <a href="/pengaduan" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Pengaduan</a>
 
           <a href="/survey" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Survey Kepuasan</a>
 

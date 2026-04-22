@@ -1,27 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import UserDropdownMenu from '../components/UserDropdownMenu';
 import { LayoutDashboard, ClipboardList, FileBarChart2, Plus, History, MessageSquare, Home, CheckCircle, X, UserCheck, Settings, FileText, Send } from 'lucide-react';
 
 export default function Consultation() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const consultationType = searchParams.get('type') || 'psikolog'; // psikolog | teknis
   const [view, setView] = useState('menu'); // menu | history | choose_psikolog | create | create_teknis
-
-  // Debug: Log URL parameters
-  console.log('Consultation.jsx - URL params:', {
-    consultationType,
-    allParams: Object.fromEntries(searchParams.entries())
-  });
-
-  // Auto-redirect to create_teknis if consultation type is teknis
-  useEffect(() => {
-    if (consultationType === 'teknis' && view === 'menu') {
-      setView('create_teknis');
-    }
-  }, [consultationType, view]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
@@ -785,12 +770,12 @@ export default function Consultation() {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {consultationType === 'teknis' ? 'Konsultasi Teknis' : 'Konsultasi Psikolog'}
+                  {isPsikolog ? 'Konsultasi Psikolog' : 'Konsultasi Teknis'}
                 </h1>
                 <p className="text-gray-600">
-                  {consultationType === 'teknis' 
-                    ? 'Layanan konsultasi teknis untuk kepatuhan dan regulasi internal.'
-                    : 'Layanan konsultasi psikologis untuk kesehatan mental dan wellbeing.'}
+                  {isPsikolog 
+                    ? 'Layanan konsultasi psikologis untuk kesehatan mental dan wellbeing.'
+                    : 'Layanan konsultasi teknis untuk kepatuhan dan regulasi internal.'}
                 </p>
               </div>
               <UserDropdownMenu user={user} onLogout={handleLogout} />
@@ -880,22 +865,22 @@ export default function Consultation() {
                     </>
                   ) : (
                     <>
-                      <button onClick={consultationType === 'teknis' ? () => setView('create_teknis') : openConsent} className={`group text-left bg-gradient-to-br ${consultationType === 'teknis' ? 'from-blue-50 to-cyan-50 border-blue-100' : 'from-purple-50 to-indigo-50 border-purple-100'} rounded-2xl border shadow-sm hover:shadow-lg hover:border-blue-200 transition-all p-6 overflow-hidden relative h-full`}>
-                        <div className={`absolute top-0 right-0 w-20 h-20 ${consultationType === 'teknis' ? 'bg-blue-50' : 'bg-purple-50'} rounded-bl-full opacity-70`} />
-                        <div className={`w-12 h-12 rounded-xl ${consultationType === 'teknis' ? 'bg-blue-100' : 'bg-purple-100'} flex items-center justify-center mb-4 ${consultationType === 'teknis' ? 'group-hover:bg-blue-600' : 'group-hover:bg-purple-600'} transition-colors`}>
-                          {consultationType === 'teknis' ? (
-                            <Settings className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
-                          ) : (
+                      <button onClick={isPsikolog ? openConsent : () => setView('create_teknis')} className={`group text-left bg-gradient-to-br ${isPsikolog ? 'from-purple-50 to-indigo-50 border-purple-100' : 'from-blue-50 to-cyan-50 border-blue-100'} rounded-2xl border shadow-sm hover:shadow-lg hover:border-blue-200 transition-all p-6 overflow-hidden relative h-full`}>
+                        <div className={`absolute top-0 right-0 w-20 h-20 ${isPsikolog ? 'bg-purple-50' : 'bg-blue-50'} rounded-bl-full opacity-70`} />
+                        <div className={`w-12 h-12 rounded-xl ${isPsikolog ? 'bg-purple-100' : 'bg-blue-100'} flex items-center justify-center mb-4 ${isPsikolog ? 'group-hover:bg-purple-600' : 'group-hover:bg-blue-600'} transition-colors`}>
+                          {isPsikolog ? (
                             <Plus className="w-6 h-6 text-purple-600 group-hover:text-white transition-colors" />
+                          ) : (
+                            <Settings className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
                           )}
                         </div>
                         <p className="font-semibold text-gray-800 text-lg mb-2">
-                          {consultationType === 'teknis' ? 'Buat Konsultasi Teknis' : 'Buat Konsultasi Psikolog'}
+                          {isPsikolog ? 'Buat Konsultasi Psikolog' : 'Buat Konsultasi Teknis'}
                         </p>
                         <p className="text-sm text-gray-500 leading-relaxed">
-                          {consultationType === 'teknis' 
-                            ? 'Ajukan pertanyaan teknis seputar compliance, regulasi, dan SOP.'
-                            : 'Isi form profiling untuk memulai sesi konseling dengan psikolog bersertifikat.'}
+                          {isPsikolog 
+                            ? 'Isi form profiling untuk memulai sesi konseling dengan psikolog bersertifikat.'
+                            : 'Ajukan pertanyaan teknis seputar compliance, regulasi, dan SOP.'}
                         </p>
                       </button>
 
@@ -913,8 +898,8 @@ export default function Consultation() {
                         <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
                           <MessageSquare className="w-6 h-6 text-purple-600 group-hover:text-white transition-colors" />
                         </div>
-                        <p className="font-semibold text-gray-800 text-lg mb-2">Chat Psikolog</p>
-                        <p className="text-sm text-gray-500 leading-relaxed">Akses percakapan langsung setelah profiling selesai untuk sesi konseling.</p>
+                        <p className="font-semibold text-gray-800 text-lg mb-2">{isPsikolog ? 'Chat Klien' : 'Chat dengan Konsultan Teknis'}</p>
+                        <p className="text-sm text-gray-500 leading-relaxed">{isPsikolog ? 'Akses percakapan langsung dengan klien untuk sesi konseling interaktif.' : 'Dapatkan konsultasi langsung dari konsultan teknis PATNAL.'}</p>
                       </a>
 
                       <a href="/dashboard" className="group text-left bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-100 shadow-sm hover:shadow-lg hover:border-green-200 transition-all p-6 overflow-hidden relative h-full">
@@ -1437,166 +1422,105 @@ export default function Consultation() {
 
               {view === 'create_teknis' && (
                 <div className="mt-2">
-                  {/* Header Section */}
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl p-6 text-white mb-6 shadow-lg">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">Form Konsultasi Teknis PATNAL</h2>
-                        <p className="text-blue-100 text-sm">Layanan konsultasi untuk kepatuhan internal, integritas, dan regulasi</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">PATNAL</span>
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">Integritas</span>
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">Kepatuhan</span>
-                      <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">Investigasi</span>
-                    </div>
-                  </div>
+                  <h2 className="text-xl font-bold text-gray-800 mb-1">Form Konsultasi Teknis PATNAL</h2>
+                  <p className="text-sm text-gray-500 mb-5">Ajukan pertanyaan mengenai kepatuhan internal, integritas, dan regulasi PATNAL.</p>
 
-                  <form onSubmit={handleTeknisSubmit} className="space-y-6">
-                    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        Subjek Konsultasi
-                      </label>
+                  <form onSubmit={handleTeknisSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Subjek</label>
                       <input
                         type="text"
                         name="subject"
                         value={teknisForm.subject}
                         onChange={handleTeknisChange}
                         required
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Contoh: Pertanyaan mengenai integritas dan kepatuhan internal"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                          Subdit PATNAL
-                        </label>
-                        <select
-                          name="subdit"
-                          value={teknisForm.subdit}
-                          onChange={handleTeknisChange}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
-                        >
-                          <option value="advokasi">Fasilitasi Advokasi & Investigasi Internal</option>
-                          <option value="pencegahan">Pencegahan & Pengendalian</option>
-                        </select>
-                      </div>
-
-                      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          Kategori Konsultasi
-                        </label>
-                        <select
-                          name="category"
-                          value={teknisForm.category}
-                          onChange={handleTeknisChange}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                        >
-                          <option value="patnal_integritas">PATNAL & Integritas</option>
-                          <option value="kepatuhan">Kepatuhan Internal</option>
-                          <option value="investigasi">Investigasi Internal</option>
-                          <option value="pelanggaran">Pelanggaran Disiplin</option>
-                        </select>
-                      </div>
-
-                      <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                          Tingkat Urgensi
-                        </label>
-                        <select
-                          name="urgency"
-                          value={teknisForm.urgency}
-                          onChange={handleTeknisChange}
-                          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                        >
-                          <option value="low">Rendah</option>
-                          <option value="medium">Sedang</option>
-                          <option value="high">Tinggi</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Subdit PATNAL</label>
+                      <select
+                        name="subdit"
+                        value={teknisForm.subdit}
+                        onChange={handleTeknisChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="advokasi">Fasilitasi Advokasi & Investigasi Internal</option>
+                        <option value="pencegahan">Pencegahan & Pengendalian</option>
+                      </select>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        Deskripsi Detail
-                      </label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Konsultasi</label>
+                      <select
+                        name="category"
+                        value={teknisForm.category}
+                        onChange={handleTeknisChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="patnal_integritas">PATNAL & Integritas</option>
+                        <option value="kepatuhan">Kepatuhan Internal</option>
+                        <option value="investigasi">Investigasi Internal</option>
+                        <option value="pelanggaran">Pelanggaran Disiplin</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Tingkat Urgensi</label>
+                      <select
+                        name="urgency"
+                        value={teknisForm.urgency}
+                        onChange={handleTeknisChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="low">Rendah</option>
+                        <option value="medium">Sedang</option>
+                        <option value="high">Tinggi</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi Detail</label>
                       <textarea
                         name="description"
                         value={teknisForm.description}
                         onChange={handleTeknisChange}
                         required
-                        rows={6}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all resize-none"
+                        rows={5}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Jelaskan secara detail pertanyaan mengenai PATNAL, integritas, atau kepatuhan internal..."
                       />
-                      <div className="mt-2 text-xs text-gray-500">
-                        <span className="inline-flex items-center gap-1">
-                          <span>Minimal 20 karakter untuk deskripsi yang jelas</span>
-                        </span>
-                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200 p-5 shadow-sm">
-                      <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                        Lampiran Dokumen (Opsional)
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
-                        <input
-                          type="file"
-                          onChange={handleFileChange}
-                          accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                          className="hidden"
-                          id="file-upload"
-                        />
-                        <label htmlFor="file-upload" className="cursor-pointer">
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                              <FileText className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <p className="text-sm font-medium text-gray-700">Klik untuk upload atau drag & drop</p>
-                            <p className="text-xs text-gray-500">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG (Max 5MB)</p>
-                          </div>
-                        </label>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Lampiran (Opsional)</label>
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Format yang didukung: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, JPEG (Max 5MB)
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4 pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setView('menu')}
-                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all flex items-center gap-2"
-                      >
-                        <X className="w-4 h-4" />
-                        Batal
-                      </button>
+                    <div className="flex items-center gap-3 pt-2">
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-8 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
                       >
-                        {submitting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Mengirim...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4" />
-                            Kirim Konsultasi Teknis
-                          </>
-                        )}
+                        {submitting ? 'Mengirim...' : 'Kirim Konsultasi Teknis'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setView('menu')}
+                        className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+                      >
+                        Batal
                       </button>
                     </div>
                   </form>

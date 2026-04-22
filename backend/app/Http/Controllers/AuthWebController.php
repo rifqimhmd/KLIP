@@ -76,7 +76,7 @@ class AuthWebController extends Controller
                 'password' => ['required', 'string', 'min:8', 'confirmed'],
                 'pangkat_golongan' => ['required', 'string', 'max:255'],
                 'jabatan' => ['required', 'string', 'max:255'],
-                'bagian' => ['required', 'string', 'max:255'],
+                'instansi' => ['required', 'string', 'max:255'],
                 'no_wa' => ['required', 'string'],
                 'daftar_sebagai' => ['required', 'string', 'in:UPT,Kanwil,Ditjenpas'],
                 'organization_detail' => ['nullable', 'string'],
@@ -84,7 +84,7 @@ class AuthWebController extends Controller
             ]);
 
             // Trim whitespace from all string fields to prevent login failures
-            foreach (['name', 'nip', 'email', 'pangkat_golongan', 'jabatan', 'bagian', 'no_wa', 'daftar_sebagai', 'status_pengguna'] as $field) {
+            foreach (['name', 'nip', 'email', 'pangkat_golongan', 'jabatan', 'instansi', 'no_wa', 'daftar_sebagai', 'status_pengguna'] as $field) {
                 if (isset($validated[$field])) {
                     $validated[$field] = trim($validated[$field]);
                 }
@@ -106,7 +106,7 @@ class AuthWebController extends Controller
                 'nip' => $validated['nip'],
                 'pangkat_golongan' => $validated['pangkat_golongan'],
                 'jabatan' => $validated['jabatan'],
-                'bagian' => $validated['bagian'],
+                'instansi' => $validated['instansi'],
                 'no_wa' => $validated['no_wa'],
                 'daftar_sebagai' => $validated['daftar_sebagai'],
                 'organization_detail' => $validated['organization_detail'] ?? null,
@@ -126,6 +126,30 @@ class AuthWebController extends Controller
         } catch (\Exception $e) {
             \Log::error('Register error: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Logout user and revoke tokens
+     */
+    public function logout(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            if ($user) {
+                // Revoke current access token
+                $request->user()->currentAccessToken()->delete();
+
+                \Log::info('User logged out', ['user_id' => $user->id, 'email' => $user->email]);
+            }
+
+            return response()->json([
+                'message' => 'Logged out successfully'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Logout error: ' . $e->getMessage());
+            return response()->json(['message' => 'Logout failed'], 500);
         }
     }
 }

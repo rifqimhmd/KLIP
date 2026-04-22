@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import api from '../lib/axios';
 import { getPusher } from '../lib/pusher';
 import UserDropdownMenu from '../components/UserDropdownMenu';
+import Logo from '../components/Logo';
 import { MessageCircle } from 'lucide-react';
 
 export default function Chat() {
@@ -10,6 +11,13 @@ export default function Chat() {
   const [searchParams] = useSearchParams();
   const expertType = searchParams.get('expert');
   const navigate = useNavigate();
+
+  // Determine chat type based on expertType or consultation type
+  const getChatType = () => {
+    if (expertType === 'kasubdit') return 'teknis';
+    if (consultation?.type === 'teknis') return 'teknis';
+    return 'psikolog'; // default
+  };
 
   // Debug: Log URL parameters
   console.log('Chat.jsx - URL params:', {
@@ -26,6 +34,7 @@ export default function Chat() {
   const [sending, setSending]         = useState(false);
   const [error, setError]             = useState(null);
   const [deletingMsgId, setDeletingMsgId] = useState(null);
+  const [deletingAll, setDeletingAll]     = useState(false);
   const [confirmEndChat, setConfirmEndChat] = useState(false);
   const [endingChat, setEndingChat]       = useState(false);
 
@@ -36,10 +45,16 @@ export default function Chat() {
 
   // â”€â”€â”€ Auth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
+    let isMounted = true;
     api.get('/user')
-      .then((r) => setUser(r.data?.user ?? r.data))
-      .catch(() => navigate('/login'));
-  }, [navigate]);
+      .then((r) => {
+        if (isMounted) setUser(r.data?.user ?? r.data);
+      })
+      .catch(() => {
+        if (isMounted) navigate('/login');
+      });
+    return () => { isMounted = false; };
+  }, []);
 
   // â”€â”€â”€ Load consultation + message history â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
@@ -104,10 +119,15 @@ export default function Chat() {
     if (!consultationId) return;
 
     const POLL_INTERVAL = 3000;
+    let authErrorCount = 0;
+    const MAX_AUTH_ERRORS = 2;
 
     const poll = async () => {
       // Skip polling when Pusher is connected and subscribed
       if (pusherReady.current) return;
+      // Stop polling if too many auth errors
+      if (authErrorCount >= MAX_AUTH_ERRORS) return;
+
       try {
         const { data } = await api.get(`/chat/${consultationId}/messages`);
         const incoming = Array.isArray(data) ? data : [];
@@ -120,8 +140,17 @@ export default function Chat() {
           return [...prev, ...newMsgs];
         });
       } catch (err) {
-        // Silently ignore poll errors (keep variable used for ESLint).
-        void err;
+        // Count auth errors and stop polling if too many
+        if (err.response?.status === 401) {
+          authErrorCount++;
+          console.error(`Auth error ${authErrorCount}/${MAX_AUTH_ERRORS} in poll`);
+          if (authErrorCount >= MAX_AUTH_ERRORS) {
+            console.error('Stopping poll due to auth errors');
+            clearInterval(pollTimerRef.current);
+            pollTimerRef.current = null;
+          }
+        }
+        // Silently ignore other poll errors
       }
     };
 
@@ -189,6 +218,23 @@ export default function Chat() {
     }
   };
 
+  const deleteAllMessages = async () => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus semua riwayat chat ini? Tindakan ini tidak dapat dibatalkan.')) {
+      return;
+    }
+    setDeletingAll(true);
+    try {
+      await api.delete(`/chat/${consultationId}/messages`);
+      setMessages([]);
+      alert('Riwayat chat berhasil dihapus');
+    } catch (err) {
+      console.error('Failed to delete all messages:', err);
+      alert('Gagal menghapus riwayat chat: ' + (err.response?.data?.message || 'Unknown error'));
+    } finally {
+      setDeletingAll(false);
+    }
+  };
+
   const endChat = async () => {
     setEndingChat(true);
     try {
@@ -214,6 +260,7 @@ export default function Chat() {
   const roleTag = (role) => {
     if (role === 'Admin')    return { label: 'Admin',    color: 'bg-purple-100 text-purple-700' };
     if (role === 'Psikolog') return { label: 'Psikolog', color: 'bg-green-100 text-green-700' };
+    if (getChatType() === 'teknis' && role === 'User') return { label: 'Tim Kepatuhan', color: 'bg-cyan-100 text-cyan-700' };
     return { label: 'User', color: 'bg-blue-100 text-blue-700' };
   };
   const formatTime = (iso) =>
@@ -221,6 +268,14 @@ export default function Chat() {
 
   const partnerName = () => {
     if (!consultation || !user) return '…';
+
+    // Chat Teknis - Kasubdit/Direktur sebagai partner
+    if (getChatType() === 'teknis') {
+      if (user.status_pengguna === 'User') return 'Tim Kepatuhan Internal';
+      return consultation.user?.name ?? 'User';
+    }
+
+    // Chat Psikolog
     if (user.status_pengguna === 'User')     return consultation.psikolog?.name ?? 'Psikolog';
     if (user.status_pengguna === 'Psikolog') return consultation.user?.name ?? 'User';
     return `${consultation.user?.name ?? 'User'} -> ${consultation.psikolog?.name ?? 'Psikolog'}`;
@@ -257,7 +312,7 @@ export default function Chat() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
+            <Logo className="h-10 md:h-11 w-auto" alt="KLIP" />
           </Link>
           {user && <UserDropdownMenu user={user} onLogout={handleLogout} />}
         </div>
@@ -266,12 +321,49 @@ export default function Chat() {
       {/* Chat window */}
       <div className="flex-1 flex flex-col max-w-3xl w-full mx-auto px-4 py-6">
         {/* Room header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-2xl px-5 py-4 flex items-center justify-between flex-shrink-0 shadow-sm">
-          <div>
-            <p className="font-semibold truncate">Sesi #{consultationId} &ndash; {partnerName()}</p>
-            <p className="text-xs text-blue-200 mt-0.5">{roleTag(user?.status_pengguna).label}</p>
+        <div className={`text-white rounded-t-2xl px-5 py-4 flex items-center justify-between flex-shrink-0 shadow-sm ${
+          getChatType() === 'teknis'
+            ? 'bg-gradient-to-r from-blue-600 to-cyan-600'
+            : 'bg-gradient-to-r from-purple-600 to-pink-600'
+        }`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              getChatType() === 'teknis' ? 'bg-blue-500' : 'bg-purple-500'
+            }`}>
+              {getChatType() === 'teknis' ? (
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="font-semibold truncate">{getChatType() === 'teknis' ? 'Sesi Teknis' : 'Sesi Psikolog'} #{consultationId}</p>
+              <p className="text-xs text-white/70 mt-0.5">{partnerName()} &middot; {roleTag(user?.status_pengguna).label}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
+            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              getChatType() === 'teknis'
+                ? 'bg-blue-100 text-blue-700'
+                : 'bg-purple-100 text-purple-700'
+            }`}>
+              {getChatType() === 'teknis' ? 'Chat Teknis' : 'Chat Psikolog'}
+            </span>
+            {/* Tombol Hapus Riwayat - untuk semua role */}
+            {messages.length > 0 && (
+              <button
+                onClick={deleteAllMessages}
+                disabled={deletingAll}
+                className="text-xs bg-red-500/80 hover:bg-red-600 disabled:bg-red-400 px-3 py-1 rounded transition"
+                title="Hapus semua riwayat chat"
+              >
+                {deletingAll ? 'Menghapus...' : 'Hapus Riwayat'}
+              </button>
+            )}
             {consultation?.status !== 'completed' && (
               <button
                 onClick={() => setConfirmEndChat(true)}
@@ -282,7 +374,7 @@ export default function Chat() {
               </button>
             )}
             <Link
-              to="/chat"
+              to={getChatType() === 'teknis' ? '/chat?expert=kasubdit' : '/chat'}
               className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition"
             >
               Kembali
@@ -441,15 +533,17 @@ function ConsultationPicker({ user, onLogout, expertType }) {
   const [deletingSessionId, setDeletingSessionId] = useState(null);
 
   useEffect(() => {
-    api.get('/consultations')
+    const isTeknis = expertType === 'kasubdit';
+    const endpoint = isTeknis ? '/consultations?type=teknis' : '/consultations?type=psikolog';
+
+    api.get(endpoint)
       .then((r) => {
         const list = Array.isArray(r.data) ? r.data : (r.data?.data ?? []);
-        // Only consultations that have a psikolog assigned (chat-eligible)
-        setConsultations(list.filter((c) => c.psikolog_id));
+        setConsultations(list);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [expertType]);
 
   const activeChats  = consultations.filter((c) => c.status !== 'completed');
   const historyChats = consultations.filter((c) => c.status === 'completed');
@@ -469,9 +563,29 @@ function ConsultationPicker({ user, onLogout, expertType }) {
   };
 
   const renderCard = (c, isHistory) => {
-    const partner = user?.status_pengguna === 'User'
-      ? (c.psikolog?.name ?? 'Psikolog')
-      : (c.user?.name ?? 'User');
+    const isTeknis = c.type === 'teknis' || expertType === 'kasubdit';
+
+    // Determine partner name based on consultation type
+    let partner, partnerLabel;
+    if (isTeknis) {
+      // Konsultasi teknis
+      if (user?.status_pengguna === 'User') {
+        partner = c.assigned_to ? (c.assigned_to?.name ?? 'Tim Kepatuhan') : 'Menunggu Konsultan';
+        partnerLabel = 'Konsultan Teknis';
+      } else {
+        partner = c.user?.name ?? 'User';
+        partnerLabel = 'User';
+      }
+    } else {
+      // Konsultasi psikolog
+      if (user?.status_pengguna === 'User') {
+        partner = c.psikolog?.name ?? 'Psikolog';
+        partnerLabel = 'Psikolog';
+      } else {
+        partner = c.user?.name ?? 'User';
+        partnerLabel = 'User';
+      }
+    }
     const dateStr = c.updated_at
       ? new Date(c.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
       : '';
@@ -480,17 +594,23 @@ function ConsultationPicker({ user, onLogout, expertType }) {
       <div
         key={c.id}
         className={`w-full bg-white border rounded-lg px-5 py-4 flex items-center justify-between hover:shadow-sm transition
-          ${isHistory ? 'border-gray-200 opacity-90' : 'border-gray-200 hover:border-blue-400'}`}
+          ${isHistory ? 'border-gray-200 opacity-90' : isTeknis ? 'border-cyan-200 hover:border-cyan-400' : 'border-purple-200 hover:border-purple-400'}`}
       >
         <div>
           <div className="flex items-center gap-2">
-            <p className="font-medium text-gray-800">Sesi #{c.id}</p>
+            <p className="font-medium text-gray-800">{isTeknis ? 'Sesi Teknis' : 'Sesi Psikolog'} #{c.id}</p>
+            {isTeknis && (
+              <span className="text-[10px] bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full font-medium">Teknis</span>
+            )}
+            {!isTeknis && (
+              <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Psikolog</span>
+            )}
             {isHistory && (
               <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Selesai</span>
             )}
           </div>
           <p className="text-sm text-gray-500 mt-0.5">
-            {user?.status_pengguna === 'User' ? 'Psikolog' : 'User'}: {partner}
+            {partnerLabel}: {partner}
           </p>
           {dateStr && <p className="text-xs text-gray-400 mt-0.5">{isHistory ? 'Diselesaikan' : 'Terakhir aktif'}: {dateStr}</p>}
         </div>
@@ -502,8 +622,14 @@ function ConsultationPicker({ user, onLogout, expertType }) {
             Hapus Semua Chat
           </button>
           <button
-            onClick={() => navigate(`/chat/${c.id}`)}
-            className={`text-sm font-medium hover:underline ${isHistory ? 'text-gray-600' : 'text-blue-600'}`}
+            onClick={() => navigate(`/chat/${c.id}${isTeknis ? '?expert=kasubdit' : ''}`)}
+            className={`text-sm font-medium hover:underline ${
+              isHistory
+                ? 'text-gray-600'
+                : isTeknis
+                  ? 'text-cyan-600 hover:text-cyan-700'
+                  : 'text-purple-600 hover:text-purple-700'
+            }`}
           >
             {isHistory ? 'Lihat' : 'Buka'} &rarr;
           </button>
@@ -517,20 +643,44 @@ function ConsultationPicker({ user, onLogout, expertType }) {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20 flex-shrink-0">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center">
-            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
+            <Logo className="h-10 md:h-11 w-auto" alt="KLIP" />
           </Link>
           {user && <UserDropdownMenu user={user} onLogout={onLogout} />}
         </div>
       </header>
 
       <div className="max-w-2xl w-full mx-auto px-4 py-8">
-        <h2 className="text-xl font-bold text-gray-800 mb-1">
-          {expertType === 'kasubdit' ? 'Chat Konsultasi Teknis' : 'Chat Konsultasi Psikolog'}
-        </h2>
-        <p className="text-sm text-gray-500 mb-6">
-          {expertType === 'kasubdit' 
-            ? 'Pilih sesi konsultasi teknis untuk bantuan compliance dan regulasi.' 
-            : 'Pilih sesi konsultasi psikolog untuk dukungan kesehatan mental dan wellbeing.'}
+        <div className="flex items-center gap-3 mb-1">
+          {expertType === 'kasubdit' ? (
+            <>
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Chat Konsultasi Teknis</h2>
+                <span className="text-xs text-blue-600 font-medium">Bantuan Kepatuhan Internal & Compliance</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">Chat Konsultasi Psikolog</h2>
+                <span className="text-xs text-purple-600 font-medium">Konseling Kesehatan Mental & Wellbeing</span>
+              </div>
+            </>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 mb-6 mt-3">
+          {expertType === 'kasubdit'
+            ? 'Pilih sesi konsultasi teknis untuk bantuan compliance, regulasi, dan kepatuhan internal.'
+            : 'Pilih sesi konsultasi psikolog untuk dukungan kesehatan mental, konseling, dan wellbeing.'}
         </p>
 
         {/* Tabs */}
@@ -539,13 +689,19 @@ function ConsultationPicker({ user, onLogout, expertType }) {
             onClick={() => setActiveTab('active')}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
               activeTab === 'active'
-                ? 'border-blue-600 text-blue-600'
+                ? expertType === 'kasubdit'
+                  ? 'border-cyan-600 text-cyan-600'
+                  : 'border-purple-600 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             Chat Aktif
             {!loading && activeChats.length > 0 && (
-              <span className="ml-2 bg-blue-100 text-blue-700 text-xs px-1.5 py-0.5 rounded-full">
+              <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                expertType === 'kasubdit'
+                  ? 'bg-cyan-100 text-cyan-700'
+                  : 'bg-purple-100 text-purple-700'
+              }`}>
                 {activeChats.length}
               </span>
             )}
@@ -554,7 +710,9 @@ function ConsultationPicker({ user, onLogout, expertType }) {
             onClick={() => setActiveTab('history')}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
               activeTab === 'history'
-                ? 'border-blue-600 text-blue-600'
+                ? expertType === 'kasubdit'
+                  ? 'border-cyan-600 text-cyan-600'
+                  : 'border-purple-600 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -576,10 +734,10 @@ function ConsultationPicker({ user, onLogout, expertType }) {
               <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                 <p className="text-gray-500 mb-4">Belum ada sesi chat aktif.</p>
                 <Link
-                  to={expertType === 'kasubdit' ? "/consultation?type=teknis" : "/consultation?type=psikolog"}
+                  to={expertType === 'kasubdit' ? "/consultation-teknis" : "/consultation-psikolog"}
                   className={`inline-block px-5 py-2 rounded-lg text-sm hover:opacity-90 transition ${
-                    expertType === 'kasubdit' 
-                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white' 
+                    expertType === 'kasubdit'
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
                       : 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white'
                   }`}
                 >

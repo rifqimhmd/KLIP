@@ -6,7 +6,8 @@ const STATIC_IMAGES = [
   "/images/banner/3.png",
 ];
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// VITE_API_URL: "/api" (Vite proxy) atau "http://localhost:8000/api" (absolute)
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export default function Banner() {
   const sliderRef = useRef(null);
@@ -18,16 +19,32 @@ export default function Banner() {
 
   // Fetch banners from API
   useEffect(() => {
-    fetch(`${API_BASE}/banners`)
+    fetch(`${API_URL}/banners`)
       .then((r) => r.json())
       .then((data) => {
+        console.log('Banner API response:', data);
         if (Array.isArray(data) && data.length > 0) {
-          setApiBanners(data.map((b) => b.image_url));
+          // Konversi ke relative path agar lewat Vite proxy (hindari CORS)
+          const toRelative = (url) => {
+            try {
+              const u = new URL(url);
+              return u.pathname; // "/storage/banners/xxx.jpg"
+            } catch {
+              return url; // sudah relative
+            }
+          };
+          const banners = data.map((b) => toRelative(b.image_url));
+          console.log('Banner images from API:', banners);
+          setApiBanners(banners);
         } else {
+          console.log('No API banners, using static:', STATIC_IMAGES);
           setApiBanners([]); // empty → use static
         }
       })
-      .catch(() => setApiBanners([])); // error → use static
+      .catch((err) => {
+        console.error('Banner fetch error:', err);
+        setApiBanners([]); // error → use static
+      });
   }, []);
 
   const images = useMemo(() => {
@@ -35,24 +52,38 @@ export default function Banner() {
     return apiBanners.length > 0 ? apiBanners : STATIC_IMAGES;
   }, [apiBanners]);
 
-  const slides = useMemo(
-    () =>
-      images.length > 0
-        ? [images[images.length - 1], ...images, images[0], images[1]]
-        : [],
-    [images]
-  );
+  const slides = useMemo(() => {
+    if (images.length === 0) return [];
+    if (images.length === 1) return [images[0], images[0], images[0]];
+    // For infinite loop: clone last before, all images, clone first two after
+    const clones = images.length >= 2
+      ? [images[images.length - 1], ...images, images[0], images[1]]
+      : [images[images.length - 1], ...images, images[0]];
+    return clones;
+  }, [images]);
+
+  // Debug index changes (moved after slides declaration)
+  useEffect(() => {
+    console.log('Banner index:', index, 'of', slides.length, 'slides');
+  }, [index, slides]);
 
   useEffect(() => {
-    if (images.length === 0) return;
+    if (slides.length === 0) return;
     let loadedCount = 0;
-    slides.forEach((src) => {
+    const validSlides = slides.filter(Boolean);
+    if (validSlides.length === 0) {
+      setLoaded(true);
+      return;
+    }
+    const checkDone = () => {
+      loadedCount++;
+      if (loadedCount >= validSlides.length) setLoaded(true);
+    };
+    validSlides.forEach((src) => {
       const img = new Image();
+      img.onload = checkDone;
+      img.onerror = checkDone; // ← penting! jika gambar gagal load, tetap lanjut
       img.src = src;
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === slides.length) setLoaded(true);
-      };
     });
   }, [slides]);
 
@@ -78,9 +109,25 @@ export default function Banner() {
   );
 
   const nextSlide = useCallback(() => {
-    if (transitioning) return;
+    if (transitioning) {
+      // Safety: if transitioning stuck for more than 6 seconds, force reset
+      return;
+    }
     setTransitioning(true);
-    setIndex((prev) => prev + 1);
+    setIndex((prev) => {
+      const next = prev + 1;
+      // Safety timeout: reset transitioning flag after 6 seconds if transitionend doesn't fire
+      setTimeout(() => {
+        setTransitioning((current) => {
+          if (current) {
+            console.warn('Banner: transitioning timeout - forcing reset');
+            return false;
+          }
+          return current;
+        });
+      }, 6000);
+      return next;
+    });
   }, [transitioning]);
 
   const prevSlide = useCallback(() => {
@@ -113,8 +160,10 @@ export default function Banner() {
     if (!slider) return;
 
     const handleTransitionEnd = () => {
+      console.log('Banner transitionEnd fired, index:', index, 'slides.length:', slides.length);
       setTransitioning(false);
       if (index >= slides.length - 2) {
+        console.log('Banner: resetting to start (infinite loop)');
         slider.style.transition = "none";
         setIndex(1);
         slider.style.transform = `translateX(-${getSlideWidth()}px)`;
@@ -123,13 +172,11 @@ export default function Banner() {
             slider.style.transition = "transform 1s ease-in-out";
           })
         );
-      }
-      if (index <= 0) {
+      } else if (index <= 0) {
+        console.log('Banner: resetting to end (infinite loop)');
         slider.style.transition = "none";
         setIndex(slides.length - 3);
-        slider.style.transform = `translateX(-${
-          getSlideWidth() * (slides.length - 3)
-        }px)`;
+        slider.style.transform = `translateX(-${getSlideWidth() * (slides.length - 3)}px)`;
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
             slider.style.transition = "transform 1s ease-in-out";

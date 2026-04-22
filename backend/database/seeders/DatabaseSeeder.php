@@ -43,11 +43,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Winanti, M.Psi - Psikolog Utama
         User::updateOrCreate(
             ['nip' => '333333333'],
             [
-                'name' => 'Psikolog',
-                'email' => 'shavirarai19@gmail.com',
+                'name' => 'Winanti, M.Psi',
+                'email' => 'winanti.psikolog@gmail.com',
                 'password' => 'psikolog',
                 'no_wa' => '+628333333333',
                 'daftar_sebagai' => 'Ditjenpas',

@@ -45,7 +45,14 @@ export default function Footer() {
               <MapPin size={22} className="text-blue-600 shrink-0" />
               <p className="leading-relaxed">
                 <span className="font-bold block mb-1 text-gray-900">Alamat Kantor</span>
-                Jl. Veteran No. 11, Jakarta Pusat, DKI Jakarta
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Jl.+Veteran+No.+11,+Jakarta+Pusat,+DKI+Jakarta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline hover:text-blue-700 transition-colors"
+                >
+                  Jl. Veteran No. 11, Jakarta Pusat, DKI Jakarta
+                </a>
               </p>
             </div>
             

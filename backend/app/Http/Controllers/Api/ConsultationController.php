@@ -67,7 +67,7 @@ class ConsultationController extends Controller
 
     private function canHandleConsultation($user): bool
     {
-        return $this->isPsikolog($user) || $this->isAsisPsikolog($user);
+        return $this->isPsikolog($user) || $this->isAsisPsikolog($user) || $this->isKonsultanTeknis($user);
     }
 
     private function isAdmin($user): bool
@@ -80,30 +80,75 @@ class ConsultationController extends Controller
             || strtolower((string) ($user->daftar_sebagai ?? '')) === 'admin';
     }
 
+    private function isKonsultanTeknis($user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        // Admin atau role konsultan teknis bisa menangani konsultasi teknis
+        return $this->isAdmin($user)
+            || strtolower((string) ($user->status_pengguna ?? '')) === 'konsultan teknis'
+            || strtolower((string) ($user->daftar_sebagai ?? '')) === 'konsultan teknis';
+    }
+
+    /**
+     * Get all consultations for admin dashboard
+     */
+    public function adminIndex(Request $request)
+    {
+        $consultations = Consultation::with(['user', 'psikolog'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'consultations' => $consultations,
+            'total' => $consultations->count(),
+            'active' => $consultations->where('status', 'active')->count(),
+            'completed' => $consultations->where('status', 'completed')->count(),
+        ]);
+    }
+
     /**
      * Get all consultations for the authenticated user
      */
     public function index(Request $request)
     {
         $user = $request->user();
+        $type = $request->query('type'); // Filter by type: 'psikolog' or 'teknis'
+
+        $query = Consultation::with(['user', 'psikolog', 'assignedTo']);
+
+        // Filter by type if specified
+        if ($type) {
+            $query->where('type', $type);
+        }
 
         if ($this->isPsikolog($user) || $this->isAsisPsikolog($user)) {
-            $consultations = Consultation::with(['user', 'psikolog'])
+            // Psikolog hanya bisa melihat konsultasi psikolog yang ditugaskan ke mereka
+            $query->where('type', 'psikolog')
                 ->where('psikolog_id', $user->id)
-                ->where('deleted_by_psikolog', false)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                ->where('deleted_by_psikolog', false);
+        } elseif ($this->isKonsultanTeknis($user)) {
+            // Konsultan teknis bisa melihat semua konsultasi teknis
+            if (!$type || $type === 'teknis') {
+                $query->where(function ($q) use ($user) {
+                    $q->where('type', 'teknis')
+                        ->where(function ($sq) use ($user) {
+                            $sq->whereNull('assigned_to')
+                                ->orWhere('assigned_to', $user->id);
+                        });
+                });
+            }
         } elseif ($this->isAdmin($user)) {
-            $consultations = Consultation::with(['user', 'psikolog'])
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // Admin bisa melihat semua
         } else {
-            $consultations = Consultation::with(['user', 'psikolog'])
-                ->where('user_id', $user->id)
-                ->where('deleted_by_user', false)
-                ->orderBy('created_at', 'desc')
-                ->get();
+            // User biasa hanya bisa melihat konsultasi mereka sendiri
+            $query->where('user_id', $user->id)
+                ->where('deleted_by_user', false);
         }
+
+        $consultations = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json($consultations);
     }
@@ -113,6 +158,55 @@ class ConsultationController extends Controller
      */
     public function store(Request $request)
     {
+        $type = $request->input('type', 'psikolog');
+        \Log::info('Creating consultation', ['type' => $type, 'user_id' => $request->user()->id]);
+
+        if ($type === 'teknis') {
+            // Validasi untuk konsultasi teknis
+            $validated = $request->validate([
+                'subject' => 'required|string|max:255',
+                'description' => 'required|string',
+                'subdit' => 'required|string|in:advokasi,pencegahan',
+                'category' => 'required|string',
+                'urgency' => 'required|string|in:low,medium,high',
+            ]);
+
+            \Log::info('Teknis consultation validated', $validated);
+
+            try {
+                $consultation = Consultation::create([
+                    'user_id' => $request->user()->id,
+                    'type' => 'teknis',
+                    'subject' => $validated['subject'],
+                    'description' => $validated['description'],
+                    'subdit' => $validated['subdit'],
+                    'category' => $validated['category'],
+                    'urgency' => $validated['urgency'],
+                    'status' => 'pending',
+                    'q1' => $validated['subject'], // Store subject in q1 for compatibility
+                    'q2' => $validated['description'], // Store description in q2 for compatibility
+                    'q3' => '', // Default empty for teknis
+                    'q4' => '', // Default empty for teknis
+                    'q5' => '', // Default empty for teknis
+                    'q6' => '', // Default empty for teknis
+                    'q7' => '', // Default empty for teknis
+                ]);
+
+                \Log::info('Teknis consultation created', ['consultation_id' => $consultation->id]);
+
+                return response()->json([
+                    'message' => 'Konsultasi teknis berhasil dikirim',
+                    'consultation' => $consultation->load(['user'])
+                ], 201);
+            } catch (\Exception $e) {
+                \Log::error('Failed to create teknis consultation', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'message' => 'Gagal menyimpan konsultasi: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+
+        // Validasi untuk konsultasi psikolog (default)
         $validated = $request->validate([
             'q1' => 'required|string',
             'q2' => 'required|string',
@@ -146,6 +240,7 @@ class ConsultationController extends Controller
 
         $consultation = Consultation::create([
             'user_id' => $request->user()->id,
+            'type' => 'psikolog',
             'q1' => $validated['q1'],
             'q2' => $validated['q2'],
             'q3' => $validated['q3'],
@@ -169,7 +264,7 @@ class ConsultationController extends Controller
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $consultation = Consultation::with(['user', 'psikolog'])->findOrFail($id);
+        $consultation = Consultation::with(['user', 'psikolog', 'assignedTo'])->findOrFail($id);
 
         if ($this->isAdmin($user)) {
             return response()->json($consultation);
@@ -181,6 +276,17 @@ class ConsultationController extends Controller
 
         if ($this->isPsikolog($user) || $this->isAsisPsikolog($user)) {
             if ($consultation->psikolog_id === $user->id) {
+                return response()->json($consultation);
+            }
+        }
+
+        // Konsultan teknis bisa akses konsultasi teknis
+        if ($this->isKonsultanTeknis($user) && $consultation->type === 'teknis') {
+            // Bisa akses jika: unassigned, assigned ke mereka, atau sudah pernah reply
+            $isUnassigned = is_null($consultation->assigned_to);
+            $isAssignedToMe = $consultation->assigned_to === $user->id;
+
+            if ($isUnassigned || $isAssignedToMe) {
                 return response()->json($consultation);
             }
         }
@@ -227,6 +333,51 @@ class ConsultationController extends Controller
         return response()->json([
             'message' => 'Konsultasi berhasil diperbarui',
             'consultation' => $consultation->load(['user', 'psikolog'])
+        ]);
+    }
+
+    /**
+     * Update teknis consultation status (for Konsultan Teknis only)
+     */
+    public function updateTeknis(Request $request, $id)
+    {
+        $user = $request->user();
+
+        // Only konsultan teknis or admin can update teknis consultations
+        if (!$this->isKonsultanTeknis($user) && !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Hanya Konsultan Teknis yang dapat mengubah konsultasi teknis.'], 403);
+        }
+
+        $consultation = Consultation::findOrFail($id);
+
+        // Only teknis type consultations
+        if ($consultation->type !== 'teknis') {
+            return response()->json(['message' => 'Konsultasi ini bukan tipe teknis.'], 403);
+        }
+
+        // Can only update if unassigned or assigned to current user
+        $isUnassigned = is_null($consultation->assigned_to);
+        $isAssignedToMe = $consultation->assigned_to === $user->id;
+
+        if (!$isUnassigned && !$isAssignedToMe && !$this->isAdmin($user)) {
+            return response()->json(['message' => 'Konsultasi ini sudah ditangani oleh konsultan lain.'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|in:pending,in_progress,completed',
+            'notes' => 'sometimes|string|nullable',
+        ]);
+
+        // Auto-assign if unassigned
+        if ($isUnassigned && !$this->isAdmin($user)) {
+            $validated['assigned_to'] = $user->id;
+        }
+
+        $consultation->update($validated);
+
+        return response()->json([
+            'message' => 'Konsultasi teknis berhasil diperbarui',
+            'consultation' => $consultation->load(['user', 'assignedTo'])
         ]);
     }
 

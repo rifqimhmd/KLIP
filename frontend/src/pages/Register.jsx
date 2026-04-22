@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios';
 import { UPT_BY_PROVINCE, UPT_PROVINCES } from '../lib/uptOptions';
+import Logo from '../components/Logo';
 import { Eye, EyeOff, X } from 'lucide-react';
 
 export default function Register() {
@@ -180,7 +181,7 @@ export default function Register() {
         {/* Header */}
         <div className="text-center mb-8">
           <a href="/" className="inline-block cursor-pointer">
-            <img src="/Logo.png" alt="KLIP Logo" className="h-14 w-auto mx-auto mb-4 drop-shadow hover:opacity-80 transition-opacity" />
+            <Logo className="h-14 w-auto mx-auto mb-4 drop-shadow hover:opacity-80 transition-opacity" alt="KLIP Logo" />
           </a>
           <h1 className="text-3xl font-bold text-blue-700">Daftar Akun</h1>
           <p className="text-gray-500 mt-1 text-sm">Isi data diri Anda untuk bergabung dengan kami</p>
@@ -470,12 +471,12 @@ export default function Register() {
                   {/* Bagian */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Bagian <span className="text-red-500">*</span>
+                      Instansi <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      name="bagian"
-                      value={formData.bagian}
+                      name="instansi"
+                      value={formData.instansi}
                       onChange={handleChange}
                       placeholder="Contoh: Kepatuhan Internal"
                       required
@@ -526,6 +527,7 @@ export default function Register() {
                       <option value="User">User</option>
                       <option value="Psikolog">Psikolog</option>
                       <option value="Asisten Psikolog">Asisten Psikolog</option>
+                      <option value="Konsultan Teknis">Konsultan Teknis</option>
                     </select>
                   </div>
                 </div>

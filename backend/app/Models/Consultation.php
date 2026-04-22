@@ -12,6 +12,7 @@ class Consultation extends Model
 
     protected $fillable = [
         'user_id',
+        'type',
         'q1',
         'q2',
         'q3',
@@ -22,8 +23,14 @@ class Consultation extends Model
         'status',
         'notes',
         'psikolog_id',
+        'assigned_to',
         'deleted_by_user',
         'deleted_by_psikolog',
+        'subject',
+        'description',
+        'subdit',
+        'category',
+        'urgency',
     ];
 
     protected $casts = [
@@ -45,5 +52,13 @@ class Consultation extends Model
     public function psikolog(): BelongsTo
     {
         return $this->belongsTo(User::class, 'psikolog_id');
+    }
+
+    /**
+     * Get the technical consultant assigned to this consultation
+     */
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 }

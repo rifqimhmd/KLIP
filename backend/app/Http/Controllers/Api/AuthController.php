@@ -113,7 +113,7 @@ class AuthController extends Controller
             'no_wa' => 'nullable|string|max:20',
             'pangkat_golongan' => 'nullable|string|max:255',
             'jabatan' => 'nullable|string|max:255',
-            'bagian' => 'nullable|string|max:255',
+            'instansi' => 'nullable|string|max:255',
             'daftar_sebagai' => 'nullable|in:UPT,Kanwil,Ditjenpas',
             'organization_detail' => 'nullable|string|max:255',
         ]);

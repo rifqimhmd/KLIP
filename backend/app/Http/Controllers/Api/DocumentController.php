@@ -20,6 +20,23 @@ class DocumentController extends Controller
     }
 
     /**
+     * Admin documents index - Get all documents for admin dashboard
+     */
+    public function adminIndex(Request $request)
+    {
+        $documents = Document::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'documents' => $documents,
+            'total' => $documents->count(),
+            'published' => $documents->where('status', 'published')->count(),
+            'pending' => $documents->where('status', 'pending')->count(),
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      * Public can see published documents, authenticated users can see their own drafts
      */
@@ -75,6 +92,29 @@ class DocumentController extends Controller
             return response()->json(['error' => 'Only admin can add documents'], 403);
         }
 
+        \Log::info('Document store payload:', $request->all());
+        \Log::info('Has file?', ['file' => $request->hasFile('file')]);
+        \Log::info('Files:', $request->allFiles());
+
+        // Handle cover: uploaded file takes priority over URL string
+        if ($request->hasFile('cover')) {
+            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
+            $coverPath = $request->file('cover')->store('documents/covers', 'public');
+            $coverValue = Storage::disk('public')->url($coverPath);
+        } else {
+            $coverValue = $request->input('cover') ?? null;
+        }
+
+        // Handle document file: uploaded file takes priority over URL string
+        $fileValue = null;
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
+            $filePath = $request->file('file')->store('documents', 'public');
+            $fileValue = Storage::disk('public')->url($filePath);
+        } else {
+            $fileValue = $request->input('file') ?: null;
+        }
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'category'    => 'required|string|in:peraturan,ebook,edukasi',
@@ -83,26 +123,6 @@ class DocumentController extends Controller
             'type'        => 'required|string|in:pdf,video,ebook,other',
             'video_url'   => 'nullable|url',
         ]);
-
-        // Handle cover: uploaded file takes priority over URL string
-        if ($request->hasFile('cover')) {
-            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
-            $coverPath = $request->file('cover')->store('documents/covers', 'public');
-            $coverValue = Storage::disk('public')->url($coverPath);
-        } else {
-            $request->validate(['cover' => 'nullable|string|max:500']);
-            $coverValue = $request->cover ?? null;
-        }
-
-        // Handle document file: uploaded file takes priority over URL string
-        if ($request->hasFile('file')) {
-            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
-            $filePath = $request->file('file')->store('documents', 'public');
-            $fileValue = Storage::disk('public')->url($filePath);
-        } else {
-            $request->validate(['file' => 'nullable|string|max:500']);
-            $fileValue = $request->input('file') ?? null;
-        }
 
         $document = Document::create([
             'user_id'      => $request->user()->id,
@@ -151,6 +171,26 @@ class DocumentController extends Controller
             return response()->json(['error' => 'Document not found'], 404);
         }
 
+        // Handle cover file or URL first
+        $coverValue = null;
+        if ($request->hasFile('cover')) {
+            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
+            $coverPath = $request->file('cover')->store('documents/covers', 'public');
+            $coverValue = Storage::disk('public')->url($coverPath);
+        } elseif ($request->has('cover')) {
+            $coverValue = $request->input('cover') ?: null;
+        }
+
+        // Handle document file or URL first
+        $fileValue = null;
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
+            $filePath = $request->file('file')->store('documents', 'public');
+            $fileValue = Storage::disk('public')->url($filePath);
+        } elseif ($request->has('file')) {
+            $fileValue = $request->input('file') ?: null;
+        }
+
         $validated = $request->validate([
             'title'       => 'sometimes|string|max:255',
             'category'    => 'sometimes|string|in:peraturan,ebook,edukasi',
@@ -160,24 +200,11 @@ class DocumentController extends Controller
             'video_url'   => 'nullable|url',
         ]);
 
-        // Handle cover file or URL
-        if ($request->hasFile('cover')) {
-            $request->validate(['cover' => 'image|mimes:jpeg,png,jpg,gif,webp|max:5120']);
-            $coverPath = $request->file('cover')->store('documents/covers', 'public');
-            $validated['cover'] = Storage::disk('public')->url($coverPath);
-        } elseif ($request->has('cover')) {
-            $request->validate(['cover' => 'nullable|string|max:500']);
-            $validated['cover'] = $request->cover;
+        if ($coverValue !== null) {
+            $validated['cover'] = $coverValue;
         }
-
-        // Handle document file or URL
-        if ($request->hasFile('file')) {
-            $request->validate(['file' => 'file|mimes:pdf,doc,docx,xlsx,xls,pptx,ppt|max:20480']);
-            $filePath = $request->file('file')->store('documents', 'public');
-            $validated['file'] = Storage::disk('public')->url($filePath);
-        } elseif ($request->has('file')) {
-            $request->validate(['file' => 'nullable|string|max:500']);
-            $validated['file'] = $request->input('file');
+        if ($fileValue !== null) {
+            $validated['file'] = $fileValue;
         }
 
         $document->update($validated);

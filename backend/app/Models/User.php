@@ -25,7 +25,7 @@ class User extends Authenticatable
         'nip',
         'pangkat_golongan',
         'jabatan',
-        'bagian',
+        'instansi',
         'no_wa',
         'foto',
         'foto_position_x',
@@ -35,6 +35,7 @@ class User extends Authenticatable
         'is_available',
         'organization_detail',
         'status_approval',
+        'role',
     ];
 
     /**

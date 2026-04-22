@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/axios";
 import UserDropdownMenu from "../components/UserDropdownMenu";
+import Logo from "../components/Logo";
 import { LayoutDashboard, ClipboardList, FileBarChart2, RefreshCw, Star } from "lucide-react";
 
 export default function Reports() {
@@ -272,7 +273,7 @@ export default function Reports() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <a href="/" className="flex items-center">
-            <img src="/Logo.png" alt="KLIP" className="h-10 md:h-11 w-auto object-contain" />
+            <Logo className="h-10 md:h-11 w-auto" alt="KLIP" />
           </a>
           <UserDropdownMenu user={user} onLogout={handleLogout} />
         </div>

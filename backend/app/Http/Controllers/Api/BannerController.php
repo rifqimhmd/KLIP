@@ -45,7 +45,10 @@ class BannerController extends Controller
             ->get()
             ->map(fn($b) => array_merge($b->toArray(), ['image_url' => $b->image_url]));
 
-        return response()->json($banners);
+        return response()->json([
+            'banners' => $banners,
+            'total' => $banners->count()
+        ]);
     }
 
     /** POST /api/admin/banners — create a new banner with image upload */

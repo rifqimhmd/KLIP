@@ -1,0 +1,6 @@
+<!-- Placeholder avatar SVG -->
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" rx="64" fill="#E5E7EB"/>
+  <circle cx="64" cy="52" r="20" fill="#9CA3AF"/>
+  <path d="M24 104C24 88.536 36.536 76 52 76H76C91.464 76 104 88.536 104 104" fill="#9CA3AF"/>
+</svg>

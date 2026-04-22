@@ -27,7 +27,10 @@ class AdminUserController extends Controller
 
         $users = User::orderBy('id', 'desc')->get();
 
-        return response()->json($users);
+        return response()->json([
+            'users' => $users,
+            'total' => $users->count()
+        ]);
     }
 
     public function store(Request $request)
@@ -44,7 +47,7 @@ class AdminUserController extends Controller
             'no_wa' => ['nullable', 'string', 'max:25'],
             'pangkat_golongan' => ['nullable', 'string', 'max:255'],
             'jabatan' => ['nullable', 'string', 'max:255'],
-            'bagian' => ['nullable', 'string', 'max:255'],
+            'instansi' => ['nullable', 'string', 'max:255'],
             'daftar_sebagai' => ['nullable', 'string', 'max:255'],
             'organization_detail' => ['nullable', 'string', 'max:255'],
             'status_pengguna' => ['required', Rule::in(['User', 'Admin', 'Psikolog', 'Asisten Psikolog'])],
@@ -56,7 +59,7 @@ class AdminUserController extends Controller
         }
 
         // Normalize empty strings to null for optional fields
-        foreach (['pangkat_golongan', 'jabatan', 'bagian', 'no_wa', 'daftar_sebagai', 'organization_detail'] as $field) {
+        foreach (['pangkat_golongan', 'jabatan', 'instansi', 'no_wa', 'daftar_sebagai', 'organization_detail'] as $field) {
             if (array_key_exists($field, $validated) && $validated[$field] === '') {
                 $validated[$field] = null;
             }
@@ -86,7 +89,7 @@ class AdminUserController extends Controller
             'no_wa' => ['nullable', 'string', 'max:25'],
             'pangkat_golongan' => ['nullable', 'string', 'max:255'],
             'jabatan' => ['nullable', 'string', 'max:255'],
-            'bagian' => ['nullable', 'string', 'max:255'],
+            'instansi' => ['nullable', 'string', 'max:255'],
             'daftar_sebagai' => ['nullable', 'string', 'max:255'],
             'organization_detail' => ['nullable', 'string', 'max:255'],
             'status_pengguna' => ['required', Rule::in(['User', 'Admin', 'Psikolog', 'Asisten Psikolog'])],
@@ -98,7 +101,7 @@ class AdminUserController extends Controller
         }
 
         // Normalize empty strings to null for optional fields
-        foreach (['pangkat_golongan', 'jabatan', 'bagian', 'no_wa', 'daftar_sebagai', 'organization_detail'] as $field) {
+        foreach (['pangkat_golongan', 'jabatan', 'instansi', 'no_wa', 'daftar_sebagai', 'organization_detail'] as $field) {
             if (array_key_exists($field, $validated) && $validated[$field] === '') {
                 $validated[$field] = null;
             }
@@ -127,5 +130,40 @@ class AdminUserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'User berhasil dihapus']);
+    }
+
+    public function updateFoto(Request $request, string $id)
+    {
+        if (!$this->isAdmin($request->user())) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'foto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/profile'), $filename);
+
+            // Delete old photo if exists
+            if ($user->foto && file_exists(public_path($user->foto))) {
+                @unlink(public_path($user->foto));
+            }
+
+            $user->foto = 'uploads/profile/' . $filename;
+            $user->save();
+
+            return response()->json([
+                'message' => 'Foto profil berhasil diperbarui',
+                'foto_url' => asset($user->foto),
+                'user' => $user
+            ]);
+        }
+
+        return response()->json(['message' => 'Gagal mengupload foto'], 422);
     }
 }

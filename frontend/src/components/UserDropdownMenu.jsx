@@ -81,13 +81,13 @@ export default function UserDropdownMenu({ user, onLogout, onUserUpdate }) {
 
       {open && (
         <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
-          <a href={dashboardPath} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <a href={dashboardPath} className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
             Dashboard
           </a>
-          <a href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <a href="/profile" className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
             Profil
           </a>
-          <a href="/update-password" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <a href="/update-password" className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
             Ubah Password
           </a>
           {isPsikolog && (
