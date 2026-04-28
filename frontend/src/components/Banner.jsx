@@ -25,14 +25,22 @@ export default function Banner() {
         if (Array.isArray(data) && data.length > 0) {
           // Konversi ke relative path agar lewat Vite proxy (hindari CORS)
           const toRelative = (url) => {
-            try {
-              const u = new URL(url);
-              return u.pathname; // "/storage/banners/xxx.jpg"
-            } catch {
-              return url; // sudah relative
+            if (!url) return url;
+            if (url.startsWith('http://localhost:8000/storage/')) {
+              return url.replace('http://localhost:8000/storage/', '/storage/');
             }
+            if (url.startsWith('http://127.0.0.1:8000/storage/')) {
+              return url.replace('http://127.0.0.1:8000/storage/', '/storage/');
+            }
+            return url; // sudah relative
           };
-          const banners = data.map((b) => toRelative(b.image_url));
+          // Add cache-busting timestamp to force reload after update
+          const bustCache = (url) => {
+            if (!url) return url;
+            const separator = url.includes('?') ? '&' : '?';
+            return `${url}${separator}_t=${Date.now()}`;
+          };
+          const banners = data.map((b) => bustCache(toRelative(b.image_url)));
             setApiBanners(banners);
         } else {
                     setApiBanners([]); // empty → use static

@@ -165,7 +165,7 @@ export default function AdminDashboardMenu({
         </div>
         <p className="font-semibold text-gray-800 text-sm mb-1">Foto Psikolog</p>
         <p className="text-xs text-gray-500 mb-3">
-          Upload foto profil tim psikolog.
+          Upload foto profil tim psikologi.
         </p>
         <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-medium">
           {psychologistCount} Psikolog

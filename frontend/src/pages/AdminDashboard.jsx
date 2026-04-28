@@ -21,6 +21,7 @@ import {
   Shield,
 } from "lucide-react";
 import api from "../services/api";
+import { useToast } from "../components/Toast";
 import Logo from "../components/Logo";
 import AdminConsultationSection from "../components/admin/AdminConsultationSection";
 import AdminDashboardMenu from "../components/admin/AdminDashboardMenu";
@@ -52,6 +53,7 @@ const categoryOptions = {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const toast = useToast();
   const emptyUserForm = {
     name: "",
     nip: "",
@@ -134,17 +136,18 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = async () => {
-    if (!confirm("Yakin ingin logout?")) return;
-    
-    try {
-      await api.post("/logout");
-    } catch (err) {
-      void err;
-    } finally {
-      localStorage.removeItem("auth_token");
-      delete api.defaults.headers.common["Authorization"];
-      navigate("/login");
-    }
+    toast.confirm("Yakin ingin logout?", async () => {
+      try {
+        await api.post("/logout");
+      } catch (err) {
+        void err;
+      } finally {
+        localStorage.removeItem("auth_token");
+        delete api.defaults.headers.common["Authorization"];
+        navigate("/login");
+        toast.success("Berhasil logout!");
+      }
+    }, null, { confirmText: "Logout", confirmVariant: "danger" });
   };
 
   const checkAdmin = async () => {
@@ -283,39 +286,44 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!confirm("Yakin ingin menghapus user ini?")) return;
-    
-    try {
-      await api.delete(`/admin/users/${userId}`);
-      await fetchAdminData();
-    } catch (error) {
-      alert("Gagal menghapus user");
-    }
+    toast.confirm("Yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.", async () => {
+      try {
+        await api.delete(`/admin/users/${userId}`);
+        await fetchAdminData();
+        toast.success("User berhasil dihapus!");
+      } catch (error) {
+        toast.error("Gagal menghapus user");
+      }
+    }, null, { confirmText: "Hapus", confirmVariant: "danger" });
   };
 
   const handleApproveUser = async (userId) => {
-    if (!confirm("Yakin ingin approve user ini?")) return;
-    
-    try {
-      await api.post(`/admin/users/${userId}/approve`);
-      await fetchAdminData();
-      alert("User berhasil diapprove!");
-    } catch (error) {
-      alert("Gagal approve user: " + (error.response?.data?.message || error.message));
-    }
+    toast.confirm("Yakin ingin approve user ini?", async () => {
+      try {
+        await api.post(`/admin/users/${userId}/approve`);
+        await fetchAdminData();
+        toast.success("User berhasil diapprove!");
+      } catch (error) {
+        toast.error("Gagal approve user: " + (error.response?.data?.message || error.message));
+      }
+    }, null, { confirmText: "Approve", confirmVariant: "success" });
   };
 
   const handleRejectUser = async (userId) => {
     const reason = prompt("Masukkan alasan penolakan:");
     if (!reason) return;
     
-    try {
-      await api.post(`/admin/users/${userId}/reject`, { rejection_reason: reason });
-      await fetchAdminData();
-      alert("User berhasil direject!");
-    } catch (error) {
-      alert("Gagal reject user: " + (error.response?.data?.message || error.message));
-    }
+    toast.promise(
+      async () => {
+        await api.post(`/admin/users/${userId}/reject`, { rejection_reason: reason });
+        await fetchAdminData();
+      },
+      {
+        loading: "Menolak user...",
+        success: "User berhasil direject!",
+        error: "Gagal reject user"
+      }
+    );
   };
 
   const handleDocFormChange = (e) => {
@@ -410,14 +418,15 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteDoc = async (docId) => {
-    if (!confirm("Yakin ingin menghapus dokumen ini?")) return;
-    
-    try {
-      await api.delete(`/admin/documents/${docId}`);
-      await fetchAdminData();
-    } catch (error) {
-      alert("Gagal menghapus dokumen");
-    }
+    toast.confirm("Yakin ingin menghapus dokumen ini?", async () => {
+      try {
+        await api.delete(`/admin/documents/${docId}`);
+        await fetchAdminData();
+        toast.success("Dokumen berhasil dihapus!");
+      } catch (error) {
+        toast.error("Gagal menghapus dokumen");
+      }
+    }, null, { confirmText: "Hapus", confirmVariant: "danger" });
   };
 
   const handleBannerSubmit = async (e) => {
@@ -523,7 +532,7 @@ export default function AdminDashboard() {
       setProdukImages(prev => ({ ...prev, ...res.data.updated_images }));
       setProdukImageFiles({});
       setProdukImageError("");
-      alert("Gambar produk berhasil diperbarui!");
+      toast.success("Gambar produk berhasil diperbarui!");
     } catch (err) {
       console.error('Upload error:', err);
       console.error('Error response:', err.response?.data);
@@ -534,7 +543,7 @@ export default function AdminDashboard() {
                         "Gagal mengupload gambar produk.";
       
       setProdukImageError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setProdukImageUploading({ all: false });
     }
@@ -548,7 +557,7 @@ export default function AdminDashboard() {
   const handleKasubditPhotoUpload = async (id) => {
     const file = kasubditPhotos[id];
     if (!file) {
-      alert('Pilih foto terlebih dahulu');
+      toast.warning('Pilih foto terlebih dahulu');
       return;
     }
 
@@ -561,7 +570,7 @@ export default function AdminDashboard() {
 
       const res = await api.post(`/kasubdit/${id}/upload-photo`, fd);
 
-      alert('Foto berhasil diupload!');
+      toast.success('Foto berhasil diupload!');
       setKasubditPhotos(prev => ({ ...prev, [id]: null }));
     } catch (err) {
       console.error('Upload error:', err);
@@ -569,7 +578,7 @@ export default function AdminDashboard() {
                         err.response?.data?.error || 
                         "Gagal mengupload foto.";
       setKasubditPhotoError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setKasubditPhotoUploading(prev => ({ ...prev, [id]: false }));
     }
@@ -583,7 +592,7 @@ export default function AdminDashboard() {
   const handlePsychologistPhotoUpload = async (id) => {
     const file = psychologistPhotos[id];
     if (!file) {
-      alert('Pilih foto terlebih dahulu');
+      toast.warning('Pilih foto terlebih dahulu');
       return;
     }
 
@@ -598,7 +607,7 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      alert('Foto psikolog berhasil diupload!');
+      toast.success('Foto psikolog berhasil diupload!');
       setPsychologistPhotos(prev => ({ ...prev, [id]: null }));
       fetchAdminData(); // Refresh user list to get updated photo URLs
     } catch (err) {
@@ -607,7 +616,7 @@ export default function AdminDashboard() {
                         err.response?.data?.error || 
                         "Gagal mengupload foto.";
       setPsychologistPhotoError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setPsychologistPhotoUploading(prev => ({ ...prev, [id]: false }));
     }
@@ -626,7 +635,7 @@ export default function AdminDashboard() {
 
       const res = await api.post("/admin/banners", fd);
 
-      alert(`Banner ${order} berhasil diupload!`);
+      toast.success(`Banner ${order} berhasil diupload!`);
       fetchBanners();
     } catch (err) {
       console.error("Banner upload error:", err);
@@ -635,7 +644,7 @@ export default function AdminDashboard() {
         err.response?.data?.error ||
         "Gagal mengupload banner.";
       setBannerError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setBannerSubmitting(false);
     }
@@ -646,27 +655,25 @@ export default function AdminDashboard() {
     try {
       await api.put(`/admin/banners/${id}`, { is_active: isActive });
       fetchBanners();
-      alert(`Banner ${isActive ? "diaktifkan" : "dinonaktifkan"}!`);
+      toast.success(`Banner ${isActive ? "diaktifkan" : "dinonaktifkan"}!`);
     } catch (err) {
       console.error("Toggle banner error:", err);
-      alert("Gagal mengubah status banner.");
+      toast.error("Gagal mengubah status banner.");
     }
   };
 
   // Handle Delete Banner
   const handleDeleteBanner = async (id) => {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus banner ini?")) {
-      return;
-    }
-
-    try {
-      await api.delete(`/admin/banners/${id}`);
-      fetchBanners();
-      alert("Banner berhasil dihapus!");
-    } catch (err) {
-      console.error("Delete banner error:", err);
-      alert("Gagal menghapus banner.");
-    }
+    toast.confirm("Apakah Anda yakin ingin menghapus banner ini?", async () => {
+      try {
+        await api.delete(`/admin/banners/${id}`);
+        fetchBanners();
+        toast.success("Banner berhasil dihapus!");
+      } catch (err) {
+        console.error("Delete banner error:", err);
+        toast.error("Gagal menghapus banner.");
+      }
+    }, null, { confirmText: "Hapus", confirmVariant: "danger" });
   };
 
   // Handle Logo Upload
@@ -682,13 +689,13 @@ export default function AdminDashboard() {
 
       const res = await api.post("/admin/logos", fd);
       
-      alert("Logo berhasil diupload!");
+      toast.success("Logo berhasil diupload!");
       fetchAdminData();
     } catch (err) {
       console.error("Logo upload error:", err);
       const errorMessage = err.response?.data?.message || "Gagal mengupload logo.";
       setLogoError(errorMessage);
-      alert(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
     } finally {
       setLogoUploading({ ...logoUploading, [logoKey]: false });
     }
@@ -1864,19 +1871,20 @@ export default function AdminDashboard() {
                           </button>
                         </div>
 
-                        {/* Toggle Active */}
-                        {banner && (
-                          <button
-                            onClick={() => handleToggleBannerActive(banner.id, !banner.is_active)}
-                            className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition ${
-                              banner.is_active
-                                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
-                          >
-                            {banner.is_active ? "Nonaktifkan" : "Aktifkan"}
-                          </button>
-                        )}
+                        {/* Toggle Active - selalu muncul untuk semua slot */}
+                        <button
+                          onClick={() => banner ? handleToggleBannerActive(banner.id, !banner.is_active) : toast.info("Upload gambar terlebih dahulu")}
+                          disabled={!banner}
+                          className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition ${
+                            banner?.is_active
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : banner 
+                                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          }`}
+                        >
+                          {!banner ? "Upload dulu untuk Aktifkan" : (banner.is_active ? "Nonaktifkan" : "Aktifkan")}
+                        </button>
 
                         {/* Delete Button */}
                         {banner && (
@@ -2308,7 +2316,7 @@ export default function AdminDashboard() {
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <Users className="w-5 h-5 text-purple-600" />
-                  Upload Foto Tim Psikolog
+                  Upload Foto Tim Psikologi
                 </h2>
                 <button onClick={() => handleViewChange("menu")} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition">
                   <ArrowLeft className="w-4 h-4" /> Kembali

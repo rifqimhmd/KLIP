@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../lib/axios";
+import { useToast } from "./Toast";
 
 export default function Profil({ initialUser }) {
   const apiBaseUrl = (import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/$/, "");
+  const toast = useToast();
   const [user, setUser] = useState(initialUser);
   const [editField, setEditField] = useState({});
   const [uploading, setUploading] = useState(false);
@@ -24,7 +26,7 @@ export default function Profil({ initialUser }) {
 
   const handleSave = async () => {
     if (!currentPassword) {
-      alert('Masukkan password saat ini untuk menyimpan perubahan.');
+      toast.warning('Masukkan password saat ini untuk menyimpan perubahan.');
       return;
     }
     try {
@@ -57,11 +59,11 @@ export default function Profil({ initialUser }) {
         }));
       }
 
-      alert("Perubahan disimpan");
+      toast.success("Perubahan disimpan");
       setEditField({});
       setCurrentPassword('');
     } catch (error) {
-      alert(
+      toast.error(
         error?.response?.data?.errors?.email?.[0] ||
         error?.response?.data?.errors?.no_wa?.[0] ||
         error?.response?.data?.errors?.current_password?.[0] ||
@@ -78,12 +80,12 @@ export default function Profil({ initialUser }) {
     if (!file) return;
 
     if (!file.type?.startsWith("image/")) {
-      alert("File harus berupa gambar (image).");
+      toast.error("File harus berupa gambar (image).");
       return;
     }
 
     if (file.size > 1 * 1024 * 1024) {
-      alert("Ukuran foto maksimal 1MB.");
+      toast.warning("Ukuran foto maksimal 1MB.");
       return;
     }
 
@@ -103,9 +105,9 @@ export default function Profil({ initialUser }) {
         foto_position_x: Number(response.data?.foto_position_x ?? prev.foto_position_x ?? 50),
         foto_position_y: Number(response.data?.foto_position_y ?? prev.foto_position_y ?? 50),
       }));
-      alert("Foto profil berhasil diperbarui");
+      toast.success("Foto profil berhasil diperbarui");
     } catch (error) {
-      alert(
+      toast.error(
         error?.response?.data?.errors?.foto?.[0] ||
           error?.response?.data?.message ||
           "Gagal upload foto"

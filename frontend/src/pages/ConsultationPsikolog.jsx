@@ -731,25 +731,25 @@ export default function ConsultationPsikolog() {
               {view === 'choose_psikolog' && !isPsikolog && (
                 <div className="mt-4">
                   <div className="text-center mb-10">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-3 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Tim Psikolog PATNAL</h2>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-3 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Tim Psikologi</h2>
                     <p className="text-gray-600 text-lg">Konselor profesional kami siap mendampingi kesehatan mental dan wellbeing Anda.</p>
                   </div>
 
                   {psychologistsLoading && (
                     <div className="text-center py-12">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Memuat data tim psikolog...</p>
+                      <p className="text-gray-600">Memuat data tim psikologi...</p>
                     </div>
                   )}
 
                   {!psychologistsLoading && psychologists.length === 0 && (
                     <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-                      <p className="text-gray-500">Belum ada psikolog yang terdaftar saat ini.</p>
+                      <p className="text-gray-500">Belum ada Psikologi yang terdaftar saat ini.</p>
                     </div>
                   )}
 
                   {!psychologistsLoading && psychologists.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10 place-items-center">
                       {psychologists.map((psikolog) => {
                         const isSelected = selectedPsychologistId === psikolog.id;
 
