@@ -161,6 +161,8 @@ export default function Header() {
 
             <a href="/pengaduan" className="text-gray-700 hover:text-blue-600 transition">Pengaduan</a>
 
+            <a href="/was-in" className="text-gray-700 hover:text-blue-600 transition">Was-In</a>
+
             <a href="/survey" className="text-gray-700 hover:text-blue-600 transition">Survey Kepuasan</a>
 
             <a href="/tentang" className="text-gray-700 hover:text-blue-600 transition">Tentang Kami</a>
@@ -215,6 +217,8 @@ export default function Header() {
           </a>
 
           <a href="/pengaduan" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Pengaduan</a>
+
+          <a href="/was-in" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Was-In</a>
 
           <a href="/survey" className="px-6 py-4 text-gray-700 hover:bg-blue-50 font-medium border-b border-gray-50" onClick={closeMobileMenu}>Survey Kepuasan</a>
 

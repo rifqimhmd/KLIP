@@ -16,6 +16,7 @@ import KonsultanTeknisDashboard from "./pages/KonsultanTeknisDashboard";
 import LaporanTeknis from "./pages/LaporanTeknis";
 import Survey from "./pages/Survey";
 import Pengaduan from "./pages/Pengaduan";
+import WasIn from "./pages/WasIn";
 import Chat from "./pages/Chat";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminReports from "./pages/AdminReports";
@@ -33,6 +34,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tentang" element={<Tentang />} />
+        <Route path="/was-in" element={<WasIn />} />
         <Route path="/survey" element={<Survey />} />
         {/* Public Routes */}
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />

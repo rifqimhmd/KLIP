@@ -670,7 +670,7 @@ export default function ConsultationPsikolog() {
                         <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
                           <MessageSquare className="w-6 h-6 text-purple-600 group-hover:text-white transition-colors" />
                         </div>
-                        <p className="font-semibold text-gray-800 text-lg mb-2">Chat Konsultasi Psikolog</p>
+                        <p className="font-semibold text-gray-800 text-lg mb-2">Chat Konsultasi Psikologi</p>
                         <p className="text-sm text-gray-500 leading-relaxed">Akses percakapan dengan klien untuk sesi konseling.</p>
                       </a>
 
@@ -710,8 +710,8 @@ export default function ConsultationPsikolog() {
                         <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:bg-purple-600 transition-colors">
                           <MessageSquare className="w-6 h-6 text-purple-600 group-hover:text-white transition-colors" />
                         </div>
-                        <p className="font-semibold text-gray-800 text-lg mb-2">Chat Konsultasi Psikolog</p>
-                        <p className="text-sm text-gray-500 leading-relaxed">Lihat dan lanjutkan chat konsultasi psikolog Anda.</p>
+                        <p className="font-semibold text-gray-800 text-lg mb-2">Chat Konsultasi Psikologi</p>
+                        <p className="text-sm text-gray-500 leading-relaxed">Lihat dan lanjutkan chat konsultasi psikologi Anda.</p>
                       </a>
 
                       <a href="/dashboard" className="group text-left bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-100 shadow-sm hover:shadow-lg hover:border-green-200 transition-all p-6 overflow-hidden relative h-full">
@@ -732,7 +732,7 @@ export default function ConsultationPsikolog() {
                 <div className="mt-4">
                   <div className="text-center mb-10">
                     <h2 className="text-3xl font-bold text-gray-800 mb-3 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Tim Psikologi</h2>
-                    <p className="text-gray-600 text-lg">Konselor profesional kami siap mendampingi kesehatan mental dan wellbeing Anda.</p>
+                    <p className="text-gray-600 text-lg">Konselor profesional kami siap mendampingi kesehatan mental Anda.</p>
                   </div>
 
                   {psychologistsLoading && (
