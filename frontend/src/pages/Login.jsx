@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import api from '../lib/axios';
 import { Eye, EyeOff, Lock, User, ArrowRight, CheckCircle, MessageCircle, Settings } from 'lucide-react';
+import TextCaptcha from '../components/TextCaptcha';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Login() {
   const [nip, setNip] = useState('');
@@ -16,26 +18,16 @@ export default function Login() {
   });
   
   // CAPTCHA states
-  const [captchaNum1, setCaptchaNum1] = useState(0);
-  const [captchaNum2, setCaptchaNum2] = useState(0);
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaValid, setCaptchaValid] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState('');
+  
+  // Login confirmation modal
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingLoginData, setPendingLoginData] = useState(null);
   
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
-  
-  // Generate new CAPTCHA on mount
-  useEffect(() => {
-    generateCaptcha();
-  }, []);
-  
-  const generateCaptcha = () => {
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    setCaptchaNum1(num1);
-    setCaptchaNum2(num2);
-    setCaptchaAnswer('');
-  };
 
   // Fetch logos from site-settings
   useEffect(() => {
@@ -59,18 +51,27 @@ export default function Login() {
     setError(null);
     
     // Validate CAPTCHA
-    const expectedAnswer = captchaNum1 + captchaNum2;
-    const userAnswer = parseInt(captchaAnswer);
-    
-    if (isNaN(userAnswer) || userAnswer !== expectedAnswer) {
-      setError('Jawaban CAPTCHA salah. Silakan coba lagi.');
-      generateCaptcha();
+    if (!captchaValid || !captchaInput) {
+      setError('Jawaban CAPTCHA salah atau belum diisi. Silakan coba lagi.');
       return;
     }
     
-    setLoading(true);
+    // Show confirmation modal before login
     const identifier = nip.trim();
-    const userPassword = password.trim();
+    if (!identifier || !password.trim()) {
+      setError('NIP dan password harus diisi.');
+      return;
+    }
+    
+    setPendingLoginData({ identifier, password: password.trim() });
+    setShowLoginModal(true);
+  };
+  
+  const executeLogin = async () => {
+    setShowLoginModal(false);
+    setLoading(true);
+    
+    const { identifier, password: userPassword } = pendingLoginData;
     console.log('Login request data:', { nip: identifier, password: userPassword });
     try {
       // POST to login route (returns bearer token)
@@ -258,38 +259,11 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* CAPTCHA - Simple Math */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Verifikasi Keamanan
-                </label>
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-50 px-4 py-2.5 rounded-xl border border-blue-100">
-                    <span className="text-lg font-semibold text-blue-700">
-                      {captchaNum1} + {captchaNum2} = ?
-                    </span>
-                  </div>
-                  <input
-                    type="number"
-                    value={captchaAnswer}
-                    onChange={(e) => setCaptchaAnswer(e.target.value)}
-                    placeholder="Jawaban"
-                    required
-                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  />
-                  <button
-                    type="button"
-                    onClick={generateCaptcha}
-                    className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition"
-                    title="Ganti soal"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">Masukkan hasil penjumlahan di atas</p>
-              </div>
+              {/* CAPTCHA - Text Scrambled */}
+              <TextCaptcha 
+                onValidate={setCaptchaValid}
+                onChange={setCaptchaInput}
+              />
 
               {/* Forgot password */}
               <div className="flex justify-end">
@@ -356,6 +330,18 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Login Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onConfirm={executeLogin}
+        title="Konfirmasi Login"
+        message={`Anda akan login dengan NIP: ${pendingLoginData?.identifier || ''}. Pastikan data Anda sudah benar.`}
+        confirmText="Ya, Login"
+        cancelText="Batal"
+        type="login"
+      />
     </div>
   );
 }

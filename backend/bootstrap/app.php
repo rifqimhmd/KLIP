@@ -38,5 +38,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Hide detailed error messages in production (prevent information disclosure)
+        $exceptions->render(function (Throwable $e, $request) {
+            if (config('app.debug') === false) {
+                if ($request->is('api/*')) {
+                    return response()->json([
+                        'message' => 'An error occurred. Please try again later.'
+                    ], 500);
+                }
+            }
+        });
     })->create();

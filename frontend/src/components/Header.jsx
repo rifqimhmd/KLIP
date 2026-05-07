@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import api from "../lib/axios";
 import { ChevronDown } from "lucide-react";
+import ConfirmModal from "./ConfirmModal";
 
 export default function Header() {
   const location = useLocation();
@@ -10,6 +11,7 @@ export default function Header() {
   const [currentUser, setCurrentUser] = useState(null);
   const [showKonsultasiDropdown, setShowKonsultasiDropdown] = useState(false);
   const [homeLogo, setHomeLogo] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // === HIDE HEADER ON SCROLL ===
   useEffect(() => {
@@ -170,7 +172,7 @@ export default function Header() {
             {currentUser ? (
               <>
                 <a href={dashboardPath} className="text-gray-700 hover:text-blue-600 transition">{currentUser.name}</a>
-                <button onClick={handleLogout} className="text-red-600 hover:text-red-700 transition">Logout</button>
+                <button onClick={() => setShowLogoutModal(true)} className="text-red-600 hover:text-red-700 transition">Logout</button>
               </>
             ) : (
               <a href="/login" className="text-gray-700 hover:text-blue-600 transition">Login</a>
@@ -230,7 +232,7 @@ export default function Header() {
               <button
                 onClick={() => {
                   closeMobileMenu();
-                  handleLogout();
+                  setShowLogoutModal(true);
                 }}
                 className="px-6 py-4 text-left text-red-600 hover:bg-red-50 font-medium border-b border-gray-50"
               >
@@ -247,6 +249,21 @@ export default function Header() {
       {showMobileMenu && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[55] transition-opacity" onClick={closeMobileMenu}></div>
       )}
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={() => {
+          setShowLogoutModal(false);
+          handleLogout();
+        }}
+        title="Konfirmasi Logout"
+        message="Apakah Anda yakin ingin keluar dari sistem PATNAL Integrity Hub?"
+        confirmText="Ya, Logout"
+        cancelText="Batal"
+        type="logout"
+      />
     </>
   );
 }
