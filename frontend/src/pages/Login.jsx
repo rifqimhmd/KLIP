@@ -14,9 +14,28 @@ export default function Login() {
     login_logo_kemenkumham: null,
     login_logo_ditjen: null
   });
+  
+  // CAPTCHA states
+  const [captchaNum1, setCaptchaNum1] = useState(0);
+  const [captchaNum2, setCaptchaNum2] = useState(0);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/dashboard';
+  
+  // Generate new CAPTCHA on mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+  
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptchaNum1(num1);
+    setCaptchaNum2(num2);
+    setCaptchaAnswer('');
+  };
 
   // Fetch logos from site-settings
   useEffect(() => {
@@ -38,6 +57,17 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    
+    // Validate CAPTCHA
+    const expectedAnswer = captchaNum1 + captchaNum2;
+    const userAnswer = parseInt(captchaAnswer);
+    
+    if (isNaN(userAnswer) || userAnswer !== expectedAnswer) {
+      setError('Jawaban CAPTCHA salah. Silakan coba lagi.');
+      generateCaptcha();
+      return;
+    }
+    
     setLoading(true);
     const identifier = nip.trim();
     const userPassword = password.trim();
@@ -226,6 +256,39 @@ export default function Login() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+              </div>
+
+              {/* CAPTCHA - Simple Math */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Verifikasi Keamanan
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="bg-blue-50 px-4 py-2.5 rounded-xl border border-blue-100">
+                    <span className="text-lg font-semibold text-blue-700">
+                      {captchaNum1} + {captchaNum2} = ?
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    value={captchaAnswer}
+                    onChange={(e) => setCaptchaAnswer(e.target.value)}
+                    placeholder="Jawaban"
+                    required
+                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={generateCaptcha}
+                    className="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition"
+                    title="Ganti soal"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Masukkan hasil penjumlahan di atas</p>
               </div>
 
               {/* Forgot password */}
