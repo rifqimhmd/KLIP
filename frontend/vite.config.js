@@ -31,7 +31,6 @@ export default defineConfig(({ mode }) => {
       },
     ],
     server: {
-      https: true,
       headers: {
         "Permissions-Policy": "compute-pressure=()",
       },
