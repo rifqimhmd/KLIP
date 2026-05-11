@@ -21,6 +21,7 @@ import {
   Clock,
   Bell,
   TrendingUp,
+  BarChart3,
   Shield,
   HeadphonesIcon,
   FileText,
@@ -201,13 +202,29 @@ export default function Dashboard() {
                   </>
                 )}
                 {isPsikolog && (
-                  <a
-                    href="/reports"
-                    className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent"
-                  >
-                    <FileBarChart2 className="w-4 h-4 flex-shrink-0" />
-                    Laporan
-                  </a>
+                  <>
+                    <a
+                      href="/laporan/harian"
+                      className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent"
+                    >
+                      <Calendar className="w-4 h-4 flex-shrink-0" />
+                      Laporan Harian
+                    </a>
+                    <a
+                      href="/laporan/bulanan"
+                      className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent"
+                    >
+                      <TrendingUp className="w-4 h-4 flex-shrink-0" />
+                      Laporan Bulanan
+                    </a>
+                    <a
+                      href="/laporan/tahunan"
+                      className="flex items-center gap-3 px-4 py-2.5 text-gray-600 hover:bg-gray-50 transition text-sm border-l-4 border-transparent"
+                    >
+                      <BarChart3 className="w-4 h-4 flex-shrink-0" />
+                      Laporan Tahunan
+                    </a>
+                  </>
                 )}
                 {isKonsultanTeknis && (
                   <a
