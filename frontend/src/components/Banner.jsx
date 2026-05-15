@@ -1,68 +1,83 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import api from "../lib/axios";
+import { resolvePublicStorageUrl } from "../lib/storageUrl";
 
-const STATIC_IMAGES = [
-  "/images/banner/1.png",
-  "/images/banner/2.png",
-  "/images/banner/3.png",
-];
+const TRANSITION_MS = 1000;
+const TRANSITION_SAFETY_MS = TRANSITION_MS + 350;
+
+function normalizeBannersPayload(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.data)) return data.data;
+  if (data && Array.isArray(data.banners)) return data.banners;
+  return [];
+}
+
+function toBannerSrc(item) {
+  if (!item || typeof item !== "object") return null;
+  const raw = item.image_url ?? item.imageUrl;
+  if (!raw || typeof raw !== "string") return null;
+  const resolved = resolvePublicStorageUrl(raw.trim());
+  if (!resolved) return null;
+  const sep = resolved.includes("?") ? "&" : "?";
+  return `${resolved}${sep}_t=${Date.now()}`;
+}
 
 export default function Banner() {
   const sliderRef = useRef(null);
   const [index, setIndex] = useState(1);
-  const [transitioning, setTransitioning] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const [fetchState, setFetchState] = useState("loading"); // loading | ready | empty
+  const [apiBanners, setApiBanners] = useState([]);
   const autoSlideRef = useRef(null);
-  const [apiBanners, setApiBanners] = useState(null); // null = not yet fetched
+  const safetyTimerRef = useRef(null);
+  const transitioningRef = useRef(false);
+  const layoutOnceRef = useRef(false);
+  const indexRef = useRef(1);
 
-  // Fetch banners from API
   useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  const clearSafetyTimer = useCallback(() => {
+    if (safetyTimerRef.current) {
+      clearTimeout(safetyTimerRef.current);
+      safetyTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
     api
       .get("/banners")
       .then((res) => {
-        const data = res?.data;
-        if (Array.isArray(data) && data.length > 0) {
-          // Konversi ke relative path agar lewat Vite proxy (hindari CORS)
-          const toRelative = (url) => {
-            if (!url) return url;
-            if (url.startsWith('http://localhost:8000/storage/')) {
-              return url.replace('http://localhost:8000/storage/', '/storage/');
-            }
-            if (url.startsWith('http://127.0.0.1:8000/storage/')) {
-              return url.replace('http://127.0.0.1:8000/storage/', '/storage/');
-            }
-            return url; // sudah relative
-          };
-          // Add cache-busting timestamp to force reload after update
-          const bustCache = (url) => {
-            if (!url) return url;
-            const separator = url.includes('?') ? '&' : '?';
-            return `${url}${separator}_t=${Date.now()}`;
-          };
-          const banners = data.map((b) => bustCache(toRelative(b.image_url)));
-            setApiBanners(banners);
-        } else {
-                    setApiBanners([]); // empty → use static
-        }
+        if (cancelled) return;
+        const list = normalizeBannersPayload(res?.data);
+        const urls = list
+          .map(toBannerSrc)
+          .filter((u) => typeof u === "string" && u.length > 0);
+        setApiBanners(urls);
+        setFetchState(urls.length > 0 ? "ready" : "empty");
       })
       .catch((err) => {
-        console.error('Banner fetch error:', err);
-        setApiBanners([]); // error → use static
+        console.error("Banner fetch error:", err);
+        if (!cancelled) {
+          setApiBanners([]);
+          setFetchState("empty");
+        }
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const images = useMemo(() => {
-    if (apiBanners === null) return []; // still loading
-    return apiBanners.length > 0 ? apiBanners : STATIC_IMAGES;
-  }, [apiBanners]);
+  const images = apiBanners;
 
   const slides = useMemo(() => {
     if (images.length === 0) return [];
     if (images.length === 1) return [images[0], images[0], images[0]];
-    // For infinite loop: clone last before, all images, clone first two after
-    const clones = images.length >= 2
-      ? [images[images.length - 1], ...images, images[0], images[1]]
-      : [images[images.length - 1], ...images, images[0]];
+    const clones =
+      images.length >= 2
+        ? [images[images.length - 1], ...images, images[0], images[1]]
+        : [images[images.length - 1], ...images, images[0]];
     return clones;
   }, [images]);
 
@@ -74,37 +89,18 @@ export default function Banner() {
   }, [images.length, index]);
 
   useEffect(() => {
-    if (images.length > 0) {
-      setIndex(1);
-    }
-  }, [images.length]);
-
-  useEffect(() => {
-    if (slides.length === 0) return;
-    let loadedCount = 0;
-    const validSlides = slides.filter(Boolean);
-    if (validSlides.length === 0) {
-      setLoaded(true);
-      return;
-    }
-    const checkDone = () => {
-      loadedCount++;
-      if (loadedCount >= validSlides.length) setLoaded(true);
-    };
-    validSlides.forEach((src) => {
-      const img = new Image();
-      img.onload = checkDone;
-      img.onerror = checkDone; // ← penting! jika gambar gagal load, tetap lanjut
-      img.src = src;
-    });
-  }, [slides]);
+    if (images.length === 0) return;
+    setIndex(1);
+    layoutOnceRef.current = false;
+  }, [images.join("|")]);
 
   const getSlideWidth = useCallback(() => {
     const slider = sliderRef.current;
     if (!slider) return 0;
     const slide = slider.children[0];
+    if (!slide) return 0;
     const style = window.getComputedStyle(slider);
-    const gap = window.innerWidth >= 768 ? parseInt(style.gap) || 0 : 0;
+    const gap = window.innerWidth >= 768 ? parseInt(style.gap, 10) || 0 : 0;
     return slide.offsetWidth + gap;
   }, []);
 
@@ -113,40 +109,40 @@ export default function Banner() {
       const slider = sliderRef.current;
       if (!slider) return;
       slider.style.transition = withTransition
-        ? "transform 1s ease-in-out"
+        ? `transform ${TRANSITION_MS}ms ease-in-out`
         : "none";
-      slider.style.transform = `translateX(-${getSlideWidth() * i}px)`;
+      const w = getSlideWidth();
+      slider.style.transform = `translateX(-${w * i}px)`;
     },
     [getSlideWidth]
   );
 
+  const beginSlideTransition = useCallback(() => {
+    if (transitioningRef.current) return false;
+    transitioningRef.current = true;
+    clearSafetyTimer();
+    safetyTimerRef.current = setTimeout(() => {
+      if (transitioningRef.current) {
+        transitioningRef.current = false;
+      }
+    }, TRANSITION_SAFETY_MS);
+    return true;
+  }, [clearSafetyTimer]);
+
+  const endSlideTransition = useCallback(() => {
+    clearSafetyTimer();
+    transitioningRef.current = false;
+  }, [clearSafetyTimer]);
+
   const nextSlide = useCallback(() => {
-    if (transitioning) {
-      // Safety: if transitioning stuck for more than 6 seconds, force reset
-      return;
-    }
-    setTransitioning(true);
-    setIndex((prev) => {
-      const next = prev + 1;
-      // Safety timeout: reset transitioning flag after 6 seconds if transitionend doesn't fire
-      setTimeout(() => {
-        setTransitioning((current) => {
-          if (current) {
-            console.warn('Banner: transitioning timeout - forcing reset');
-            return false;
-          }
-          return current;
-        });
-      }, 6000);
-      return next;
-    });
-  }, [transitioning]);
+    if (!beginSlideTransition()) return;
+    setIndex((prev) => prev + 1);
+  }, [beginSlideTransition]);
 
   const prevSlide = useCallback(() => {
-    if (transitioning) return;
-    setTransitioning(true);
+    if (!beginSlideTransition()) return;
     setIndex((prev) => prev - 1);
-  }, [transitioning]);
+  }, [beginSlideTransition]);
 
   const startAutoSlide = useCallback(() => {
     clearInterval(autoSlideRef.current);
@@ -155,68 +151,67 @@ export default function Banner() {
 
   const goToSlide = useCallback(
     (i) => {
+      clearSafetyTimer();
+      transitioningRef.current = false;
       setIndex(i);
       startAutoSlide();
     },
-    [startAutoSlide]
+    [clearSafetyTimer, startAutoSlide]
   );
 
   useEffect(() => {
-    if (!loaded) return;
+    if (fetchState !== "ready") return;
     startAutoSlide();
     return () => clearInterval(autoSlideRef.current);
-  }, [loaded, startAutoSlide]);
+  }, [fetchState, startAutoSlide]);
+
+  const handleTransitionEnd = useCallback(
+    (e) => {
+      if (e.target !== e.currentTarget) return;
+      if (e.propertyName !== "transform") return;
+
+      endSlideTransition();
+
+      const slider = sliderRef.current;
+      if (!slider || images.length === 0) return;
+
+      setIndex((current) => {
+        if (current > images.length) {
+          slider.style.transition = "none";
+          const w = getSlideWidth();
+          slider.style.transform = `translateX(-${w}px)`;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              slider.style.transition = `transform ${TRANSITION_MS}ms ease-in-out`;
+            })
+          );
+          return 1;
+        }
+        if (current < 1) {
+          slider.style.transition = "none";
+          const w = getSlideWidth();
+          slider.style.transform = `translateX(-${w * images.length}px)`;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              slider.style.transition = `transform ${TRANSITION_MS}ms ease-in-out`;
+            })
+          );
+          return images.length;
+        }
+        return current;
+      });
+    },
+    [endSlideTransition, getSlideWidth, images.length]
+  );
 
   useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const handleTransitionEnd = () => {
-      setTransitioning(false);
-      if (index > images.length) {
-        slider.style.transition = "none";
-        setIndex(1);
-        slider.style.transform = `translateX(-${getSlideWidth()}px)`;
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            slider.style.transition = "transform 1s ease-in-out";
-          })
-        );
-      } else if (index < 1) {
-        slider.style.transition = "none";
-        setIndex(images.length);
-        slider.style.transform = `translateX(-${getSlideWidth() * images.length}px)`;
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            slider.style.transition = "transform 1s ease-in-out";
-          })
-        );
-      }
-    };
-
-    slider.addEventListener("transitionend", handleTransitionEnd);
-    
-    // Fallback: reset transitioning after 2.5s if transitionend doesn't fire
-    const fallbackTimeout = setTimeout(() => {
-      if (transitioning) {
-        setTransitioning(false);
-      }
-    }, 2500);
-    
-    return () => {
-      slider.removeEventListener("transitionend", handleTransitionEnd);
-      clearTimeout(fallbackTimeout);
-    };
-  }, [getSlideWidth, images.length, index, transitioning]);
-
-  useEffect(() => {
+    if (fetchState !== "ready") return;
     moveToSlide(index, true);
-  }, [index, moveToSlide]);
+  }, [index, moveToSlide, fetchState]);
 
-  // Swipe
   useEffect(() => {
     const slider = sliderRef.current;
-    if (!slider) return;
+    if (!slider || fetchState !== "ready") return;
     let startX = 0;
     let moveX = 0;
     let isSwiping = false;
@@ -249,53 +244,78 @@ export default function Banner() {
       slider.removeEventListener("touchmove", handleMove);
       slider.removeEventListener("touchend", handleEnd);
     };
-  }, [nextSlide, prevSlide, startAutoSlide]);
+  }, [nextSlide, prevSlide, startAutoSlide, fetchState]);
 
-  // Resize
   useEffect(() => {
     const handleResize = () => moveToSlide(index, false);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [index, moveToSlide]);
 
+  useEffect(() => () => clearSafetyTimer(), [clearSafetyTimer]);
+
+  if (fetchState === "loading") {
+    return (
+      <section className="relative w-full overflow-hidden">
+        <div className="flex justify-center items-center h-[300px]">
+          <p className="text-gray-500">Memuat banner…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (fetchState === "empty") {
+    return (
+      <section className="relative w-full overflow-hidden">
+        <div className="flex flex-col justify-center items-center h-[220px] md:h-[280px] px-6 text-center bg-gradient-to-br from-slate-50 to-slate-100 border-b border-slate-200">
+          <p className="text-slate-700 font-medium">Belum ada banner aktif</p>
+          <p className="text-slate-500 text-sm mt-2 max-w-md">
+            Halaman ini hanya menampilkan banner berstatus <strong>Aktif</strong>. Di admin, setelah upload gambar, tekan{" "}
+            <strong>Aktifkan</strong> pada slot tersebut.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full overflow-hidden">
-      {!loaded ? (
-        <div className="flex justify-center items-center h-[300px]">
-          <p className="text-gray-500">Memuat banner...</p>
-        </div>
-      ) : (
-        <>
-          <div
-            ref={sliderRef}
-            id="banner-slider"
-            className="flex transition-transform ease-in-out duration-[1000ms] md:gap-6 md:px-6 md:pt-6"
-          >
-            {slides.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt={`Banner ${i}`}
-                loading="eager"
-                decoding="async"
-                className="banner-slide flex-shrink-0 w-full md:w-[37%] object-cover md:rounded-xl max-h-[260px] md:max-h-[340px]"
-              />
-            ))}
-          </div>
+      <div
+        ref={sliderRef}
+        id="banner-slider"
+        onTransitionEnd={handleTransitionEnd}
+        className="flex md:gap-6 md:px-6 md:pt-6"
+        style={{ willChange: "transform" }}
+      >
+        {slides.map((src, i) => (
+          <img
+            key={`${i}-${src}`}
+            src={src}
+            alt={`Banner ${i + 1}`}
+            loading="eager"
+            decoding="async"
+            onLoad={() => {
+              if (layoutOnceRef.current) return;
+              layoutOnceRef.current = true;
+              requestAnimationFrame(() => moveToSlide(indexRef.current, false));
+            }}
+            className="banner-slide flex-shrink-0 w-full md:w-[37%] object-cover md:rounded-xl max-h-[260px] md:max-h-[340px]"
+          />
+        ))}
+      </div>
 
-          <div className="relative mt-4 flex justify-center space-x-2 z-10">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                className={`dot size-2 rounded-full ${
-                  i === activeDotIndex ? "bg-blue-600" : "bg-blue-300"
-                }`}
-                onClick={() => goToSlide(i + 1)}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      <div className="relative mt-4 flex justify-center space-x-2 z-10">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            className={`dot size-2 rounded-full ${
+              i === activeDotIndex ? "bg-blue-600" : "bg-blue-300"
+            }`}
+            onClick={() => goToSlide(i + 1)}
+          />
+        ))}
+      </div>
     </section>
   );
 }

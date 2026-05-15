@@ -29,8 +29,8 @@
 # ----- 3. Disable directory listing -----
 Options -Indexes
 
-# ----- 4. Block sensitive directories -----
-RedirectMatch 403 ^/(storage|bootstrap|config|database|resources|routes|tests|vendor|app)/
+# ----- 4. Block sensitive directories (not /storage/ — Laravel serves uploads via public/storage symlink) -----
+RedirectMatch 403 ^/(bootstrap|config|database|resources|routes|tests|vendor|app)/
 
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>

@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-// The backend API root. Set VITE_API_URL in your .env (e.g. http://localhost:8000 or http://localhost:8000/api)
-const rawBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const normalizedBaseURL = rawBaseURL.replace(/\/$/, '');
-const baseURL = normalizedBaseURL.endsWith('/api') ? normalizedBaseURL : `${normalizedBaseURL}/api`;
+// Default: relative `/api` so the Vite dev proxy forwards to Laravel (see `frontend/vite.config.js`).
+// Optional override: set `VITE_API_URL` in repo-root `.env` (e.g. `http://127.0.0.1:8000`) to call Laravel
+// directly and bypass the proxy (useful if the proxy target is wrong or unreachable).
+const rawApi = (import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
+const baseURL =
+  rawApi.length > 0
+    ? rawApi.endsWith('/api')
+      ? rawApi
+      : `${rawApi}/api`
+    : '/api';
 
 const api = axios.create({
   baseURL,

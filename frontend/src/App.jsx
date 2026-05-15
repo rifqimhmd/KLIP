@@ -30,7 +30,12 @@ import TestRegister from "./pages/TestRegister";
 
 export default function App() {
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tentang" element={<Tentang />} />

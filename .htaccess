@@ -42,10 +42,11 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Block access to sensitive directories
+    # Block access to sensitive directories (never block URL /storage/ — use public/storage for uploads)
     RewriteRule ^vendor(/.*)?$ - [F,L]
     RewriteRule ^node_modules(/.*)?$ - [F,L]
-    RewriteRule ^storage(/.*)?$ - [F,L]
+    RewriteRule ^storage/framework(/.*)?$ - [F,L]
+    RewriteRule ^storage/logs(/.*)?$ - [F,L]
     RewriteRule ^bootstrap(/.*)?$ - [F,L]
     RewriteRule ^config(/.*)?$ - [F,L]
     RewriteRule ^database(/.*)?$ - [F,L]

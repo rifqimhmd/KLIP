@@ -30,10 +30,14 @@ Options -Indexes
     RewriteRule ^\.git - [F,L]
     RewriteRule ^\.git/ - [F,L]
 
-    # Block access to sensitive directories when backend/ is exposed
     RewriteRule ^vendor(/.*)?$ - [F,L]
     RewriteRule ^node_modules(/.*)?$ - [F,L]
-    RewriteRule ^storage(/.*)?$ - [F,L]
+
+    # Block private Laravel dirs under project root when docroot is `backend/`.
+    # Do NOT use `^storage(/.*)?$` here — URL `/storage/...` must reach `public/storage` (uploads);
+    # a blanket block causes 403 for banner images behind Laragon / proxy.
+    RewriteRule ^storage/framework(/.*)?$ - [F,L]
+    RewriteRule ^storage/logs(/.*)?$ - [F,L]
     RewriteRule ^bootstrap(/.*)?$ - [F,L]
     RewriteRule ^config(/.*)?$ - [F,L]
     RewriteRule ^database(/.*)?$ - [F,L]

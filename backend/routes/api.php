@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\SurveyController;
 use App\Http\Controllers\Api\KasubditController;
 use App\Http\Controllers\Api\PengaduanController;
+use App\Http\Controllers\Api\PublicStorageController;
 use App\Http\Controllers\AuthWebController;
 use App\Http\Controllers\Admin\UserApprovalController;
 
@@ -31,6 +32,10 @@ Route::get('/documents/{id}', [DocumentController::class, 'show']);
 // Public banners & site settings
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/site-settings', [SiteSettingController::class, 'index']);
+
+// Public disk files (banners, site images) — avoids Apache 403 on /storage/* when docroot rules block that path
+Route::get('/public-storage/{path}', [PublicStorageController::class, 'show'])
+    ->where('path', '.*');
 
 // Public survey endpoint
 Route::post('/survey', [SurveyController::class, 'store']);

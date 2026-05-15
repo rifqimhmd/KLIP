@@ -21,6 +21,7 @@ import {
   Shield,
 } from "lucide-react";
 import api from "../services/api";
+import { resolvePublicStorageUrl } from "../lib/storageUrl";
 import { useToast } from "../components/Toast";
 import Logo from "../components/Logo";
 import AdminConsultationSection from "../components/admin/AdminConsultationSection";
@@ -629,11 +630,16 @@ export default function AdminDashboard() {
     setBannerError("");
 
     try {
+      const existing = banners.find((b) => b.order === order);
       const fd = new FormData();
       fd.append("image", file);
-      fd.append("order", order);
+      fd.append("order", String(order));
 
-      const res = await api.post("/admin/banners", fd);
+      if (existing) {
+        await api.post(`/admin/banners/${existing.id}`, fd);
+      } else {
+        await api.post("/admin/banners", fd);
+      }
 
       toast.success(`Banner ${order} berhasil diupload!`);
       fetchBanners();
@@ -653,7 +659,7 @@ export default function AdminDashboard() {
   // Handle Toggle Banner Active
   const handleToggleBannerActive = async (id, isActive) => {
     try {
-      await api.put(`/admin/banners/${id}`, { is_active: isActive });
+      await api.post(`/admin/banners/${id}`, { is_active: isActive });
       fetchBanners();
       toast.success(`Banner ${isActive ? "diaktifkan" : "dinonaktifkan"}!`);
     } catch (err) {
@@ -1833,7 +1839,7 @@ export default function AdminDashboard() {
                         <div className="border-2 border-dashed border-pink-300 rounded-lg p-4 bg-white">
                           {banner?.image_url ? (
                             <img
-                              src={banner.image_url}
+                              src={resolvePublicStorageUrl(banner.image_url)}
                               alt={`Banner ${bannerNum}`}
                               className="w-full h-32 object-cover rounded-lg"
                             />
